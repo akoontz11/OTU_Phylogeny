@@ -85,10 +85,19 @@ SimulateCommnunity <- function(comm.size,comm.spp,comm.timesteps,comm.migrate,co
   intra.test <- phy.d.transform(intra.phy, deltas, intra.comm,"Community with intraspecific differences added")
   # Seq. error
   seq.test <- phy.d.transform(seq.phy, deltas, seq.comm,"Community with seq. error differences added")
-  # Export a list of each of the matrices of mpd values at each site for each transform value
-  transform.matrices <- list(sim.test,intra.test,seq.test)
-  return(transform.matrices)
+  
+  # PACKAGE SIMULATION DATA
+  # Export a list containing all simulation data: phylogenies, abundances, and mpd.mat for each community "type" (original, intra, and seq)
+  community.abundances <- list(orig.community=sim.comm,intra.community=intra.comm,seq_err.community=seq.comm)
+  community.phylogenies <- list(orig.phylo=sim.phy,intra.phylo=intra.phy,seq_err.phylo=seq.phy)
+  community.transforms <- list(orig.transform=sim.test,intra.transform=intra.test,seq_err.transform=seq.test)
+  simulation.data <- list(phylogenies=community.phylogenies,abundances=community.abundances,transforms=community.transforms)
+  return(simulation.data)
 }
 
-test.matrices <- SimulateCommnunity(comm.size=10, comm.spp=1,comm.timesteps=100,comm.migrate=0.02,comm.env=10,comm.abund=4,comm.stoch=1,comm.speciate=0.06,intra.birth=0.1,intra.death=0.1,intra.steps=3,seq.birth=0.2,seq.death=0.2,seq.steps=3)
-str(test.matrices)
+sim.data <- SimulateCommnunity(comm.size=10, comm.spp=1,comm.timesteps=100,comm.migrate=0.02,comm.env=10,comm.abund=4,comm.stoch=1,comm.speciate=0.06,intra.birth=0.1,intra.death=0.1,intra.steps=3,seq.birth=0.2,seq.death=0.2,seq.steps=3)
+str(sim.data)
+
+# Code to find columns in a certain row of the seq.comm community matrix that have non zero values
+row <- 1
+which(seq.comm[row,]!=0, arr.ind=T)
