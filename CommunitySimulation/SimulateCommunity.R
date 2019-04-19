@@ -38,7 +38,7 @@ abundance.mapping <- function(oldColumnNames, newColumnNames, rowNames, donor.co
 }
 
 # %%% FUNCTION FOR TESTING TRANSFORMATIONS OVER COMMUNITY SIMULATIONS %%%
-SimulateCommnunity <- function(comm.size,comm.spp,comm.timesteps,comm.migrate,comm.env,comm.abund,comm.stoch,comm.speciate,intra.birth,intra.death,intra.steps,seq.birth,seq.death,seq.steps){
+SimulateCommnunity <- function(comm.size,comm.spp,comm.timesteps,comm.migrate,comm.env,comm.abund,comm.stoch,comm.speciate,intra.birth,intra.death,intra.steps,seq.birth,seq.death,seq.steps,deltas){
   
   # SIMULATE AND CLEANUP COMMUNITY
   # Simulate community (using pez function sim.meta.phy.comm)

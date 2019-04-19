@@ -41,8 +41,3 @@ test.site <- measureShifts(sim.data$transforms$orig.transform,deltas)
 
 # Plot changes in mpd ranking of sites versus changes in delta values, 
 plot(test.site$mpdRankingChanges[11:29] ~ deltaDifferences[11:29],ylim=c(0,17),xlim=c(0,2.2));lines(deltaDifferences[11:29], test.site$mpdRankingChanges[11:29],col=1);points(test.site$mpdRankingChanges[1:10] ~ deltaDifferences[1:10]);lines(deltaDifferences[1:10], test.site$mpdRankingChanges[1:10],col=2)
-
-# Running many simulations
-params <- expand.grid(a=1:10,b=1:3,c=5:9)
-params
-?mcMap
