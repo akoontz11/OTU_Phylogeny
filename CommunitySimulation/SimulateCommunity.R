@@ -38,15 +38,13 @@ abundance.mapping <- function(oldColumnNames, newColumnNames, rowNames, donor.co
 }
 
 # %%% FUNCTION FOR TESTING TRANSFORMATIONS OVER COMMUNITY SIMULATIONS %%%
-SimulateCommnunity <- function(comm.size,comm.spp,comm.timesteps,comm.migrate,comm.env,comm.abund,comm.stoch,comm.speciate,intra.birth,intra.death,intra.steps,seq.birth,seq.death,seq.steps,deltas){
-  
+SimulateCommnunity <- function(comm.size,comm.spp,comm.timesteps,comm.migrate,comm.env,comm.abund,comm.stoch,comm.speciate,intra.birth,intra.death,intra.steps,seq.birth,seq.death,seq.steps){
   # SIMULATE AND CLEANUP COMMUNITY
   # Simulate community (using pez function sim.meta.phy.comm)
   DemoCom <- sim.meta.phy.comm(size=comm.size, n.spp=comm.spp, timesteps=comm.timesteps, p.migrate=comm.migrate, env.lam=comm.env, abund.lam=comm.abund, stoch.lam=comm.stoch, p.speciate=comm.speciate)
   # %%% "CLEANUP" SIMULATED COMMUNITY, AND SETUP COMMUNITY WITH ADDED POPULATIONS %%%
   # Drop sites with one or less species in them from community matrix  (by removing rows with only one nonzero value in them)
   # We do this because our mpd calculation is abundance weighted, and mpd can only be calculated between different species
-  # (...does it make sense for our mpd to be abundance weighted? Think about what this means.)
   sim.comm <- DemoCom$comm[apply(DemoCom$comm, 1, function(x) sum(x!=0) > 1),,drop=F]
   # Drop extinct species from community matrix (by removing columns with only 0s in them)
   sim.comm <- sim.comm[,apply(sim.comm,2,function(x) !all(x==0))]
@@ -95,9 +93,10 @@ SimulateCommnunity <- function(comm.size,comm.spp,comm.timesteps,comm.migrate,co
   return(simulation.data)
 }
 
-sim.data <- SimulateCommnunity(comm.size=10, comm.spp=1,comm.timesteps=100,comm.migrate=0.02,comm.env=10,comm.abund=4,comm.stoch=1,comm.speciate=0.06,intra.birth=0.1,intra.death=0.1,intra.steps=3,seq.birth=0.2,seq.death=0.2,seq.steps=3)
+sim.data <- SimulateCommnunity(comm.size=10, comm.spp=1,comm.timesteps=100,comm.migrate=0.02,comm.env=10,comm.abund=4,comm.stoch=1,comm.speciate=0.06,intra.birth=0.1,intra.death=0.5,intra.steps=5,seq.birth=0.1,seq.death=0.5,seq.steps=5)
 str(sim.data)
 
-# Code to find columns in a certain row of the seq.comm community matrix that have non zero values
-row <- 1
-which(seq.comm[row,]!=0, arr.ind=T)
+sim.data <- SimulateCommnunity(comm.size=5, comm.spp=1,comm.timesteps=100,comm.migrate=0.02,comm.env=10,comm.abund=4,comm.stoch=1,comm.speciate=0.01,intra.birth=0.1,intra.death=0.5,intra.steps=5,seq.birth=0.1,seq.death=0.5,seq.steps=5)
+str(sim.data)
+
+sim.meta.phy.comm(5,1,100,0.02,10,4,1,0.01)
