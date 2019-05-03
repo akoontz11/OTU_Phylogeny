@@ -55,4 +55,4 @@ rownames(species.abundances) <- paste("site_", seq_len(nrow(species.abundances))
 deltas <- seq(0.1,3,by=0.1)
 deltas
 # Demonstrating function
-laja.test <- phy.d.transform(invert.tree, deltas,species.abundances,"laja")
+laja.test <- phy.d.transform(invert.tree, deltas,species.abundances,"Phylogenetic diversity over increasing values of delta transformation \n(Laja Dataset)")
