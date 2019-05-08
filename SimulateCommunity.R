@@ -60,7 +60,7 @@ SimulateCommnunity <- function(comm.size,comm.spp,comm.timesteps,comm.migrate,co
   # INTRASPECIFIC
   # Add intraspecific difference to simulated community phylogeny
   # (Extinct species are dropped from the tree within the add.branch function)
-  intra.phy <- add.branch(sim.phy,birth=intra.birth,death=intra.death,steps=intra.steps,"pops")
+  intra.phy <- tryCatch(add.branch(sim.phy,birth=intra.birth,death=intra.death,steps=intra.steps,"pops"),error=function(cond) {return(NA)})
   # Create an empty matrix for the intra.phy
   intra.comm <- matrix(nrow=length(sites),ncol=Ntip(intra.phy),dimnames = list(sites,intra.phy$tip.label))
   population.names <- colnames(intra.comm)
@@ -69,7 +69,7 @@ SimulateCommnunity <- function(comm.size,comm.spp,comm.timesteps,comm.migrate,co
   
   # SEQ. ERROR
   # Add random error to intra.tree phylogeny
-  seq.phy <- add.branch(intra.phy,birth=seq.birth,death=seq.death,steps=seq.steps,"seq.err")
+  seq.phy <- tryCatch(add.branch(intra.phy,birth=seq.birth,death=seq.death,steps=seq.steps,"seq.err"),error=function(cond) {return(NA)})
   # Create an empty matrix for the seq.phy
   seq.comm <- matrix(nrow=length(sites),ncol=Ntip(seq.phy),dimnames = list(sites,seq.phy$tip.label))
   individual.names <- colnames(seq.comm)
@@ -93,10 +93,10 @@ SimulateCommnunity <- function(comm.size,comm.spp,comm.timesteps,comm.migrate,co
   return(simulation.data)
 }
 
-sim.data <- SimulateCommnunity(comm.size=10, comm.spp=1,comm.timesteps=100,comm.migrate=0.02,comm.env=10,comm.abund=4,comm.stoch=1,comm.speciate=0.06,intra.birth=0.1,intra.death=0.5,intra.steps=5,seq.birth=0.1,seq.death=0.5,seq.steps=5)
-str(sim.data)
+#sim.data <- SimulateCommnunity(comm.size=10, comm.spp=1,comm.timesteps=100,comm.migrate=0.02,comm.env=10,comm.abund=4,comm.stoch=1,comm.speciate=0.06,intra.birth=0.1,intra.death=0.5,intra.steps=5,seq.birth=0.1,seq.death=0.5,seq.steps=5)
+#str(sim.data)
 
-sim.data <- SimulateCommnunity(comm.size=5, comm.spp=1,comm.timesteps=100,comm.migrate=0.02,comm.env=10,comm.abund=4,comm.stoch=1,comm.speciate=0.01,intra.birth=0.1,intra.death=0.5,intra.steps=5,seq.birth=0.1,seq.death=0.5,seq.steps=5)
-str(sim.data)
+#sim.data <- SimulateCommnunity(comm.size=5, comm.spp=1,comm.timesteps=100,comm.migrate=0.02,comm.env=10,comm.abund=4,comm.stoch=1,comm.speciate=0.01,intra.birth=0.1,intra.death=0.5,intra.steps=5,seq.birth=0.1,seq.death=0.5,seq.steps=5)
+#str(sim.data)
 
-sim.meta.phy.comm(5,1,100,0.02,10,4,1,0.01)
+#sim.meta.phy.comm(5,1,100,0.02,10,4,1,0.01)
