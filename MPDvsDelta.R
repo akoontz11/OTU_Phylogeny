@@ -28,31 +28,31 @@ phy.d.transform <- function(phylo,d,abundance.matrix,title){
   }
   # PLOTTING--For each 'site' or simulation, plot the change in mpd versus the increasing values of delta
   # Specifying the range values, removing any NAs
-  ymin <- min(mpd.mat, na.rm=T); ymax <- max(mpd.mat,na.rm=T)
+  #ymin <- min(mpd.mat, na.rm=T); ymax <- max(mpd.mat,na.rm=T)
   # Plotting the first matrix row (i.e. Site1 values) 
-  plot((mpd.mat[1,1:length(d)]) ~ d, xlab="delta", ylab="MPD Values", ylim=c(ymin,ymax), pch=20,main=title)
-  lines(d, mpd.mat[1,])
+  #plot((mpd.mat[1,1:length(d)]) ~ d, xlab="delta", ylab="MPD Values", ylim=c(ymin,ymax), pch=20,main=title)
+  #lines(d, mpd.mat[1,])
   # Below loop iterates through length of the matrix, adding connected points onto the plot
-  for(i in 2:nsim){
-    points((mpd.mat[i,1:length(d)]) ~ d,col=i, pch=20)
+  #for(i in 2:nsim){
+    #points((mpd.mat[i,1:length(d)]) ~ d,col=i, pch=20)
     # Capture mpd values for current row of matrix, and connect points
-    y <- (mpd.mat[i,])
-    lines(d,y,col=i)
-  }
+    #y <- (mpd.mat[i,])
+    #lines(d,y,col=i)
+  #}
   return(mpd.mat)
 }
 
-# %%% USING LAJA DATASET %%%
-data(laja)
-data <- comparative.comm(invert.tree, river.sites, invert.traits, river.env)
-plot(invert.tree)
+# %%% Demonstration using laja dataset %%%
+#data(laja)
+#data <- comparative.comm(invert.tree, river.sites, invert.traits, river.env)
+#plot(invert.tree)
 # Updating species-site abundance matrix
-species.abundances <- round(t(sim.char(invert.tree, 5, model="BM", nsim=10)[,1,]) * 100)
-species.abundances[species.abundances < 0] <- 0
-colnames(species.abundances) <- invert.tree$tip.label
-rownames(species.abundances) <- paste("site_", seq_len(nrow(species.abundances)))
+#species.abundances <- round(t(sim.char(invert.tree, 5, model="BM", nsim=10)[,1,]) * 100)
+#species.abundances[species.abundances < 0] <- 0
+#colnames(species.abundances) <- invert.tree$tip.label
+#rownames(species.abundances) <- paste("site_", seq_len(nrow(species.abundances)))
 # Generating a vector of delta values from 0.1 to 3
-deltas <- seq(0.1,3,by=0.1)
-deltas
+#deltas <- seq(0.1,3,by=0.1)
+#deltas
 # Demonstrating function
-laja.test <- phy.d.transform(invert.tree, deltas,species.abundances,"Phylogenetic diversity over increasing values of delta transformation \n(Laja Dataset)")
+#laja.test <- phy.d.transform(invert.tree, deltas,species.abundances,"Phylogenetic diversity over increasing values of delta transformation \n(Laja Dataset)")
