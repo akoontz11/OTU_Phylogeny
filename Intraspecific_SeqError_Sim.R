@@ -48,11 +48,12 @@ add.branch <- function(tree,birth,death,steps,type=c("pops","seq.err")){
   return(tree)
 }
 
-tree <- sim.bdtree(b=0.1, d=0, stop="time", t=10)
-plot(tree, main="Original tree")
+# Demonstration
+#tree <- sim.bdtree(b=0.1, d=0, stop="time", t=10)
+#plot(tree, main="Original tree")
 
-intra.tree <- add.branch(tree,birth=0.1,death=0.2,steps=5,type="pops")
-plot(intra.tree, main="Population tree")
+#intra.tree <- add.branch(tree,birth=0.1,death=0.2,steps=5,type="pops")
+#plot(intra.tree, main="Population tree")
 
-seq.tree <- add.branch(intra.tree,birth=0.2,death=0.2,steps=3,type="seq.err")
-plot(seq.tree, main="Sequencing error tree")
+#seq.tree <- add.branch(intra.tree,birth=0.2,death=0.2,steps=3,type="seq.err")
+#plot(seq.tree, main="Sequencing error tree")
