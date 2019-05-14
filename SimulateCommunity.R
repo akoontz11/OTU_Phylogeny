@@ -46,8 +46,8 @@ abundance.mapping <- function(oldColumnNames, newColumnNames, rowNames, donor.co
 # %%% FUNCTION FOR TESTING TRANSFORMATIONS OVER COMMUNITY SIMULATIONS %%%
 SimulateCommnunity <- function(comm.size,comm.spp,comm.timesteps,comm.migrate,comm.env,comm.abund,comm.stoch,comm.speciate,intra.birth,intra.death,intra.steps,seq.birth,seq.death,seq.steps){
   # SIMULATE AND CLEANUP COMMUNITY
-  # Simulate community (using pez function sim.meta.phy.comm)
-  DemoCom <- sim.meta.phy.comm(size=comm.size, n.spp=comm.spp, timesteps=comm.timesteps, p.migrate=comm.migrate, env.lam=comm.env, abund.lam=comm.abund, stoch.lam=comm.stoch, p.speciate=comm.speciate)
+  # Simulate community (using pez function sim.meta.phy.comm). Generate NULL for DemoCom object is error
+  DemoCom <- tryCatch(sim.meta.phy.comm(size=comm.size, n.spp=comm.spp, timesteps=comm.timesteps, p.migrate=comm.migrate, env.lam=comm.env, abund.lam=comm.abund, stoch.lam=comm.stoch, p.speciate=comm.speciate),error=function(cond) {return(NULL)})
   # If DemoCom is NULL, then assign NULL to sim.phy and sim.comm variables
   if(is.null(DemoCom)){
     sim.phy <- NULL ; sim.comm <- NULL
@@ -114,22 +114,22 @@ SimulateCommnunity <- function(comm.size,comm.spp,comm.timesteps,comm.migrate,co
 # # %%% "CLEANUP" SIMULATED COMMUNITY, AND SETUP COMMUNITY WITH ADDED POPULATIONS %%%
 # # If DemoCom is NULL, then assign NULL to sim.phy and sim.comm variables
 # if(is.null(DemoCom)){
-#  sim.phy <- NULL ; sim.comm <- NULL
+# sim.phy <- NULL ; sim.comm <- NULL
 # }else{
-#  # Drop sites with one or less species in them from community matrix  (by removing rows with only one nonzero value in them)
-#  # (We do this because our mpd calculation is abundance weighted, and mpd can only be calculated between different species)
-#  sim.comm <- DemoCom$comm[apply(DemoCom$comm, 1, function(x) sum(x!=0) > 1),,drop=F]
-#  # Drop extinct species from community matrix (by removing columns with only 0s in them)
-#  sim.comm <- sim.comm[,apply(sim.comm,2,function(x) !all(x==0))]
-#  # Get the names of remaining species in community (after removing extinctions and 'singletons')
-#  species.names <- colnames(sim.comm)
-#  # Trim phylogeny to only contain remaining species (using drop.tip)
-#  # (Tips are determined by looking for the tip.labels that are not in the species names)
-#  sim.phy <- drop.tip(DemoCom$phy, tip = DemoCom$phy$tip.label[!DemoCom$phy$tip.label %in% species.names])  
+# # Drop sites with one or less species in them from community matrix  (by removing rows with only one nonzero value in them)
+# # (We do this because our mpd calculation is abundance weighted, and mpd can only be calculated between different species)
+# sim.comm <- DemoCom$comm[apply(DemoCom$comm, 1, function(x) sum(x!=0) > 1),,drop=F]
+# # Drop extinct species from community matrix (by removing columns with only 0s in them)
+# sim.comm <- sim.comm[,apply(sim.comm,2,function(x) !all(x==0))]
+# # Get the names of remaining species in community (after removing extinctions and 'singletons')
+# species.names <- colnames(sim.comm)
+# # Trim phylogeny to only contain remaining species (using drop.tip)
+# # (Tips are determined by looking for the tip.labels that are not in the species names)
+# sim.phy <- drop.tip(DemoCom$phy, tip = DemoCom$phy$tip.label[!DemoCom$phy$tip.label %in% species.names])  
 # }
-
-
-#sim.data <- tryCatch(SimulateCommnunity(comm.size=5, comm.spp=1,comm.timesteps=100,comm.migrate=0.02,comm.env=10,comm.abund=4,comm.stoch=1,comm.speciate=0.01,intra.birth=0.1,intra.death=0.5,intra.steps=5,seq.birth=0.1,seq.death=0.5,seq.steps=5),error=function(cond) {return(NA)})
-#str(sim.data)
+# 
+# 
+# sim.data <- SimulateCommnunity(comm.size=5, comm.spp=1,comm.timesteps=100,comm.migrate=0.02,comm.env=10,comm.abund=4,comm.stoch=1,comm.speciate=0.01,intra.birth=0.1,intra.death=0.5,intra.steps=5,seq.birth=0.1,seq.death=0.5,seq.steps=5)
+# str(sim.data)
 
 #sim.meta.phy.comm(5,1,100,0.02,10,4,1,0.01)
