@@ -4,8 +4,8 @@ library(geiger)
 
 # ABUNDANCE MAPPING FUNCTION
 abundance.mapping <- function(oldColumnNames, newColumnNames, rowNames, donor.comm, recip.comm){
-  # If `donor.com` argument is NULL, return recip.comm argument as NULL
-  if(is.null(donor.comm)){
+  # If `donor.com` argument is empty, column names will be NULL; return the recip.comm argument as NULL
+  if(is.null(oldColumnNames)){
     recip.comm <- NULL
     return(recip.comm)
   }else{
@@ -48,9 +48,9 @@ SimulateCommnunity <- function(comm.size,comm.spp,comm.timesteps,comm.migrate,co
   # SIMULATE AND CLEANUP COMMUNITY
   # Simulate community (using pez function sim.meta.phy.comm). Generate NULL for DemoCom object is error
   DemoCom <- tryCatch(sim.meta.phy.comm(size=comm.size, n.spp=comm.spp, timesteps=comm.timesteps, p.migrate=comm.migrate, env.lam=comm.env, abund.lam=comm.abund, stoch.lam=comm.stoch, p.speciate=comm.speciate),error=function(cond) {return(NULL)})
-  # If DemoCom is NULL, then assign NULL to sim.phy and sim.comm variables
+  # If DemoCom is NULL, then assign NULL to relevant variables
   if(is.null(DemoCom)){
-    sim.phy <- NULL ; sim.comm <- NULL
+    sim.phy <- NULL ; sim.comm <- NULL ; species.names <- NULL ; sites <- NULL
   }else{
   # %%% "CLEANUP" SIMULATED COMMUNITY, AND SETUP COMMUNITY WITH ADDED POPULATIONS %%%
   # Drop sites with one or less species in them from community matrix  (by removing rows with only one nonzero value in them)
@@ -68,8 +68,7 @@ SimulateCommnunity <- function(comm.size,comm.spp,comm.timesteps,comm.migrate,co
   }
   # INTRASPECIFIC
   # Add intraspecific difference to simulated community phylogeny
-  # (Extinct species are dropped from the tree within the add.branch function)
-  # ((tryCatch statements included to account for trees in which all species have gone extinct))
+  # (tryCatch statements included to account for trees in which all species have gone extinct)
   intra.phy <- add.branch(sim.phy,birth=intra.birth,death=intra.death,steps=intra.steps,"pops")
   # Create an empty matrix for the intra.phy
   intra.comm <- tryCatch(matrix(nrow=length(sites),ncol=Ntip(intra.phy),dimnames = list(sites,intra.phy$tip.label)),error=function(cond) {return(NA)})
@@ -79,7 +78,7 @@ SimulateCommnunity <- function(comm.size,comm.spp,comm.timesteps,comm.migrate,co
   
   # SEQ. ERROR
   # Add random error to intra.tree phylogeny
-  # ((tryCatch statements included to account for trees in which all species have gone extinct)) 
+  # (tryCatch statements included to account for trees in which all species have gone extinct)
   seq.phy <- add.branch(intra.phy,birth=seq.birth,death=seq.death,steps=seq.steps,"seq.err")
   # Create an empty matrix for the seq.phy
   seq.comm <- tryCatch(matrix(nrow=length(sites),ncol=Ntip(seq.phy),dimnames = list(sites,seq.phy$tip.label)),error=function(cond) {return(NA)})
@@ -108,27 +107,39 @@ SimulateCommnunity <- function(comm.size,comm.spp,comm.timesteps,comm.migrate,co
 # str(sim.data)
 # 
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------
-# # SIMULATE AND CLEANUP COMMUNITY
-# # Simulate community (using pez function sim.meta.phy.comm)
-# DemoCom <- tryCatch(sim.meta.phy.comm(size=5, n.spp=1, timesteps=100, p.migrate=0.02, env.lam=10, abund.lam=4, stoch.lam=1, p.speciate=0.01),error=function(cond) {return(NULL)})
-# # %%% "CLEANUP" SIMULATED COMMUNITY, AND SETUP COMMUNITY WITH ADDED POPULATIONS %%%
-# # If DemoCom is NULL, then assign NULL to sim.phy and sim.comm variables
-# if(is.null(DemoCom)){
-# sim.phy <- NULL ; sim.comm <- NULL
-# }else{
-# # Drop sites with one or less species in them from community matrix  (by removing rows with only one nonzero value in them)
-# # (We do this because our mpd calculation is abundance weighted, and mpd can only be calculated between different species)
-# sim.comm <- DemoCom$comm[apply(DemoCom$comm, 1, function(x) sum(x!=0) > 1),,drop=F]
-# # Drop extinct species from community matrix (by removing columns with only 0s in them)
-# sim.comm <- sim.comm[,apply(sim.comm,2,function(x) !all(x==0))]
-# # Get the names of remaining species in community (after removing extinctions and 'singletons')
-# species.names <- colnames(sim.comm)
-# # Trim phylogeny to only contain remaining species (using drop.tip)
-# # (Tips are determined by looking for the tip.labels that are not in the species names)
-# sim.phy <- drop.tip(DemoCom$phy, tip = DemoCom$phy$tip.label[!DemoCom$phy$tip.label %in% species.names])  
-# }
-# 
-# 
+# SIMULATE AND CLEANUP COMMUNITY
+# Simulate community (using pez function sim.meta.phy.comm)
+DemoCom <- tryCatch(sim.meta.phy.comm(size=5, n.spp=1, timesteps=100, p.migrate=0.02, env.lam=10, abund.lam=4, stoch.lam=1, p.speciate=0.01),error=function(cond) {return(NULL)})
+#DemoCom <- tryCatch(sim.meta.phy.comm(size=5, n.spp=5, timesteps=100, p.migrate=0.02, env.lam=10, abund.lam=4, stoch.lam=1, p.speciate=0.01),error=function(cond) {return(NULL)})
+# %%% "CLEANUP" SIMULATED COMMUNITY, AND SETUP COMMUNITY WITH ADDED POPULATIONS %%%
+# If DemoCom is NULL, then assign NULL to sim.phy and sim.comm variables
+if(is.null(DemoCom)){
+sim.phy <- NULL ; sim.comm <- NULL
+}else{
+# Drop sites with one or less species in them from community matrix  (by removing rows with only one nonzero value in them)
+# (We do this because our mpd calculation is abundance weighted, and mpd can only be calculated between different species)
+sim.comm <- DemoCom$comm[apply(DemoCom$comm, 1, function(x) sum(x!=0) > 1),,drop=F]
+# Drop extinct species from community matrix (by removing columns with only 0s in them)
+sim.comm <- sim.comm[,apply(sim.comm,2,function(x) !all(x==0))]
+# Get the names of remaining species in community (after removing extinctions and 'singletons')
+species.names <- colnames(sim.comm)
+# Trim phylogeny to only contain remaining species (using drop.tip)
+# (Tips are determined by looking for the tip.labels that are not in the species names)
+sim.phy <- drop.tip(DemoCom$phy, tip = DemoCom$phy$tip.label[!DemoCom$phy$tip.label %in% species.names])
+sites <- rownames(sim.comm)
+}
+# INTRASPECIFIC
+# Add intraspecific difference to simulated community phylogeny
+# (Extinct species are dropped from the tree within the add.branch function)
+# ((tryCatch statements included to account for trees in which all species have gone extinct))
+intra.phy <- add.branch(sim.phy,birth=intra.birth,death=intra.death,steps=intra.steps,"pops")
+# Create an empty matrix for the intra.phy
+intra.comm <- tryCatch(matrix(nrow=length(sites),ncol=Ntip(intra.phy),dimnames = list(sites,intra.phy$tip.label)),error=function(cond) {return(NA)})
+population.names <- colnames(intra.comm)
+# Map abundance values from original community matrix to columns of intra.comm
+intra.comm <- abundance.mapping(species.names, population.names, sites, sim.comm, intra.comm)
+
+
 # sim.data <- SimulateCommnunity(comm.size=5, comm.spp=1,comm.timesteps=100,comm.migrate=0.02,comm.env=10,comm.abund=4,comm.stoch=1,comm.speciate=0.01,intra.birth=0.1,intra.death=0.5,intra.steps=5,seq.birth=0.1,seq.death=0.5,seq.steps=5)
 # str(sim.data)
 
