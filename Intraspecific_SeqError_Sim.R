@@ -49,7 +49,14 @@ add.branch <- function(tree,birth,death,steps,type=c("pops","seq.err")){
       # the next "open" tip of the original tree (which is where the next new tree will be added) becomes tip number 1.
     }
     # Drop extinct branches of the tree, such that only extant leaves are shown
-    tree <- drop.extinct(tree)
+    # Because drop.extinct errors if the resulting tree has one or less tips, compare the number of extinct tips to the total number of tips
+    if(Ntip(tree)-length(is.extinct(tree))<=1){
+      # If tree has one or less branches remaining, return NULL for the resulting tree
+      tree <- NULL
+      }else{
+        # Otherwise, prune the tree of tips that have gone extinct
+        tree <- drop.extinct(tree)
+        }
     return(tree)
   }
 }
