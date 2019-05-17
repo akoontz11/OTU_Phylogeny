@@ -107,9 +107,9 @@ SimulateCommnunity <- function(comm.size,comm.spp,comm.timesteps,comm.migrate,co
 # str(sim.data)
 # 
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------
-# SIMULATE AND CLEANUP COMMUNITY
-# Simulate community (using pez function sim.meta.phy.comm)
-# DemoCom <- tryCatch(sim.meta.phy.comm(size=5, n.spp=1, timesteps=100, p.migrate=0.02, env.lam=10, abund.lam=4, stoch.lam=1, p.speciate=0.01),error=function(cond) {return(NULL)})
+# # SIMULATE AND CLEANUP COMMUNITY
+# # Simulate community (using pez function sim.meta.phy.comm)
+# # DemoCom <- tryCatch(sim.meta.phy.comm(size=5, n.spp=1, timesteps=100, p.migrate=0.02, env.lam=10, abund.lam=4, stoch.lam=1, p.speciate=0.01),error=function(cond) {return(NULL)})
 # #DemoCom <- tryCatch(sim.meta.phy.comm(size=5, n.spp=5, timesteps=100, p.migrate=0.02, env.lam=10, abund.lam=4, stoch.lam=1, p.speciate=0.01),error=function(cond) {return(NULL)})
 # # %%% "CLEANUP" SIMULATED COMMUNITY, AND SETUP COMMUNITY WITH ADDED POPULATIONS %%%
 # # If DemoCom is NULL, then assign NULL to sim.phy and sim.comm variables
