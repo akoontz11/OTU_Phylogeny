@@ -34,10 +34,11 @@ measureShifts <- function(orig.transform, deltas){
   }
   # 2. --MEASURE PEARSON CORRELATION COEFFICIENT BETWEEN MPD AND DELTA VALUES--
   r.value <- cor(meanRankChanges,deltaDifferences)
-  measures <- list(mpdRankingChanges = meanRankChanges, r =r.value)
+  # Return two measures and vector of differences in delta values
+  measures <- list(mpdRankingChanges = meanRankChanges, r = r.value, deltaDifferences = deltaDifferences)
   return(measures)
 }
 test.site <- measureShifts(sim.data$transforms$orig.transform,deltas)
-
+str(test.site)
 # Plot changes in mpd ranking of sites versus changes in delta values, 
-plot(test.site$mpdRankingChanges[11:29] ~ deltaDifferences[11:29],ylim=c(0,17),xlim=c(0,2.2));lines(deltaDifferences[11:29], test.site$mpdRankingChanges[11:29],col=1);points(test.site$mpdRankingChanges[1:10] ~ deltaDifferences[1:10]);lines(deltaDifferences[1:10], test.site$mpdRankingChanges[1:10],col=2)
+plot(test.site$mpdRankingChanges[11:29] ~ test.site$deltaDifferences[11:29],ylim=c(0,17),xlim=c(0,2.2));lines(test.site$deltaDifferences[11:29], test.site$mpdRankingChanges[11:29],col=1);points(test.site$mpdRankingChanges[1:10] ~ test.site$deltaDifferences[1:10]);lines(test.site$deltaDifferences[1:10], test.site$mpdRankingChanges[1:10],col=2)
