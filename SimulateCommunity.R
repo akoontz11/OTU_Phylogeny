@@ -3,6 +3,7 @@ library(ape)
 library(geiger)
 
 # ABUNDANCE MAPPING FUNCTION
+# Function for mapping abundance values from one community matrix to a newer, expanded matrix
 abundance.mapping <- function(oldColumnNames, newColumnNames, rowNames, donor.comm, recip.comm){
   # If `donor.com` argument is empty, column names will be NULL; return the recip.comm argument as NULL
   if(is.null(oldColumnNames)){
@@ -22,7 +23,7 @@ abundance.mapping <- function(oldColumnNames, newColumnNames, rowNames, donor.co
         } else {
           # If there's only one remaining column derived from the "current" column in the donor, 
           # that column will receive the species' abundance values
-          # (This if statement is necessary because of the unintuitive behavior of `sample` for vectors of length 1)
+          # (This if statement is necessary because of the unintuitive behavior of `sample` for vectors of length 1...)
           if (length(current.species) == 1){
             lucky.column <- current.species
           } else {
@@ -46,9 +47,9 @@ abundance.mapping <- function(oldColumnNames, newColumnNames, rowNames, donor.co
 # %%% FUNCTION FOR TESTING TRANSFORMATIONS OVER COMMUNITY SIMULATIONS %%%
 SimulateCommnunity <- function(comm.size,comm.spp,comm.timesteps,comm.migrate,comm.env,comm.abund,comm.stoch,comm.speciate,intra.birth,intra.death,intra.steps,seq.birth,seq.death,seq.steps){
   # SIMULATE AND CLEANUP COMMUNITY
-  # Simulate community (using pez function sim.meta.phy.comm). Generate NULL for DemoCom object is error
+  # Simulate community (using pez function sim.meta.phy.comm). Generate NULL for a DemoCom object that is in error
   DemoCom <- tryCatch(sim.meta.phy.comm(size=comm.size, n.spp=comm.spp, timesteps=comm.timesteps, p.migrate=comm.migrate, env.lam=comm.env, abund.lam=comm.abund, stoch.lam=comm.stoch, p.speciate=comm.speciate),error=function(cond) {return(NULL)})
-  # If DemoCom is NULL, then assign NULL to relevant variables
+  # If DemoCom is NULL, then assign NULL to relevant phylogeny/community variables
   if(is.null(DemoCom)){
     sim.phy <- NULL ; sim.comm <- NULL ; species.names <- NULL ; sites <- NULL
   }else{
@@ -68,9 +69,9 @@ SimulateCommnunity <- function(comm.size,comm.spp,comm.timesteps,comm.migrate,co
   }
   # INTRASPECIFIC
   # Add intraspecific difference to simulated community phylogeny
-  # (tryCatch statements included to account for trees in which all species have gone extinct)
   intra.phy <- add.branch(sim.phy,birth=intra.birth,death=intra.death,steps=intra.steps,"pops")
   # Create an empty matrix for the intra.phy
+  # (tryCatch statement included to account for trees in which all species have gone extinct)
   intra.comm <- tryCatch(matrix(nrow=length(sites),ncol=Ntip(intra.phy),dimnames = list(sites,intra.phy$tip.label)),error=function(cond) {return(NULL)})
   population.names <- colnames(intra.comm)
   # Map abundance values from original community matrix to columns of intra.comm 
@@ -78,9 +79,9 @@ SimulateCommnunity <- function(comm.size,comm.spp,comm.timesteps,comm.migrate,co
   
   # SEQ. ERROR
   # Add random error to intra.tree phylogeny
-  # (tryCatch statements included to account for trees in which all species have gone extinct)
   seq.phy <- add.branch(intra.phy,birth=seq.birth,death=seq.death,steps=seq.steps,"seq.err")
   # Create an empty matrix for the seq.phy
+  # (tryCatch statement included to account for trees in which all species have gone extinct)
   seq.comm <- tryCatch(matrix(nrow=length(sites),ncol=Ntip(seq.phy),dimnames = list(sites,seq.phy$tip.label)),error=function(cond) {return(NULL)})
   individual.names <- colnames(seq.comm)
   # Map abundance values from original community matrix to columns of seq.comm
