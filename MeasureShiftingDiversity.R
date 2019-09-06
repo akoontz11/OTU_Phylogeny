@@ -1,13 +1,12 @@
 # %%% MEASUREMENT OF MPD SHIFTS %%%
 
 # 1. Average absolute change in site "ranking" (least diverse -> most diverse) versus changes in delta value
-# 2. Measure Pearson correlation coefficient between the mpd values and the delta values
+# 2. Measure Pearson correlation coefficient between the average change in site rankings and the delta values
 
 # Function needs to be able to accomodate both of the above metrics for all 3 "levels" of 
 # diversity (i.e. original, with populations, and with sequencing error)
 
 measureShifts <- function(orig.transform, deltas){
-  browser()
   # (This function assumes that the deltas vector is structured
   # such that delta = 1.0 is the 10th value in the vector, and values increment by 0.1)
   # 1. --BUILD VECTOR OF CHANGES IN STIE RANKING BY MPD--
@@ -33,7 +32,7 @@ measureShifts <- function(orig.transform, deltas){
     # Calculate difference between current delta value and baseline delta value (delta=1.0)
     deltaDifferences[i] <- abs(deltas[i]-deltas[10])
   }
-  # 2. --MEASURE PEARSON CORRELATION COEFFICIENT BETWEEN MPD AND DELTA VALUES--
+  # 2. --MEASURE PEARSON CORRELATION COEFFICIENT BETWEEN RANKING SHIFTS AND DELTA VALUES--
   r.value <- cor(meanRankChanges,deltaDifferences)
   # Return two measures and vector of differences in delta values
   measures <- list(mpdRankingChanges = meanRankChanges, r = r.value, deltaDifferences = deltaDifferences)
@@ -56,3 +55,36 @@ seq.site <- measureShifts(sim.data$transforms$seq_err.transform,deltas)
 str(seq.site)
 # Plot changes in mpd ranking of sites versus changes in delta values, 
 plot(seq.site$mpdRankingChanges[11:29] ~ seq.site$deltaDifferences[11:29],ylim=c(0,17),xlim=c(0,2.2),main="Seq-error phylogenies: changes in diversity versus changes in delta values",xlab="Differences between delta values",ylab="mpdRankChanges");lines(seq.site$deltaDifferences[11:29], seq.site$mpdRankingChanges[11:29],col=1);points(seq.site$mpdRankingChanges[1:10] ~ seq.site$deltaDifferences[1:10]);lines(seq.site$deltaDifferences[1:10], seq.site$mpdRankingChanges[1:10],col=2)
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# Testing new function
+
+measureShifts <- function(orig.transform, deltas){
+  # (This function assumes that the deltas vector is structured
+  # such that delta = 1.0 is the 10th value in the vector, and values increment by 0.1)
+  # 1. --BUILD A VECTOR OF AVERGAGE CHANGES IN DIVERSITY VALUES BETWEEN ADJACENT DELTA VALUES--
+  # Generate a matrix to capture changes in diversity values between adjacent delta values
+  div.changes <- matrix(NA, nrow=nrow(orig.transform), ncol=length(deltas)-1)
+  # Generate a numeric vector of means of mpd shifts (between adjacent delta values)
+  mean.changes <- vector(length=length(deltas)-1)
+  # For each value in the vector of delta values
+  for(i in 1:length(deltas)-1){
+    # calculate the differences between mpd values of the next delta value and the current delta value
+    div.changes[,i] <- orig.transform[,i+1] - orig.transform[,i]
+    # Calculate the means of those differences, and pass that value into a vector
+    mean.changes[i] <- mean(div.changes[,i])
+    }
+  # 2. --MEASURE PEARSON CORRELATION COEFFICIENT BETWEEN MPD VALUES AND DELTA VALUES--
+  #r.value <- cor(meanRankChanges,deltaDifferences)
+  # Return two measures and vector of differences in delta values
+  measures <- list(meansOfDiversityChanges = mean.changes)
+  return(measures)
+}
+
+test.site <- measureShifts(sim.data$transforms$orig.transform, deltas)
+deltas
+
+small.deltas <- deltas[1:29]
+small.deltas
+
+plot(test.site$meansOfDiversityChanges ~ small.deltas)
