@@ -85,8 +85,18 @@ test.site$meansOfDiversityChanges
 
 plot(test.site$meansOfDiversityChanges ~ test.site$small.deltas)
 
-lm(MPD ~ delta + MPD_true + n_spp, data=data)
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+lm(MPD ~ delta + MPD_true, data=data)
 # This requires mpd measurements, delta values, mpd values at delta = 1.0, and the number of species present in the community
 # Is this for all sites, that is, MPD values for all sites, species for all sites? How is this structured? 
 
-# Afterwards, how to apply this to all simulation settings...
+# Afterwards, how to apply this to all simulation results...
+
+length(sim.Results)
+length(str(sim.Results))
+length(table(sim.Results))
+
+plot(sim.Results[[666]]$phylogenies$orig.phylo)
+str(sim.Results[[666]]$transforms$intra.transform)
+sim.Results[[666]]$transforms$intra.transform
