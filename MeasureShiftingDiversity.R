@@ -93,10 +93,9 @@ lm(MPD ~ delta + MPD_true, data=data)
 
 # Afterwards, how to apply this to all simulation results...
 
-length(sim.Results)
-length(str(sim.Results))
-length(table(sim.Results))
+length(demo.results)
+length(unique(demo.results))
 
-plot(sim.Results[[666]]$phylogenies$orig.phylo)
-str(sim.Results[[666]]$transforms$intra.transform)
-sim.Results[[666]]$transforms$intra.transform
+test.vector <- as.numeric(demo.results[[3]]$abundances$orig.community)
+cbind(test.vector, deltas)
+length(deltas)
