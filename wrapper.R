@@ -19,11 +19,11 @@ source("~/OTU_Phylogeny/SimulateCommunity.R")
 #str(sim.data)
 
 # Varying intraspecific and sequencing error rates only
-params <- data.frame(expand.grid(comm.size=10,comm.spp=5,comm.timesteps=100,comm.migrate=0.02,comm.env=10,comm.abund=4,comm.stoch=1,comm.speciate=0.06,intra.birth=seq(0.1,0.5,0.1),intra.death=seq(0.1,0.5,0.1),intra.steps=1:5,seq.birth=seq(0.1,0.5,0.1),seq.death=seq(0.1,0.5,0.1),seq.steps=1:5))
+#params <- data.frame(expand.grid(comm.size=10,comm.spp=5,comm.timesteps=100,comm.migrate=0.02,comm.env=10,comm.abund=4,comm.stoch=1,comm.speciate=0.06,intra.birth=seq(0.1,0.5,0.1),intra.death=seq(0.1,0.5,0.1),intra.steps=1:5,seq.birth=seq(0.1,0.5,0.1),seq.death=seq(0.1,0.5,0.1),seq.steps=1:5))
 #nrow(params)
 
 # Varying intraspecific rates, sequencing error rates, and number of community species
-#params <- data.frame(expand.grid(comm.size=10,comm.spp=5:15,comm.timesteps=100,comm.migrate=0.02,comm.env=10,comm.abund=4,comm.stoch=1,comm.speciate=0.06,intra.birth=seq(0.1,0.5,0.1),intra.death=seq(0.1,0.5,0.1),intra.steps=1:5,seq.birth=seq(0.1,0.5,0.1),seq.death=seq(0.1,0.5,0.1),seq.steps=1:5))
+params <- data.frame(expand.grid(comm.size=10,comm.spp=5:15,comm.timesteps=100,comm.migrate=0.02,comm.env=10,comm.abund=4,comm.stoch=1,comm.speciate=0.06,intra.birth=seq(0.1,0.5,0.1),intra.death=seq(0.1,0.5,0.1),intra.steps=1:5,seq.birth=seq(0.1,0.5,0.1),seq.death=seq(0.1,0.5,0.1),seq.steps=1:5))
 #nrow(params)
 
 #params <- data.frame(expand.grid(comm.size=10,comm.spp=1,comm.timesteps=100,comm.migrate=0.02,comm.env=10,comm.abund=4,comm.stoch=1,comm.speciate=0.06,intra.birth=0.1,intra.death=0.5,intra.steps=1:5,seq.birth=0.1,seq.death=0.5,seq.steps=1:5))
