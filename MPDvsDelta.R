@@ -25,7 +25,8 @@ phy.d.transform <- function(phylo,d,abundance.matrix,title){
       # Apply phylogenetic transformation to tree
       s.phylo <- rescale(phylo, "delta", d[i])
       # Create comparative data object
-      c.data <- comparative.comm(s.phylo, abundance.matrix)
+      # Including the force.root argument, in order to handle unrooted phylogenies
+      c.data <- comparative.comm(s.phylo, abundance.matrix, force.root = 0)
       # Calculate mean pairwise distance
       mpd.values <- .mpd(c.data, abundance.weighted=TRUE) # This means that abundance data in simulation will effect calculation of mpd...Does this makes sense, given what we're trying to do?
       # Store calculated mpd values within a matrix
