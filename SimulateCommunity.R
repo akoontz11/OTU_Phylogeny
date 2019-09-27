@@ -97,9 +97,9 @@ SimulateCommnunity <- function(comm.size,comm.spp,comm.timesteps,comm.migrate,co
   
   # PACKAGE SIMULATION DATA
   # Export a list containing all simulation data: phylogenies, abundances, and mpd.mat for each community "type" (original, intra, and seq)
-  community.abundances <- list(orig.community=sim.comm,intra.community=intra.comm,seq_err.community=seq.comm)
-  community.phylogenies <- list(orig.phylo=sim.phy,intra.phylo=intra.phy,seq_err.phylo=seq.phy)
-  community.transforms <- list(orig.transform=sim.test,intra.transform=intra.test,seq_err.transform=seq.test)
+  community.abundances <- list(orig.community=sim.comm,intra.community=intra.comm,seq.community=seq.comm)
+  community.phylogenies <- list(orig.phylo=sim.phy,intra.phylo=intra.phy,seq.phylo=seq.phy)
+  community.transforms <- list(orig.transform=sim.test,intra.transform=intra.test,seq.transform=seq.test)
   simulation.data <- list(phylogenies=community.phylogenies,abundances=community.abundances,transforms=community.transforms)
   return(simulation.data)
 }
