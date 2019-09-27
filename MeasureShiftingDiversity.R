@@ -105,12 +105,32 @@ data.frame(result=as.numeric(matrix(1:25, 5)), n.spp=rep(n.spp, each=5) )
 data.frame(result=as.numeric(matrix(1:25, 5)), n.spp=rep(n.spp, each=4) )
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-data.frame(results=as.numeric(sim.Results[[4]]$transforms$orig.transform[1,]), deltas=deltas, orig.MPD=rep(sim.Results[[4]]$transforms$orig.transform[1,10], each=30), n.spp=rep(5:14), each=3)
-data.frame(results=as.numeric(sim.Results[[i]]$transforms$orig.transform[1,]), deltas=deltas, orig.MPD=rep(sim.Results[[i]]$transforms$orig.transform[1,10], each=30), n.spp=rep(5:14), each=3)
-
-as.numeric(sim.Results[[4]]$transforms)
-
-for i in (1:length(sim.Results)){
-  unlist(sim.Results[[i]]$transforms)
-  output <- data.frame(results=as.numeric(sim.Results[[i]]$transforms$orig.transform[1,]), deltas=deltas, orig.MPD=rep(sim.Results[[i]]$transforms$orig.transform[1,10], each=30), n.spp=rep(5:14), each=3))
+# Function for creating data.frame, to which the lm fxn will be sapplied
+generate.data.frame <- function(sim.Results){
+  # Designate data.frame to output
+  output <- data.frame()
+  # For each "simulation instance"
+  for (i in 1:length(sim.Results)){
+    #(Determine the number of sites in that simulation instance)
+    n.sites <- nrow(sim.Results[[i]]$transforms$orig.transform)
+    # For each one of those sites,
+    for(j in 1:nsites){
+      # combine the mpd values of the original site, the site with intraspecific differences added, and the site with sequencing error added
+      vector <- rbind(sim.Results[[i]]$transforms$orig.transform[j,],sim.Results[[i]]$transforms$intra.transform[j,],sim.Results[[i]]$transforms$seq_err.transform[j,])
+      # Collapse the matrix of those values into a vector
+      vector <- as.numeric(vector)
+      # Determine the MPD value for each matrix for the delta transform value of 1 (corresponding to the "true" MPD value)
+      # For the original matrix,
+      base.orig <- sim.Results[[i]]$transforms$orig.transform[j,10]
+      # for the matrix with intraspecific differences added,
+      base.intra <- sim.Results[[i]]$transforms$intra.transform[j,10]
+      # and for the matrix with sequencing error added.
+      base.seq <- sim.Results[[i]]$transforms$seq_err.transform[j,10]
+      #
+      current.site <- data.frame(results=vector, deltas=rep(deltas, each=3), base.values=rep(c(base.orig,base.intra,base.seq),times=3))
+    }
+    output <- rbind(output, current.site)
+  }
+  return(output)
 }
+
