@@ -1,136 +1,73 @@
-# %%% MEASUREMENT OF MPD SHIFTS %%%
+# %%% Analysis of simulation output %%%
 
-# 1. Average absolute change in site "ranking" (least diverse -> most diverse) versus changes in delta value
-# 2. Measure Pearson correlation coefficient between the average change in site rankings and the delta values
+# Generate backup data of simulation variables
+backup <- demo.results
+b.params <- params
 
-# measureRankingShifts <- function(orig.transform, deltas){
-#   # (This function assumes that the deltas vector is structured
-#   # such that delta = 1.0 is the 10th value in the vector, and values increment by 0.1)
-#   # 1. --BUILD VECTOR OF CHANGES IN STIE RANKING BY MPD--
-#   # Generate a numeric vector of site rankings (for delta=1.0)
-#   baseline.rank <- as.numeric(rank(sort(orig.transform[,10],decreasing = F)))
-#   # Generate a vector of names of these site rankings (at delta=1.0)
-#   baseline.names <- names(sort(orig.transform[,10],decreasing = F)) 
-#   # Generate a vector to capture mean changes between delta values
-#   meanRankChanges <- vector(length = length(deltas)-1)
-#   # Generate a vector to capture delta value differences
-#   deltaDifferences <- vector(length = length(deltas)-1)
-#   # For each value in the vector of delta values
-#   for(i in 1:length(deltas)-1){
-#     # Get the names of sites sorted from lowest to highest
-#     comparison <- names(sort(orig.transform[,i],decreasing = F))
-#     # Generate a numeric vector corresponding to how site rankings have changed from "baseline" delta value
-#     # (delta=1.0) to "current" delta value (delta[i])
-#     shifts <- match(baseline.names, comparison)
-#     # Calculate changes between two different rankings
-#     changes <- abs(shifts - baseline.rank)
-#     # Calculate mean changes, and place into vector
-#     meanRankChanges[i] <- mean(changes)
-#     # Calculate difference between current delta value and baseline delta value (delta=1.0)
-#     deltaDifferences[i] <- abs(deltas[i]-deltas[10])
-#   }
-#   # 2. --MEASURE PEARSON CORRELATION COEFFICIENT BETWEEN RANKING SHIFTS AND DELTA VALUES--
-#   r.value <- cor(meanRankChanges,deltaDifferences)
-#   # Return two measures and vector of differences in delta values
-#   measures <- list(mpdRankingChanges = meanRankChanges, r = r.value, deltaDifferences = deltaDifferences)
-#   return(measures)
-# }
-# 
-# # Demonstration with simulated species-level transforms 
-# orig.site <- measureRankingShifts(sim.Results[[4]]$transforms$orig.transform,deltas)
-# str(orig.site)
-# # Plot changes in mpd ranking of sites versus changes in delta values, 
-# plot(orig.site$mpdRankingChanges[11:29] ~ orig.site$deltaDifferences[11:29],ylim=c(0,17),xlim=c(0,2.2),main="Original phylogenies: changes in diversity versus changes in delta values",xlab="Differences between delta values",ylab="mpdRankChanges");lines(orig.site$deltaDifferences[11:29], orig.site$mpdRankingChanges[11:29],col=1);points(orig.site$mpdRankingChanges[1:10] ~ orig.site$deltaDifferences[1:10]);lines(orig.site$deltaDifferences[1:10], orig.site$mpdRankingChanges[1:10],col=2)
-# 
-# # Demonstration with simulated population-level transforms 
-# intra.site <- measureRankingShifts(sim.Results[[4]]$transforms$intra.transform,deltas)
-# str(intra.site)
-# # Plot changes in mpd ranking of sites versus changes in delta values, 
-# plot(intra.site$mpdRankingChanges[11:29] ~ intra.site$deltaDifferences[11:29],ylim=c(0,17),xlim=c(0,2.2),main="Intra phylogenies: changes in diversity versus changes in delta values",xlab="Differences between delta values",ylab="mpdRankChanges");lines(intra.site$deltaDifferences[11:29], intra.site$mpdRankingChanges[11:29],col=1);points(intra.site$mpdRankingChanges[1:10] ~ intra.site$deltaDifferences[1:10]);lines(intra.site$deltaDifferences[1:10], intra.site$mpdRankingChanges[1:10],col=2)
-# 
-# #-------------------------------------------------------------------------------------------------------------------------------------------------------------------
-# # 1. Average differences in mpd values at adjacent delta transform values versus changes in delta value
-# # 2. Measure Pearson correlation coefficient between the average change in site rankings and the delta values
-# 
-# measureShifts <- function(orig.transform, deltas){
-#   # (This function assumes that the deltas vector is structured
-#   # such that delta = 1.0 is the 10th value in the vector, and values increment by 0.1)
-#   # 1. --BUILD A VECTOR OF AVERGAGE CHANGES IN DIVERSITY VALUES BETWEEN ADJACENT DELTA VALUES--
-#   # Generate a matrix to capture changes in diversity values between adjacent delta values
-#   div.changes <- matrix(NA, nrow=nrow(orig.transform), ncol=length(deltas)-1)
-#   # Generate a numeric vector of means of mpd shifts (between adjacent delta values)
-#   mean.changes <- vector(length=length(deltas)-1)
-#   # For each value in the vector of delta values
-#   for(i in 1:length(deltas)-1){
-#     # calculate the differences between mpd values of the next delta value and the current delta value
-#     div.changes[,i] <- orig.transform[,i+1] - orig.transform[,i]
-#     # Calculate the means of those differences, and pass that value into a vector
-#     mean.changes[i] <- mean(div.changes[,i])
-#   }
-#   # 2. --MEASURE PEARSON CORRELATION COEFFICIENT BETWEEN MPD VALUES AND DELTA VALUES--
-#   # Create a vector of equal length to the vector of means (of mpd changes)
-#   small.deltas <- deltas[1:29]
-#   # Calculate r.value
-#   r.value <- cor(mean.changes, small.deltas)
-#   # Return two measures and vector of differences in delta values
-#   measures <- list(meansOfDiversityChanges = mean.changes, r = r.value, small.deltas = small.deltas)
-#   return(measures)
-# }
-# 
-# test.site <- measureShifts(sim.Results[[4]]$transforms$orig.transform, deltas)
-# test.site$meansOfDiversityChanges
-# 
-# test.site <- measureShifts(sim.data$transforms$orig.transform, deltas)
-# test.site$meansOfDiversityChanges
-# 
-# plot(test.site$meansOfDiversityChanges ~ test.site$small.deltas)
+# Removed erred lines from output (to be addressed later...)
+params <- params[sapply(demo.results, Negate(is.character)),]
+demo.results <- Filter(Negate(is.character), demo.results)
 
-#-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# Extracts relevant data from the results
+data <- lapply(demo.results, function(x) x$transforms$orig.transform)
+#data <- lapply(demo.results, function(x) x$transforms$intra.transform)
+data <- lapply(demo.results, function(x) x$transforms$seq.transform)
+params <- params[sapply(data, is.matrix),]
+data <- Filter(is.matrix, data)
 
-lm(MPD ~ delta + MPD_true, data=data)
-# This requires mpd measurements, delta values, mpd values at delta = 1.0, and the number of species present in the community
-# Is this for all sites, that is, MPD values for all sites, species for all sites? How is this structured? 
-
-# %%% EXAMPLE FROM WILL %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# Make a dummy matrix and collapse it into a vector
-matrix(1:25, 5)
-as.numeric(matrix(1:25, 5))
-# Make a dummy vector (and pad it to the length of the collapsed matrix)
-n.spp <- 1:5
-rep(n.spp, each=5)
-# Join the two after padding out the dummy vector as well
-cbind( as.numeric(matrix(1:25, 5)), rep(n.spp, each=5) )
-# Now with data.frame! :D
-data.frame(result=as.numeric(matrix(1:25, 5)), n.spp=rep(n.spp, each=5) )
-data.frame(result=as.numeric(matrix(1:25, 5)), n.spp=rep(n.spp, each=4) )
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-# Function for creating data.frame, to which the lm fxn will be sapplied
-generate.data.frame <- function(sim.Results){
-  # Designate data.frame to output
-  output <- data.frame()
-  # For each "simulation instance"
-  for (i in 1:length(sim.Results)){
-    #(Determine the number of sites in that simulation instance)
-    n.sites <- nrow(sim.Results[[i]]$transforms$orig.transform)
-    # For each one of those sites,
-    for(j in 1:nsites){
-      # combine the mpd values of the original site, the site with intraspecific differences added, and the site with sequencing error added
-      vector <- rbind(sim.Results[[i]]$transforms$orig.transform[j,],sim.Results[[i]]$transforms$intra.transform[j,],sim.Results[[i]]$transforms$seq_err.transform[j,])
-      # Collapse the matrix of those values into a vector
-      vector <- as.numeric(vector)
-      # Determine the MPD value for each matrix for the delta transform value of 1 (corresponding to the "true" MPD value)
-      # For the original matrix,
-      base.orig <- sim.Results[[i]]$transforms$orig.transform[j,10]
-      # for the matrix with intraspecific differences added,
-      base.intra <- sim.Results[[i]]$transforms$intra.transform[j,10]
-      # and for the matrix with sequencing error added.
-      base.seq <- sim.Results[[i]]$transforms$seq_err.transform[j,10]
-      #
-      current.site <- data.frame(results=vector, deltas=rep(deltas, each=3), base.values=rep(c(base.orig,base.intra,base.seq),times=3))
-    }
-    output <- rbind(output, current.site)
+# ---CORRELATIONS OF MPD VALUES BETWEEN SITE AND BASELINE---
+# A worker function that will calculate the correlations 
+.site.correls <- function(x){
+  value <- numeric(length=ncol(x))
+  for (i in 1:ncol(x)){
+    value[i] <- cor(x[,i],x[,10])
   }
-  return(output)
+  return(value)
 }
+
+# Calculate the correlations
+correls <- sapply(data, .site.correls)
+# Match the correlations to the parameters
+results <- params[rep(1:nrow(params), each=30),]
+results$correl <- as.numeric(correls)
+results$delta <- rep(deltas,length(data))
+# Do a model to see what affects the correlation
+#model <- lm(correl ~ delta + intra.birth, data=data)
+# Explanatory variable in our model should be the columns of our dataset, yes?
+model <- lm(correl ~ delta + intra.birth, data=results)
+
+# ---DIFFERENCE IN SITE RANKINGS (I.E. CROSSINGS OVER) BETWEEN SITE AND BASELINE---
+# A worker function that will calculate the difference in site rankings 
+.ranking.diff <- function(x){
+  # Generate a numeric vector of baseline site rankings (i.e. delta=1.0)
+  baseline.rank <- as.numeric(rank(sort(x[,10],decreasing = F)))
+  # Generate a vector of names of these site rankings 
+  baseline.names <- names(sort(x[,10],decreasing = F))
+  # Generate a vector to capture mean changes between rankings
+  meanRankChanges <- vector(length = ncol(x))
+  for (i in 1:ncol(x)){
+    # Get the names of sites sorted from lowest to highest for the current column (delta value)
+    comparison <- names(sort(x[,i],decreasing = F))
+    # Generate a numeric vector corresponding to how site rankings have changed from "baseline" delta value
+    shifts <- match(baseline.names, comparison)
+    # Calculate absolute changes between two different rankings
+    changes <- abs(shifts - baseline.rank)
+    # Calculate the mean of the absolute changes, and place into vector
+    meanRankChanges[i] <- mean(changes)
+  }
+  return(meanRankChanges)
+}
+
+# Calculate the ranking differences
+rank.shifts <- sapply(data, .ranking.diff)
+# Match the ranking differences to the parameters
+results <- params[rep(1:nrow(params), each=30),]
+results$rank.shifts <- as.numeric(rank.shifts)
+results$delta <- rep(deltas,length(data))
+# Do a model to see what affects the ranking difference shifts
+model <- lm(rank.shifts ~ delta + intra.birth, data=results)
+
+#demo.results <- backup
+#params <- b.params
+
 
