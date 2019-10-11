@@ -1,17 +1,25 @@
 # %%% Analysis of simulation output %%%
 
+# Function for standardizing
+z.transform <- function(data){
+  s.data <- (data-mean(data))/sd(data)
+  return(s.data)
+}
+# Load simulation results, and make a copy of the relevant output variable
+load("demoresults.RData")
+demo.results <- sim.Results
 # Generate backup data of simulation variables
 backup <- demo.results
 b.params <- params
-
+#--------------------------------------------------------------------------
 # Removed erred lines from output (to be addressed later...)
 params <- params[sapply(demo.results, Negate(is.character)),]
 demo.results <- Filter(Negate(is.character), demo.results)
 
-# Extracts relevant data from the results
+# Extract relevant data from the results
 data <- lapply(demo.results, function(x) x$transforms$orig.transform)
 #data <- lapply(demo.results, function(x) x$transforms$intra.transform)
-data <- lapply(demo.results, function(x) x$transforms$seq.transform)
+#data <- lapply(demo.results, function(x) x$transforms$seq_err.transform)
 params <- params[sapply(data, is.matrix),]
 data <- Filter(is.matrix, data)
 
@@ -24,17 +32,19 @@ data <- Filter(is.matrix, data)
   }
   return(value)
 }
-
 # Calculate the correlations
 correls <- sapply(data, .site.correls)
 # Match the correlations to the parameters
 results <- params[rep(1:nrow(params), each=30),]
 results$correl <- as.numeric(correls)
 results$delta <- rep(deltas,length(data))
+
 # Do a model to see what affects the correlation
-#model <- lm(correl ~ delta + intra.birth, data=data)
-# Explanatory variable in our model should be the columns of our dataset, yes?
-model <- lm(correl ~ delta + intra.birth, data=results)
+#model <- lm(correl ~ I(delta^2)+intra.birth+intra.death+intra.steps+seq.birth+seq.death+seq.steps, data=results)
+
+# Generating model using standardized variables
+s.model.correl <- lm(correl ~ z.transform(I(delta^2))+z.transform(intra.birth)+z.transform(intra.death)+z.transform(intra.steps)+z.transform(seq.birth)+z.transform(seq.death)+z.transform(seq.steps),data=results)
+summary(s.model.correl)
 
 # ---DIFFERENCE IN SITE RANKINGS (I.E. CROSSINGS OVER) BETWEEN SITE AND BASELINE---
 # A worker function that will calculate the difference in site rankings 
@@ -57,17 +67,20 @@ model <- lm(correl ~ delta + intra.birth, data=results)
   }
   return(meanRankChanges)
 }
-
 # Calculate the ranking differences
 rank.shifts <- sapply(data, .ranking.diff)
 # Match the ranking differences to the parameters
 results <- params[rep(1:nrow(params), each=30),]
 results$rank.shifts <- as.numeric(rank.shifts)
 results$delta <- rep(deltas,length(data))
+
 # Do a model to see what affects the ranking difference shifts
-model <- lm(rank.shifts ~ delta + intra.birth, data=results)
+#model <- lm(rank.shifts ~ I(delta^2)+intra.birth+intra.death+intra.steps+seq.birth+seq.death+seq.steps, data=results)
 
-#demo.results <- backup
-#params <- b.params
+# Generating model using standardized variables
+s.model.rank.shifts <- lm(rank.shifts ~ z.transform(I(delta^2))+z.transform(intra.birth)+z.transform(intra.death)+z.transform(intra.steps)+z.transform(seq.birth)+z.transform(seq.death)+z.transform(seq.steps),data=results)
+summary(s.model.rank.shifts)
 
+# demo.results <- backup
+# params <- b.params
 
