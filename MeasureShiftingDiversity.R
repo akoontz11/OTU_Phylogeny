@@ -39,11 +39,8 @@ results <- params[rep(1:nrow(params), each=30),]
 results$correl <- as.numeric(correls)
 results$delta <- rep(deltas,length(data))
 
-# Do a model to see what affects the correlation
-#model <- lm(correl ~ I(delta^2)+intra.birth+intra.death+intra.steps+seq.birth+seq.death+seq.steps, data=results)
-
 # Generating model using standardized variables
-s.model.correl <- lm(correl ~ z.transform(I(delta^2))+z.transform(intra.birth)+z.transform(intra.death)+z.transform(intra.steps)+z.transform(seq.birth)+z.transform(seq.death)+z.transform(seq.steps),data=results)
+s.model.correl <- lm(correl ~ z.transform(delta)+I(z.transform(delta)^2)+z.transform(intra.birth)+z.transform(intra.death)+z.transform(intra.steps)+z.transform(seq.birth)+z.transform(seq.death)+z.transform(seq.steps),data=results)
 summary(s.model.correl)
 
 # ---DIFFERENCE IN SITE RANKINGS (I.E. CROSSINGS OVER) BETWEEN SITE AND BASELINE---
@@ -74,13 +71,10 @@ results <- params[rep(1:nrow(params), each=30),]
 results$rank.shifts <- as.numeric(rank.shifts)
 results$delta <- rep(deltas,length(data))
 
-# Do a model to see what affects the ranking difference shifts
-#model <- lm(rank.shifts ~ I(delta^2)+intra.birth+intra.death+intra.steps+seq.birth+seq.death+seq.steps, data=results)
-
 # Generating model using standardized variables
-s.model.rank.shifts <- lm(rank.shifts ~ z.transform(I(delta^2))+z.transform(intra.birth)+z.transform(intra.death)+z.transform(intra.steps)+z.transform(seq.birth)+z.transform(seq.death)+z.transform(seq.steps),data=results)
+s.model.rank.shifts <- lm(rank.shifts ~ z.transform(delta)+I(z.transform(delta)^2)+z.transform(intra.birth)+z.transform(intra.death)+z.transform(intra.steps)+z.transform(seq.birth)+z.transform(seq.death)+z.transform(seq.steps),data=results)
 summary(s.model.rank.shifts)
 
-# demo.results <- backup
-# params <- b.params
+#demo.results <- backup
+#params <- b.params
 
