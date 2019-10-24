@@ -5,6 +5,7 @@ z.transform <- function(data){
   s.data <- (data-mean(data))/sd(data)
   return(s.data)
 }
+
 # Load simulation results, and make a copy of the relevant output variable
 load("demoresults.RData")
 demo.results <- sim.Results
@@ -19,7 +20,7 @@ demo.results <- Filter(Negate(is.character), demo.results)
 # Extract relevant data from the results
 data <- lapply(demo.results, function(x) x$transforms$orig.transform)
 #data <- lapply(demo.results, function(x) x$transforms$intra.transform)
-#data <- lapply(demo.results, function(x) x$transforms$seq_err.transform)
+#data <- lapply(demo.results, function(x) x$transforms$seq.transform)
 params <- params[sapply(data, is.matrix),]
 data <- Filter(is.matrix, data)
 
@@ -42,6 +43,8 @@ results$delta <- rep(deltas,length(data))
 # Generating model using standardized variables
 s.model.correl <- lm(correl ~ z.transform(delta)+I(z.transform(delta)^2)+z.transform(intra.birth)+z.transform(intra.death)+z.transform(intra.steps)+z.transform(seq.birth)+z.transform(seq.death)+z.transform(seq.steps),data=results)
 summary(s.model.correl)
+# Plotting command
+#plot(results$correl~results$delta)
 
 # ---DIFFERENCE IN SITE RANKINGS (I.E. CROSSINGS OVER) BETWEEN SITE AND BASELINE---
 # A worker function that will calculate the difference in site rankings 
