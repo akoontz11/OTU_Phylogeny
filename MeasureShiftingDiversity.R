@@ -8,19 +8,18 @@ z.transform <- function(data){
 
 # Load simulation results, and make a copy of the relevant output variable
 load("demoresults.RData")
-demo.results <- sim.Results
 # Generate backup data of simulation variables
-backup <- demo.results
+backup <- sim.Results
 b.params <- params
 #--------------------------------------------------------------------------
 # Removed erred lines from output (to be addressed later...)
-params <- params[sapply(demo.results, Negate(is.character)),]
-demo.results <- Filter(Negate(is.character), demo.results)
+params <- params[sapply(sim.Results, Negate(is.character)),]
+sim.Results <- Filter(Negate(is.character), sim.Results)
 
 # Extract relevant data from the results
-data <- lapply(demo.results, function(x) x$transforms$orig.transform)
-#data <- lapply(demo.results, function(x) x$transforms$intra.transform)
-#data <- lapply(demo.results, function(x) x$transforms$seq.transform)
+#data <- lapply(sim.Results, function(x) x$transforms$orig.transform)
+#data <- lapply(sim.Results, function(x) x$transforms$intra.transform)
+data <- lapply(sim.Results, function(x) x$transforms$seq.transform)
 params <- params[sapply(data, is.matrix),]
 data <- Filter(is.matrix, data)
 
@@ -78,6 +77,6 @@ results$delta <- rep(deltas,length(data))
 s.model.rank.shifts <- lm(rank.shifts ~ z.transform(delta)+I(z.transform(delta)^2)+z.transform(intra.birth)+z.transform(intra.death)+z.transform(intra.steps)+z.transform(seq.birth)+z.transform(seq.death)+z.transform(seq.steps),data=results)
 summary(s.model.rank.shifts)
 
-#demo.results <- backup
+#sim.Results <- backup
 #params <- b.params
 
