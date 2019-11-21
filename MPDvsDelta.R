@@ -4,12 +4,11 @@ library(geiger)
 library(pez)
 
 # Function for capturing mpd values over series of delta transformations
-phy.d.transform <- function(phylo,d,abundance.matrix,title){
+phy.d.transform <- function(phylo,abundance.matrix,d){
   # phylo--the phylogenetic tree to be transformed
   # d--the vector of delta values to utilize for the branch length transformation
   # abundance.matrix--species-sites abundance matrix, used to calculate mpd values
-  # title--title of plot generated (plotting mpd values against increasing delta values)
-  # -----------------------------------------------------------------------------
+  # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   # If `phylo` argument is NULL, return an mpd.mat object of NA
   if(is.null(phylo)){
     mpd.mat <- NA
@@ -25,31 +24,18 @@ phy.d.transform <- function(phylo,d,abundance.matrix,title){
       # Apply phylogenetic transformation to tree
       s.phylo <- rescale(phylo, "delta", d[i])
       # Create comparative data object
-      # Including the force.root argument, in order to handle unrooted phylogenies
+      # (Including the force.root argument, in order to handle unrooted phylogenies)
       c.data <- comparative.comm(s.phylo, abundance.matrix, force.root = 0)
       # Calculate mean pairwise distance
       mpd.values <- .mpd(c.data, abundance.weighted=TRUE) # This means that abundance data in simulation will effect calculation of mpd...Does this makes sense, given what we're trying to do?
       # Store calculated mpd values within a matrix
       mpd.mat[,i] <- mpd.values
     }
-    # PLOTTING--For each 'site' or simulation, plot the change in mpd versus the increasing values of delta
-    # Specifying the range values, removing any NAs
-    #ymin <- min(mpd.mat, na.rm=T); ymax <- max(mpd.mat,na.rm=T)
-    # Plotting the first matrix row (i.e. Site1 values) 
-    #plot((mpd.mat[1,1:length(d)]) ~ d, xlab="delta", ylab="MPD Values", ylim=c(ymin,ymax), pch=20,main=title)
-    #lines(d, mpd.mat[1,])
-    # Below loop iterates through length of the matrix, adding connected points onto the plot
-    #for(i in 2:nsim){
-    #points((mpd.mat[i,1:length(d)]) ~ d,col=i, pch=20)
-    # Capture mpd values for current row of matrix, and connect points
-    #y <- (mpd.mat[i,])
-    #lines(d,y,col=i)
-    #}
     return(mpd.mat)
   }
 }
 
-# %%% Demonstration using laja dataset %%%
+# %%% Demonstration using laja dataset-------------------------------
 #data(laja)
 #data <- comparative.comm(invert.tree, river.sites, invert.traits, river.env)
 #plot(invert.tree)
@@ -63,3 +49,49 @@ phy.d.transform <- function(phylo,d,abundance.matrix,title){
 #deltas
 # Demonstrating function
 #laja.test <- phy.d.transform(invert.tree, deltas,species.abundances,"Phylogenetic diversity over increasing values of delta transformation \n(Laja Dataset)")
+
+# %%% Old version of function (with title argument and plotting commands)----------------
+# Function for capturing mpd values over series of delta transformations
+# phy.d.transform <- function(phylo,d,abundance.matrix,title){
+#   # phylo--the phylogenetic tree to be transformed
+#   # d--the vector of delta values to utilize for the branch length transformation
+#   # abundance.matrix--species-sites abundance matrix, used to calculate mpd values
+#   # title--title of plot generated (plotting mpd values against increasing delta values)
+#   # If `phylo` argument is NULL, return an mpd.mat object of NA
+#   if(is.null(phylo)){
+#     mpd.mat <- NA
+#     return(mpd.mat)
+#   } else{
+#     # Calculate number of sites from species-site abundance matrix
+#     nsim <- nrow(abundance.matrix)
+#     # Create matrix with which to capture mpd.values vector for every loop iteration
+#     mpd.mat <- matrix(NA, nrow=nsim, ncol=length(d))
+#     colnames(mpd.mat) <- d
+#     rownames(mpd.mat) <- paste("Site",1:nsim,sep="_")
+#     for(i in 1:length(d)){
+#       # Apply phylogenetic transformation to tree
+#       s.phylo <- rescale(phylo, "delta", d[i])
+#       # Create comparative data object
+#       # Including the force.root argument, in order to handle unrooted phylogenies
+#       c.data <- comparative.comm(s.phylo, abundance.matrix, force.root = 0)
+#       # Calculate mean pairwise distance
+#       mpd.values <- .mpd(c.data, abundance.weighted=TRUE) # This means that abundance data in simulation will effect calculation of mpd...Does this makes sense, given what we're trying to do?
+#       # Store calculated mpd values within a matrix
+#       mpd.mat[,i] <- mpd.values
+#     }
+#     # PLOTTING--For each 'site' or simulation, plot the change in mpd versus the increasing values of delta
+#     # Specifying the range values, removing any NAs
+#     #ymin <- min(mpd.mat, na.rm=T); ymax <- max(mpd.mat,na.rm=T)
+#     # Plotting the first matrix row (i.e. Site1 values) 
+#     #plot((mpd.mat[1,1:length(d)]) ~ d, xlab="delta", ylab="MPD Values", ylim=c(ymin,ymax), pch=20,main=title)
+#     #lines(d, mpd.mat[1,])
+#     # Below loop iterates through length of the matrix, adding connected points onto the plot
+#     #for(i in 2:nsim){
+#     #points((mpd.mat[i,1:length(d)]) ~ d,col=i, pch=20)
+#     # Capture mpd values for current row of matrix, and connect points
+#     #y <- (mpd.mat[i,])
+#     #lines(d,y,col=i)
+#     #}
+#     return(mpd.mat)
+#   }
+# }
