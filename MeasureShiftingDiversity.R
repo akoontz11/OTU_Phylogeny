@@ -17,14 +17,14 @@ params <- params[sapply(sim.Results, Negate(is.character)),]
 sim.Results <- Filter(Negate(is.character), sim.Results)
 
 # Extract relevant data from the results
-data <- lapply(sim.Results, function(x) x$transforms$orig.transform)
-#data <- lapply(sim.Results, function(x) x$transforms$intra.transform)
+#data <- lapply(sim.Results, function(x) x$transforms$orig.transform)
+data <- lapply(sim.Results, function(x) x$transforms$intra.transform)
 #data <- lapply(sim.Results, function(x) x$transforms$seq.transform)
 params <- params[sapply(data, is.matrix),]
 data <- Filter(is.matrix, data)
 
 # ---CORRELATIONS OF MPD VALUES BETWEEN SITE AND BASELINE---
-# A worker function that will calculate the correlations 
+# A worker function that will calculate the correlations between each delta value and "baseline" delta value (1.0)
 .site.correls <- function(x){
   value <- numeric(length=ncol(x))
   for (i in 1:ncol(x)){
@@ -76,7 +76,10 @@ results$delta <- rep(deltas,length(data))
 # Generating model using standardized variables
 s.model.rank.shifts <- lm(rank.shifts ~ z.transform(delta)+I(z.transform(delta)^2)+z.transform(intra.birth)+z.transform(intra.death)+z.transform(intra.steps)+z.transform(seq.birth)+z.transform(seq.death)+z.transform(seq.steps),data=results)
 summary(s.model.rank.shifts)
+# Plotting command
+#plot(results$rank.shifts~results$delta)
+#plot(results$rank.shifts~results$intra.birth)
 
-#sim.Results <- backup
-#params <- b.params
+sim.Results <- backup
+params <- b.params
 
