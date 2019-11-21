@@ -17,8 +17,8 @@ params <- params[sapply(sim.Results, Negate(is.character)),]
 sim.Results <- Filter(Negate(is.character), sim.Results)
 
 # Extract relevant data from the results
-#data <- lapply(sim.Results, function(x) x$transforms$orig.transform)
-data <- lapply(sim.Results, function(x) x$transforms$intra.transform)
+data <- lapply(sim.Results, function(x) x$transforms$orig.transform)
+#data <- lapply(sim.Results, function(x) x$transforms$intra.transform)
 #data <- lapply(sim.Results, function(x) x$transforms$seq.transform)
 params <- params[sapply(data, is.matrix),]
 data <- Filter(is.matrix, data)
