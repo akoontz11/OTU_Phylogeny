@@ -52,7 +52,7 @@ SimulateCommnunity <- function(comm.size,comm.spp,comm.timesteps,comm.migrate,co
   DemoCom <- tryCatch(sim.meta.phy.comm(size=comm.size, n.spp=comm.spp, timesteps=comm.timesteps, p.migrate=comm.migrate, env.lam=comm.env, abund.lam=comm.abund, stoch.lam=comm.stoch, p.speciate=comm.speciate),error=function(cond) {return(NULL)})
   # If DemoCom is NULL, then assign NULL to relevant phylogeny/community variables
   if(is.null(DemoCom)){
-    sim.phy <- NULL ; sim.comm <- NULL ; species.names <- NULL ; sites <- NULL 
+    orig.phy <- NULL ; orig.comm <- NULL ; species.names <- NULL ; sites <- NULL 
   }else{
   # %%% "CLEANUP" SIMULATED COMMUNITY, AND SETUP COMMUNITY WITH POPULATIONS %%%
   # Drop sites with one or less species in them from community matrix  (by removing rows with only one nonzero value in them)
@@ -89,11 +89,11 @@ SimulateCommnunity <- function(comm.size,comm.spp,comm.timesteps,comm.migrate,co
   seq.comm <- abundance.mapping(species.names, individual.names, sites, sim.comm, seq.comm)
   
   # CAPTURE MPD VALUES OVER TRANSFORMATIONS FOR EACH COMMUNITY TYPE
-  # --Plotting phylogenetic diversity versus different delta transformations for original simulated community--
+  # Build mpd versus delta transformation values matrix for original simulated community
   orig.test <- phy.d.transform(orig.phy, orig.comm, deltas)
-  # --Plotting phylogenetic diversity versus different delta transformations for community with appended populations--
+  # Build mpd versus delta transformation values matrix for community with appended populations
   intra.test <- phy.d.transform(intra.phy, intra.comm, deltas)
-  # --Plotting phylogenetic diversity versus different delta transformations for community with sequencing error added on--
+  # Build mpd versus delta transformation values matrix for community with sequencing error added on
   seq.test <- phy.d.transform(seq.phy, seq.comm, deltas)
   
   # CAPTURE PHYLOGENETIC DIVERSITY METRICS OF ORIGINALLY SIMULATED PHYLOGENIES (FOR LATER COMPARISON)
@@ -134,8 +134,8 @@ SimulateCommnunity <- function(comm.size,comm.spp,comm.timesteps,comm.migrate,co
   return(simulation.data)
 }
 
-#sim.data <- SimulateCommnunity(comm.size=10, comm.spp=10,comm.timesteps=40,comm.migrate=0.02,comm.env=10,comm.abund=4,comm.stoch=1,comm.speciate=0.06,intra.birth=0.5,intra.death=0.1,intra.steps=1,seq.birth=0.5,seq.death=0.1,seq.steps=1)
-#str(sim.data)
+sim.data <- SimulateCommnunity(comm.size=10, comm.spp=10,comm.timesteps=40,comm.migrate=0.02,comm.env=10,comm.abund=4,comm.stoch=1,comm.speciate=0.06,intra.birth=0.5,intra.death=0.1,intra.steps=1,seq.birth=0.5,seq.death=0.1,seq.steps=1)
+str(sim.data)
 
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------
 # SIMULATE AND CLEANUP COMMUNITY
