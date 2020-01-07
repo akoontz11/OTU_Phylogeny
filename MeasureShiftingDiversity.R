@@ -6,7 +6,7 @@ z.transform <- function(data){
   return(s.data)
 }
 
-# Load simulation results, and make a copy of the relevant output variable
+# Load simulation results
 load("demoresults.RData")
 # Generate backup data of simulation variables
 backup <- sim.Results
@@ -32,6 +32,27 @@ data <- Filter(is.matrix, data)
   }
   return(value)
 }
+# Working space----
+# A worker function that will calculate the correlations between each delta value (x)
+# and "baseline" delta value (d, taken prior to transformations)
+.new.correls <- function(x,d){
+  value <- numeric(length=ncol(x))
+  for (i in 1:ncol(x)){
+    value[i] <- cor(x[,i],d)
+  }
+  return(value)
+}
+
+test.correls <- .new.correls(data[[1]],sim.Results[[1]]$values$mpds$orig)
+test.correls
+
+# Test, using original values
+correls <- sapply(data, .new.correls, d=replicate(30, data[[1]][,10]))
+correls
+# Test, using new values
+t.correls <- sapply(data, .new.correls, d=sim.Results[[1]]$values$mpds$orig)
+t.correls
+#----
 # Calculate the correlations
 correls <- sapply(data, .site.correls)
 # Match the correlations to the parameters
