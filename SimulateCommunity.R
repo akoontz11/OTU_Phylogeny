@@ -46,7 +46,6 @@ abundance.mapping <- function(oldColumnNames, newColumnNames, rowNames, donor.co
 
 # %%% FUNCTION FOR TESTING TRANSFORMATIONS OVER COMMUNITY SIMULATIONS %%%
 SimulateCommnunity <- function(comm.size,comm.spp,comm.timesteps,comm.migrate,comm.env,comm.abund,comm.stoch,comm.speciate,intra.birth,intra.death,intra.steps,seq.birth,seq.death,seq.steps){
-  #browser()
   # SIMULATE AND CLEANUP COMMUNITY
   # Simulate community (using pez function sim.meta.phy.comm). Generate NULL for a DemoCom object that is in error
   DemoCom <- tryCatch(sim.meta.phy.comm(size=comm.size, n.spp=comm.spp, timesteps=comm.timesteps, p.migrate=comm.migrate, env.lam=comm.env, abund.lam=comm.abund, stoch.lam=comm.stoch, p.speciate=comm.speciate),error=function(cond) {return(NULL)})
@@ -97,27 +96,11 @@ SimulateCommnunity <- function(comm.size,comm.spp,comm.timesteps,comm.migrate,co
   seq.test <- phy.d.transform(seq.phy, seq.comm, deltas)
   
   # CAPTURE PHYLOGENETIC DIVERSITY METRICS OF ORIGINALLY SIMULATED PHYLOGENIES (FOR LATER COMPARISON)
-  # --Originally simulated phylogeny/community--
   # Mean pairwise distance
   orig.MPD <- .mpd(comparative.comm(orig.phy, orig.comm, force.root = 0), abundance.weighted=TRUE)
   # Ranking of sites by diversity
   names(orig.MPD) <- rownames(orig.comm)
   orig.ranking <- names(sort(orig.MPD,decreasing = F))
-  # --Intra phylogeny/community--
-  # Mean pairwise distance
-  intra.MPD <- .mpd(comparative.comm(intra.phy, intra.comm, force.root = 0), abundance.weighted=TRUE)
-  # Ranking of sites by diversity
-  names(intra.MPD) <- rownames(intra.comm)
-  intra.ranking <- names(sort(intra.MPD,decreasing = F))
-  # --Seq phylogeny/community--
-  # Mean pairwise distance
-  seq.MPD <- .mpd(comparative.comm(seq.phy, seq.comm, force.root = 0), abundance.weighted=TRUE)
-  # Ranking of sites by diversity
-  names(seq.MPD) <- rownames(seq.comm)
-  seq.ranking <- names(sort(seq.MPD,decreasing = F))
-  # Combining metrics into lists
-  MPDs <- list(orig=orig.MPD, intra=intra.MPD, seq=seq.MPD)
-  Rankings <- list(orig=orig.ranking, intra=intra.ranking, seq=seq.ranking)
   
   # PACKAGE SIMULATION DATA
   # Export a list containing all simulation data, for each community "type" (original, intra, and seq)
@@ -128,14 +111,13 @@ SimulateCommnunity <- function(comm.size,comm.spp,comm.timesteps,comm.migrate,co
   # MPD matrices, from delta transforms
   community.transforms <- list(orig.transform=orig.test,intra.transform=intra.test,seq.transform=seq.test)
   # Phylogenetic diversity metrics, of original (untransformed) communities/phylogenies
-  community.diversityMetrics <- list(mpds=MPDs, rankings=Rankings)
+  original.diversityMetrics <- list(orig.MPD, orig.ranking)
   # Return data
-  simulation.data <- list(phylogenies=community.phylogenies,abundances=community.abundances,transforms=community.transforms,values=community.diversityMetrics)
+  simulation.data <- list(phylogenies=community.phylogenies,abundances=community.abundances,transforms=community.transforms,values=original.diversityMetrics)
   return(simulation.data)
 }
-
-sim.data <- SimulateCommnunity(comm.size=10, comm.spp=10,comm.timesteps=40,comm.migrate=0.02,comm.env=10,comm.abund=4,comm.stoch=1,comm.speciate=0.06,intra.birth=0.5,intra.death=0.1,intra.steps=1,seq.birth=0.5,seq.death=0.1,seq.steps=1)
-str(sim.data)
+#sim.data <- SimulateCommnunity(comm.size=10, comm.spp=10,comm.timesteps=40,comm.migrate=0.02,comm.env=10,comm.abund=4,comm.stoch=1,comm.speciate=0.06,intra.birth=0.5,intra.death=0.1,intra.steps=1,seq.birth=0.5,seq.death=0.1,seq.steps=1)
+#str(sim.data)
 
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------
 # SIMULATE AND CLEANUP COMMUNITY
