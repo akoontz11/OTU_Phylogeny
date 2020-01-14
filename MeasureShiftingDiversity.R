@@ -42,11 +42,12 @@ data <- Filter(is.matrix, data)
   }
   return(value)
 }
-untransformedMPDs <- .mpd(comparative.comm(sim.Results[[1]]$phylogenies$orig.phylo, sim.Results[[1]]$abundances$orig.community, force.root = 0), abundance.weighted=TRUE)
+untransformedMPDs <- sim.Results[[1]]$values$MPDs
 
+# Testing new worker function
 test.correls <- .new.correls(data[[1]],untransformedMPDs)
 test.correls
-# Test new worker function
+# Using sapply on new worker function
 t.correls <- sapply(data, .new.correls, d=untransformedMPDs)
 # Throws error: "error in cor(x[, i], d) : incompatible dimensions"
 
