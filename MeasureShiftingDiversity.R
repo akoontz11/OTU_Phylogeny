@@ -18,14 +18,15 @@ params <- params[sapply(sim.Results, Negate(is.character)),]
 sim.Results <- Filter(Negate(is.character), sim.Results)
 
 # Extract relevant data from the results
-data <- lapply(sim.Results, function(x) x$transforms$orig.transform)
-#data <- lapply(sim.Results, function(x) x$transforms$intra.transform)
-#data <- lapply(sim.Results, function(x) x$transforms$seq.transform)
-params <- params[sapply(data, is.matrix),]
-data <- Filter(is.matrix, data)
+sim.data <- lapply(sim.Results, function(x) x$transforms$orig.transform)
+#sim.data <- lapply(sim.Results, function(x) x$transforms$intra.transform)
+#sim.data <- lapply(sim.Results, function(x) x$transforms$seq.transform)
+params <- params[sapply(sim.data, is.matrix),]
+sim.data <- Filter(is.matrix, sim.data)
 # ----CORRELATIONS OF MPD VALUES BETWEEN SITE AND BASELINE----
 # A worker function that will calculate the correlations between each delta value and "baseline" delta value (1.0)
 .site.correls <- function(x){
+  browser()
   value <- numeric(length=ncol(x))
   for (i in 1:ncol(x)){
     value[i] <- cor(x[,i],x[,10])
@@ -34,7 +35,7 @@ data <- Filter(is.matrix, data)
 }
 # Development code----
 # A worker function that will calculate the correlations between each delta value (x)
-# and a "baseline" delta value (d, taken prior to transformations)
+# and a "reference" delta value (d, taken prior to transformations)
 .new.correls <- function(x,d){
   value <- numeric(length=ncol(x))
   for (i in 1:ncol(x)){
@@ -45,18 +46,18 @@ data <- Filter(is.matrix, data)
 untransformedMPDs <- sim.Results[[1]]$values$MPDs
 
 # Testing new worker function
-test.correls <- .new.correls(data[[1]],untransformedMPDs)
+test.correls <- .new.correls(sim.data[[1]],untransformedMPDs)
 test.correls
 # Using sapply on new worker function
-t.correls <- sapply(data, .new.correls, d=untransformedMPDs)
+t.correls <- sapply(sim.data, .new.correls, d=sim.Results$values$MPDs)
 # Throws error: "error in cor(x[, i], d) : incompatible dimensions"
 
 # Calculate the correlations----
-correls <- sapply(data, .site.correls)
+correls <- sapply(sim.data, .site.correls)
 # Match the correlations to the parameters
 results <- params[rep(1:nrow(params), each=30),]
 results$correl <- as.numeric(correls)
-results$delta <- rep(deltas,length(data))
+results$delta <- rep(deltas,length(sim.data))
 
 # Generating model using standardized variables
 s.model.correl <- lm(correl ~ z.transform(delta)+I(z.transform(delta)^2)+z.transform(intra.birth)+z.transform(intra.death)+z.transform(seq.birth)+z.transform(seq.death),data=results,na.action=na.omit)
@@ -87,11 +88,11 @@ summary(s.model.correl)
   return(meanRankChanges)
 }
 # Calculate the ranking differences
-rank.shifts <- sapply(data, .ranking.diff)
+rank.shifts <- sapply(sim.data, .ranking.diff)
 # Match the ranking differences to the parameters
 results <- params[rep(1:nrow(params), each=30),]
 results$rank.shifts <- as.numeric(rank.shifts)
-results$delta <- rep(deltas,length(data))
+results$delta <- rep(deltas,length(sim.data))
 
 # Generating model using standardized variables
 s.model.rank.shifts <- lm(rank.shifts ~ z.transform(delta)+I(z.transform(delta)^2)+z.transform(intra.birth)+z.transform(intra.death)+z.transform(intra.steps)+z.transform(seq.birth)+z.transform(seq.death)+z.transform(seq.steps),data=results)
