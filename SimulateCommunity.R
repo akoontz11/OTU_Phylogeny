@@ -98,11 +98,11 @@ SimulateCommnunity <- function(comm.size,comm.spp,comm.timesteps,comm.migrate,co
   # CAPTURE PHYLOGENETIC DIVERSITY METRICS OF ORIGINALLY SIMULATED PHYLOGENIES (FOR LATER COMPARISON)
   # Mean pairwise distance
   orig.MPD <- .mpd(comparative.comm(orig.phy, orig.comm, force.root = 0), abundance.weighted=TRUE)
-  # Ranking of sites by diversity
-  names(orig.MPD) <- rownames(orig.comm)
+  # Ranking of sites by diversity (changing names to match format from phy.d.transform function)
+  names(orig.MPD) <- paste("Site",1:nrow(orig.comm),sep="_")
   orig.ranking <- names(sort(orig.MPD,decreasing = F))
   
-  # PACKAGE SIMULATION DATA
+  # PACKAGING SIMULATION DATA
   # Export a list containing all simulation data, for each community "type" (original, intra, and seq)
   # Abundances
   community.abundances <- list(orig.community=orig.comm,intra.community=intra.comm,seq.community=seq.comm)
@@ -116,8 +116,8 @@ SimulateCommnunity <- function(comm.size,comm.spp,comm.timesteps,comm.migrate,co
   simulation.data <- list(phylogenies=community.phylogenies,abundances=community.abundances,transforms=community.transforms,values=original.diversityMetrics)
   return(simulation.data)
 }
-#sim.data <- SimulateCommnunity(comm.size=10, comm.spp=10,comm.timesteps=40,comm.migrate=0.02,comm.env=10,comm.abund=4,comm.stoch=1,comm.speciate=0.06,intra.birth=0.5,intra.death=0.1,intra.steps=1,seq.birth=0.5,seq.death=0.1,seq.steps=1)
-#str(sim.data)
+sim.data <- SimulateCommnunity(comm.size=10, comm.spp=10,comm.timesteps=40,comm.migrate=0.02,comm.env=10,comm.abund=4,comm.stoch=1,comm.speciate=0.06,intra.birth=0.5,intra.death=0.1,intra.steps=1,seq.birth=0.5,seq.death=0.1,seq.steps=1)
+str(sim.data)
 
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------
 # SIMULATE AND CLEANUP COMMUNITY
