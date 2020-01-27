@@ -24,7 +24,6 @@ sim.data <- lapply(sim.Results, function(x) x$transforms$orig.transform)
 
 # Extract diversity metrics from untransformed phylogenies (for later comparison)
 sim.MPDs <- lapply(sim.Results, function(x) x$values$MPDs)
-sim.ranks <- lapply(sim.Results, function(x) x$values$rankings)
 
 # Remove non-matrix simulation values
 params <- params[sapply(sim.data, is.matrix),]
@@ -100,13 +99,14 @@ summary(s.model.correl)
   browser()
   # Generate a numeric vector of baseline site rankings (i.e. delta=1.0)
   baseline.rank <- as.numeric(rank(sort(d,decreasing = F)))
-  # Generate a vector of names of these site rankings 
+  # Generate a vector of names of these site rankings
   baseline.names <- names(sort(d,decreasing = F))
   # Generate a vector to capture mean changes between rankings
   meanRankChanges <- vector(length = ncol(x))
   for (i in 1:ncol(x)){
     # Get the names of sites sorted from lowest to highest for the current column (delta value)
     comparison <- names(sort(x[,i],decreasing = F))
+    #comparison <- sort(substr(x[,i],6,9),decreasing = F)
     # Generate a numeric vector corresponding to how site rankings have changed from "baseline" delta value
     shifts <- match(baseline.names, comparison)
     # Calculate absolute changes between two different rankings
@@ -117,7 +117,7 @@ summary(s.model.correl)
   return(meanRankChanges)
 }
 # Calculate the ranking differences
-rank.shifts <- mapply(.ranking.diff, sim.data, sim.ranks)
+rank.shifts <- mapply(.ranking.diff, sim.data, sim.MPDs)
 # Match the ranking differences to the parameters
 results <- params[rep(1:nrow(params), each=30),]
 results$rank.shifts <- as.numeric(rank.shifts)
@@ -131,7 +131,7 @@ summary(s.model.rank.shifts)
 # Plotting commands
 #plot(results$rank.shifts~results$delta)
 #plot(results$rank.shifts~results$intra.birth)
-
+# ------
 sim.Results <- backup
 params <- b.params
 
