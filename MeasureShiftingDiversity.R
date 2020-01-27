@@ -96,7 +96,6 @@ summary(s.model.correl)
 
 # A worker function that will calculate the difference in site rankings 
 .ranking.diff <- function(x,d){
-  browser()
   # Generate a numeric vector of baseline site rankings (i.e. delta=1.0)
   baseline.rank <- as.numeric(rank(sort(d,decreasing = F)))
   # Generate a vector of names of these site rankings
@@ -134,4 +133,3 @@ summary(s.model.rank.shifts)
 # ------
 sim.Results <- backup
 params <- b.params
-
