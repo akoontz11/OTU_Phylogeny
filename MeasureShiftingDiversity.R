@@ -42,7 +42,7 @@ sim.data <- Filter(is.matrix, sim.data)
 # # Calculate the correlations
 # correls <- sapply(sim.data, .site.correls)
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+# ----
 # A worker function that will calculate the correlations between each delta value (x)
 # and a "reference" delta value (d, taken prior to transformations)
 .new.correls <- function(x,d){
@@ -93,7 +93,7 @@ summary(s.model.correl)
 # # Calculate the ranking differences
 # rank.shifts <- sapply(sim.data, .ranking.diff)
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+#----
 # A worker function that will calculate the difference in site rankings 
 .ranking.diff <- function(x,d){
   # Generate a numeric vector of baseline site rankings (i.e. delta=1.0)
