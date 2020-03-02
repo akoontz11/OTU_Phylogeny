@@ -1,0 +1,68 @@
+IMPORTANT WARNING: Alignment column 2987 contains only undetermined values which will be treated as missing data
+IMPORTANT WARNING: Alignment column 3795 contains only undetermined values which will be treated as missing data
+IMPORTANT WARNING: Alignment column 4263 contains only undetermined values which will be treated as missing data
+
+IMPORTANT WARNING
+Found 3 columns that contain only undetermined values which will be treated as missing data.
+Normally these columns should be excluded from the analysis.
+
+Just in case you might need it, an alignment file with 
+undetermined columns removed is printed to file repCRbact_align_seqs.reduced
+
+
+Using BFGS method to optimize GTR rate parameters, to disable this specify "--no-bfgs" 
+
+
+Alignment has 3 completely undetermined sites that will be automatically removed from the input data
+
+
+
+This is RAxML version 8.2.11 released by Alexandros Stamatakis on June 2017.
+
+With greatly appreciated code contributions by:
+Andre Aberer      (HITS)
+Simon Berger      (HITS)
+Alexey Kozlov     (HITS)
+Kassian Kobert    (HITS)
+David Dao         (KIT and HITS)
+Sarah Lutteropp   (KIT and HITS)
+Nick Pattengale   (Sandia)
+Wayne Pfeiffer    (SDSC)
+Akifumi S. Tanabe (NRIFS)
+Charlie Taylor    (UF)
+
+
+Alignment has 3084 distinct alignment patterns
+
+Proportion of gaps and completely undetermined characters in this alignment: 93.93%
+
+RAxML rapid bootstrapping and subsequent ML search
+
+Using 1 distinct models/data partitions with joint branch length optimization
+
+
+
+Executing 100 rapid bootstrap inferences and thereafter a thorough ML search 
+
+All free model parameters will be estimated by RAxML
+GAMMA model of rate heterogeneity, ML estimate of alpha-parameter
+
+GAMMA Model parameters will be estimated up to an accuracy of 0.1000000000 Log Likelihood units
+
+Partition: 0
+Alignment Patterns: 3084
+Name: No Name Provided
+DataType: DNA
+Substitution Matrix: GTR
+
+
+
+
+RAxML was called as follows:
+
+raxml -f a -i 10 -m GTRGAMMA -s repCRbact_align_seqs -n repCRbac_Mar02_phy -x 21170 -N 100 -T 12 -p 22106 
+
+
+
+Time for BS model parameter optimization on Process 0: 79.861213 seconds
+Bootstrap[0]: Time 1470.657266 seconds, bootstrap likelihood -668193.045511
