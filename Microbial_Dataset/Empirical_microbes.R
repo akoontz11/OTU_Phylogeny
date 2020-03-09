@@ -3,7 +3,7 @@
 library(ape)
 #setwd("/home/akoontz11/OTU_Phylogeny/Microbial_Dataset/")
 
-# Read in community matrices
+# Read in and reformat community matrices
 # Bacterial
 bact.comm <- as.matrix(read.csv2("CRbact_communitydat.csv", header=TRUE, sep=","))
 soil.cores <- bact.comm[,1]
@@ -15,6 +15,7 @@ fung.comm <- as.matrix(read.csv2("CRfungi_communitydat.csv", header=TRUE, sep=",
 soil.cores <- fung.comm[,1]
 fung.comm <- apply(fung.comm[,-1],2,as.numeric)
 rownames(fung.comm) <- soil.cores
+colnames(fung.comm) <- gsub(pattern="X", replacement="", colnames(fung.comm))
 sort(unique(c(fung.comm)))
 
 # Read in phylogenetic trees (aligned with mafft, built with RAxML)
@@ -22,10 +23,11 @@ sort(unique(c(fung.comm)))
 # ...
 # Fungal
 fung.phylo <- read.tree("phylos/fungal/RAxML_bestTree.repCRfung_Feb28_phy")
-plot(fung.phylo, show.tip.label=F)
- 
+plot(fung.phylo, show.tip.label=T)
+
 # %%% FUNCTION FOR TESTING TRANSFORMATIONS OVER MICROBIAL COMMUNITIES %%%
 MicrobialCommnunity <- function(comm, phy, intra.birth,intra.death,intra.steps,seq.birth,seq.death,seq.steps){
+  browser()
   # %%% CLEANUP COMMUNITY, AND SETUP COMMUNITY WITH POPULATIONS %%%
   # Drop sites with one or less species in them from community matrix  (by removing rows with only one nonzero value in them)
   # (We do this because our mpd calculation is abundance weighted, and mpd can only be calculated between different species)
@@ -88,3 +90,8 @@ MicrobialCommnunity <- function(comm, phy, intra.birth,intra.death,intra.steps,s
   simulation.data <- list(phylogenies=community.phylogenies,abundances=community.abundances,transforms=community.transforms,values=original.diversityMetrics)
   return(simulation.data)
 }
+
+micr.data <- MicrobialCommnunity(comm=fung.comm, phy=fung.phylo, intra.birth=0.5,intra.death=0.1,intra.steps=3,seq.birth=0.5,seq.death=0.1,seq.steps=3)
+str(micr.data)
+
+
