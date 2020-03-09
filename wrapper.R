@@ -26,4 +26,4 @@ params <- subset.data.frame(params, seq.birth >= seq.death)
 sim.Results <- mcMap(function(i) SimulateCommnunity(params$comm.size[i],params$comm.spp[i],params$comm.timesteps[i],params$comm.migrate[i],params$comm.env[i],params$comm.abund[i],params$comm.stoch[i],params$comm.speciate[i],params$intra.birth[i],params$intra.death[i],params$intra.steps[i],params$seq.birth[i],params$seq.death[i],params$seq.steps[i]),1:nrow(params),mc.cores=12)
 
 # Saving results
-save.image("simResults_20200302.RData")
+save.image("simResults.RData")
