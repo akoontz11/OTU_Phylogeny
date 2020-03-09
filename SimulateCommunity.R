@@ -100,6 +100,8 @@ SimulateCommnunity <- function(comm.size,comm.spp,comm.timesteps,comm.migrate,co
   orig.MPD <- .mpd(comparative.comm(orig.phy, orig.comm, force.root = 0), abundance.weighted=TRUE)
   # Changing names to match format from phy.d.transform function
   names(orig.MPD) <- paste("Site",1:nrow(orig.comm),sep="_")
+  # Site rankings by diversity
+  orig.rankings <- names(sort(orig.MPD,decreasing = F))
   
   # PACKAGING SIMULATION DATA
   # Export a list containing all simulation data, for each community "type" (original, intra, and seq)
@@ -110,7 +112,7 @@ SimulateCommnunity <- function(comm.size,comm.spp,comm.timesteps,comm.migrate,co
   # MPD matrices, from delta transforms
   community.transforms <- list(orig.transform=orig.test,intra.transform=intra.test,seq.transform=seq.test)
   # Phylogenetic diversity metrics, of original (untransformed) communities/phylogenies
-  original.diversityMetrics <- list(MPDs=orig.MPD)
+  original.diversityMetrics <- list(MPDs=orig.MPD,ranks=orig.rankings)
   # Return data
   simulation.data <- list(phylogenies=community.phylogenies,abundances=community.abundances,transforms=community.transforms,values=original.diversityMetrics)
   return(simulation.data)
