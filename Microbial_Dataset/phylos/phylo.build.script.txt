@@ -1,7 +1,0 @@
-# mafft sequence alignment steps
-mafft --auto --thread 12 repCRbact_final_seqs >repCRbact_align_seqs
-mafft --auto --thread 12 repCRfung_final_seqs >repCRfung_align_seqs
-
-# RAxML phylogeny building steps
-raxml -f a -i 10 -m GTRGAMMA -s repCRbact_align_seqs -n repCRbact_Feb28_phy -x $RANDOM -N 100 -T 12 -p $RANDOM
-raxml -f a -i 10 -m GTRGAMMA -s repCRfung_align_seqs -n repCRfung_Feb28_phy -x $RANDOM -N 100 -T 12 -p $RANDOM
