@@ -1,16 +1,18 @@
 # %%% Analysis of simulation output %%%
 
+setwd("/home/akoontz11/OTU_Phylogeny/")
+
 # Function for standardizing
 z.transform <- function(data){
   s.data <- (data-mean(data))/sd(data)
   return(s.data)
 }
 
-# Load simulation results
+# Larger simulation results (2.6 GB; including instances of death rates > birth rates)
 #load("demoresults.RData")
-# Load less bulky, pared down simulation results 
-#load("simResults.RData")
-load("simResults_20200302.RData")
+# Pared down simulation results (51 MB; excluding instances of death rates > birth rates)
+load("simResults.RData")
+
 # Generate backup data of simulation variables
 backup <- sim.Results
 b.params <- params
@@ -44,7 +46,7 @@ sim.data <- Filter(is.matrix, sim.data)
 # # Calculate the correlations
 # correls <- sapply(sim.data, .site.correls)
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# ----
+
 # A worker function that will calculate the correlations between each delta value (x)
 # and a "reference" delta value (d, taken prior to transformations)
 .new.correls <- function(x,d){
@@ -95,20 +97,18 @@ summary(s.model.correl)
 # # Calculate the ranking differences
 # rank.shifts <- sapply(sim.data, .ranking.diff)
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-#----
+
 # A worker function that will calculate the difference in site rankings 
 .ranking.diff <- function(x,d){
   # Generate a numeric vector of baseline site rankings (i.e. delta=1.0)
   baseline.rank <- as.numeric(rank(sort(d,decreasing = F)))
-  # Generate a vector of names of these site rankings
-  baseline.names <- names(sort(d,decreasing = F))
   # Generate a vector to capture mean changes between rankings
   meanRankChanges <- vector(length = ncol(x))
   for (i in 1:ncol(x)){
     # Get the names of sites sorted from lowest to highest for the current column (delta value)
     comparison <- names(sort(x[,i],decreasing = F))
     # Generate a numeric vector corresponding to how site rankings have changed from "baseline" delta value
-    shifts <- match(baseline.names, comparison)
+    shifts <- match(d, comparison)
     # Calculate absolute changes between two different rankings
     changes <- abs(shifts - baseline.rank)
     # Calculate the mean of the absolute changes, and place into vector
@@ -117,7 +117,7 @@ summary(s.model.correl)
   return(meanRankChanges)
 }
 # Calculate the ranking differences
-rank.shifts <- lapply(.ranking.diff, sim.data, sim.ranks)
+rank.shifts <- mapply(.ranking.diff, sim.data, sim.ranks)
 # Match the ranking differences to the parameters
 results <- params[rep(1:nrow(params), each=30),]
 results$rank.shifts <- as.numeric(rank.shifts)
@@ -130,7 +130,6 @@ s.model.rank.shifts <- lm(rank.shifts ~ z.transform(delta)+I(z.transform(delta)^
 summary(s.model.rank.shifts)
 # Plotting commands
 #plot(results$rank.shifts~results$delta)
-#plot(results$rank.shifts~results$intra.birth)
 # ------
 sim.Results <- backup
 params <- b.params
