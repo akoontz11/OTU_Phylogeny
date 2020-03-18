@@ -117,10 +117,10 @@ SimulateCommnunity <- function(comm.size,comm.spp,comm.timesteps,comm.migrate,co
   simulation.data <- list(phylogenies=community.phylogenies,abundances=community.abundances,transforms=community.transforms,values=original.diversityMetrics)
   return(simulation.data)
 }
-#sim.data <- SimulateCommnunity(comm.size=10, comm.spp=10,comm.timesteps=40,comm.migrate=0.02,comm.env=10,comm.abund=4,comm.stoch=1,comm.speciate=0.06,intra.birth=0.5,intra.death=0.1,intra.steps=1,seq.birth=0.5,seq.death=0.1,seq.steps=1)
-#str(sim.data)
+# sim.data <- SimulateCommnunity(comm.size=10, comm.spp=10,comm.timesteps=40,comm.migrate=0.02,comm.env=10,comm.abund=4,comm.stoch=1,comm.speciate=0.06,intra.birth=0.5,intra.death=0.1,intra.steps=1,seq.birth=0.5,seq.death=0.1,seq.steps=1)
+# str(sim.data)
 
-# ---------------------------------------------------------------------------------------------------------------------------------------------------------------
+#----
 # SIMULATE AND CLEANUP COMMUNITY
 # Simulate community (using pez function sim.meta.phy.comm)
 # DemoCom <- tryCatch(sim.meta.phy.comm(size=5, n.spp=1, timesteps=100, p.migrate=0.02, env.lam=10, abund.lam=4, stoch.lam=1, p.speciate=0.01),error=function(cond) {return(NULL)})
