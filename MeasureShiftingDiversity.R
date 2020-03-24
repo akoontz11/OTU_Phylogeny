@@ -38,6 +38,14 @@ z.transform <- function(data){
   return(meanRankChanges)
 }
 
+# Worker function for comparing two mpd values: prior to transformation, and at delta=1.0 after intra and seq additions
+.vertical.comparison <- function(x,d){
+  # x is vector of mpd values measured after delta transformations; d is original mpd value prior to transformations
+  # The use arguments allows correlations to be caluculated off of all pairs that are present
+  value <- cor(x[,10], d, use="na.or.complete")
+  return(value)
+}
+
 # %%% READING IN AND FORMATTING OF SIMULATION DATA %%% ----
 # Larger simulation results (2.6 GB; including instances of death rates > birth rates)
 #load("demoresults.RData")
@@ -119,6 +127,17 @@ summary(s.model.rankShifts)
 
 # Plotting commands
 #plot(results$rank.shifts~results$delta)
+# %%% COMPARISON OF ORIGINAL MPD VALUES TO VALUES AFTER BRANCH ADDITION %%% ----
+# Using mapply on worker function determining number of site rank shiftings
+v.comps <- mapply(.vertical.comparison, sim.data, sim.MPDs)
+# Match the ranking differences to the parameters
+results <- params[rep(1:nrow(params), each=30),]
+results$v.comps <- as.numeric(v.comps)
+results$delta <- rep(deltas,length(sim.data))
+
+# %%% LINEAR MODELS AND SUMMARIES %%%
+model.verticalComparison <- lm(v.comps ~ z.transform(intra.birth)+z.transform(intra.death)+z.transform(seq.birth)+z.transform(seq.death), data=results, na.action=na.omit)
+summary(model.verticalComparison)
 
 # %%% BACKUP VARIABLES %%% ----
 sim.Results <- backup
