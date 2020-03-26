@@ -22,18 +22,12 @@ z.transform <- function(data){
 # A worker function that will calculate the difference in site rankings 
 .ranking.diff <- function(x,d){
   # Generate a numeric vector of baseline site rankings (i.e. delta=1.0)
-  baseline.rank <- as.numeric(rank(sort(d,decreasing = F)))
+  baseline.rank <- rank(d)
   # Generate a vector to capture mean changes between rankings
   meanRankChanges <- vector(length = ncol(x))
   for (i in 1:ncol(x)){
-    # Get the names of sites sorted from lowest to highest for the current column (delta value)
-    comparison <- names(sort(x[,i],decreasing = F))
-    # Generate a numeric vector corresponding to how site rankings have changed from "baseline" delta value
-    shifts <- match(d, comparison)
-    # Calculate absolute changes between two different rankings
-    changes <- abs(shifts - baseline.rank)
-    # Calculate the mean of the absolute changes, and place into vector
-    meanRankChanges[i] <- mean(changes)
+    # Calculate the mean of the absolute changes between two different rankings, and place into vector
+    meanRankChanges[i] <- mean(abs(baseline.rank - rank(x[,i])))
   }
   return(meanRankChanges)
 }
@@ -47,8 +41,6 @@ z.transform <- function(data){
 }
 
 # %%% READING IN AND FORMATTING OF SIMULATION DATA %%% ----
-# Larger simulation results (2.6 GB; including instances of death rates > birth rates)
-#load("demoresults.RData")
 # Pared down simulation results (51 MB; excluding instances of death rates > birth rates)
 load("simResults.RData")
 # Generate backup data of simulation variables
@@ -70,7 +62,6 @@ sim.data <- Filter(is.matrix, sim.data)
 
 # Extract diversity metrics from untransformed phylogenies (for later comparison)
 sim.MPDs <- lapply(sim.Results, function(x) x$values$MPDs)
-sim.ranks <- lapply(sim.Results, function(x) x$values$ranks)
 
 # %%% CORRELATIONS OF MPD VALUES BETWEEN SITE AND BASELINE %%% ----
 # Using mapply on worker function calculating correlations between delta values
@@ -79,64 +70,52 @@ t.correls <- mapply(.new.correls, sim.data, sim.MPDs)
 results <- params[rep(1:nrow(params), each=30),]
 results$correl <- as.numeric(t.correls)
 results$delta <- rep(deltas,length(sim.data))
+# Create term for diversification rate (birth rate/death rate) for both intraspecific and sequening error differences
+results$intra.div <- results$intra.birth/results$intra.death
+results$seq.div <- results$seq.birth/results$seq.death
 
 # %%% LINEAR MODELS AND SUMMARIES %%%
 # Orig.transforms: delta, (delta)^2
 o.model.correl <- lm(correl ~ z.transform(delta)+I(z.transform(delta)^2), data=results, na.action=na.omit)
 summary(o.model.correl)
 
-# Intra.transforms: delta, (delta)^2, intra birth/death
-i.model.correl <- lm(correl ~ z.transform(delta)+I(z.transform(delta)^2)+z.transform(intra.birth)+z.transform(intra.death), data=results, na.action=na.omit)
-# Intra.transforms: delta, (delta)^2, intra birth/death/steps
-#i.model.correl <- lm(correl ~ z.transform(delta)+I(z.transform(delta)^2)+z.transform(intra.birth)+z.transform(intra.death)+z.transform(intra.steps), data=results, na.action=na.omit)
+# Intra.transforms: delta, (delta)^2, intra diversification
+i.model.correl <- lm(correl ~ z.transform(delta)+I(z.transform(delta)^2)+z.transform(intra.div), data=results, na.action=na.omit)
 summary(i.model.correl)
 
-# Seq.transforms: delta, (delta)^2, intra birth/death, seq birth/death
-s.model.correl <- lm(correl ~ z.transform(delta)+I(z.transform(delta)^2)+z.transform(intra.birth)+z.transform(intra.death)+z.transform(seq.birth)+z.transform(seq.death),data=results,na.action=na.omit)
-# Seq.transforms: delta, (delta)^2, intra birth/death/steps, seq birth/death/steps
-#s.model.correl <- lm(correl ~ z.transform(delta)+I(z.transform(delta)^2)+z.transform(intra.birth)+z.transform(intra.death)+z.transform(intra.steps)+z.transform(seq.birth)+z.transform(seq.death)+z.transform(seq.steps),data=results,na.action=na.omit)
+# Seq.transforms: delta, (delta)^2, intra diversification, seq diversification
+s.model.correl <- lm(correl ~ z.transform(delta)+I(z.transform(delta)^2)+z.transform(intra.div)+z.transform(seq.div),data=results,na.action=na.omit)
 summary(s.model.correl)
-
-# Plotting command
-#plot(results$correl~results$delta)
 
 # %%% DIFFERENCE IN SITE RANKINGS (I.E. CROSSINGS OVER) BETWEEN SITE AND BASELINE %%% ----
 # Using mapply on worker function determining number of site rank shiftings
-rank.shifts <- mapply(.ranking.diff, sim.data, sim.ranks)
+rank.shifts <- mapply(.ranking.diff, sim.data, sim.MPDs)
 # Match the ranking differences to the parameters
 results <- params[rep(1:nrow(params), each=30),]
 results$rank.shifts <- as.numeric(rank.shifts)
-results$delta <- rep(deltas,length(sim.data))
 
 # %%% LINEAR MODELS AND SUMMARIES %%%
 # Orig.transforms: delta, (delta)^2
 o.model.rankShifts <- lm(rank.shifts ~ z.transform(delta)+I(z.transform(delta)^2), data=results, na.action=na.omit)
 summary(o.model.rankShifts)
 
-# Intra.transforms: delta, (delta)^2, intra birth/death
-i.model.rankShifts <- lm(rank.shifts ~ z.transform(delta)+I(z.transform(delta)^2)+z.transform(intra.birth)+z.transform(intra.death), data=results, na.action=na.omit)
-# Intra.transforms: delta, (delta)^2, intra birth/death/steps
-#i.model.rankShifts <- lm(rank.shifts ~ z.transform(delta)+I(z.transform(delta)^2)+z.transform(intra.birth)+z.transform(intra.death)+z.transform(intra.steps), data=results, na.action=na.omit)
+# Intra.transforms: delta, (delta)^2, intra diversification
+i.model.rankShifts <- lm(rank.shifts ~ z.transform(delta)+I(z.transform(delta)^2)+z.transform(intra.div), data=results, na.action=na.omit)
 summary(i.model.rankShifts)
 
-# Seq.transforms: delta, (delta)^2, intra birth/death, seq birth/death
-s.model.rankShifts <- lm(rank.shifts ~ z.transform(delta)+I(z.transform(delta)^2)+z.transform(intra.birth)+z.transform(intra.death)+z.transform(seq.birth)+z.transform(seq.death),data=results,na.action=na.omit)
-# Seq.transforms: delta, (delta)^2, intra birth/death/steps, seq birth/death/steps
-#s.model.rankShifts <- lm(rank.shifts ~ z.transform(delta)+I(z.transform(delta)^2)+z.transform(intra.birth)+z.transform(intra.death)+z.transform(intra.steps)+z.transform(seq.birth)+z.transform(seq.death)+z.transform(seq.steps),data=results,na.action=na.omit)
+# Seq.transforms: delta, (delta)^2, intra diversification, seq diversification
+s.model.rankShifts <- lm(rank.shifts ~ z.transform(delta)+I(z.transform(delta)^2)+z.transform(intra.div)+z.transform(seq.div),data=results,na.action=na.omit)
 summary(s.model.rankShifts)
 
-# Plotting commands
-#plot(results$rank.shifts~results$delta)
 # %%% COMPARISON OF ORIGINAL MPD VALUES TO VALUES AFTER BRANCH ADDITION %%% ----
 # Using mapply on worker function determining number of site rank shiftings
 v.comps <- mapply(.vertical.comparison, sim.data, sim.MPDs)
 # Match the ranking differences to the parameters
 results <- params[rep(1:nrow(params), each=30),]
 results$v.comps <- as.numeric(v.comps)
-results$delta <- rep(deltas,length(sim.data))
 
 # %%% LINEAR MODELS AND SUMMARIES %%%
-model.verticalComparison <- lm(v.comps ~ z.transform(intra.birth)+z.transform(intra.death)+z.transform(seq.birth)+z.transform(seq.death), data=results, na.action=na.omit)
+model.verticalComparison <- lm(v.comps ~ z.transform(intra.div)+z.transform(seq.div), data=results, na.action=na.omit)
 summary(model.verticalComparison)
 
 # %%% BACKUP VARIABLES %%% ----
