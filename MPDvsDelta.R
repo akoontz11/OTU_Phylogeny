@@ -3,9 +3,9 @@
 library(geiger)
 library(pez)
 
-# # Function for capturing ses.mpd values over a series of delta transformations
+# Function for capturing ses.mpd values over a series of delta transformations
 # phy.d.transform <- function(phylo,abundance.matrix,d){
-#   #browser()
+#   browser()
 #   # phylo--the phylogenetic tree to be transformed
 #   # d--the vector of delta values to utilize for the branch length transformation
 #   # abundance.matrix--species-sites abundance matrix, used to calculate mpd values
@@ -28,7 +28,7 @@ library(pez)
 #       # (Including the force.root argument, in order to handle unrooted phylogenies)
 #       c.data <- comparative.comm(s.phylo, abundance.matrix, force.root = 0)
 #       # Calculate standard effect size of mean pairwise distance (which incorporates number of taxa)
-#       mpd.values <- .ses.mpd(c.data, abundance.weighted=TRUE) 
+#       mpd.values <- .ses.mpd(c.data, abundance.weighted=TRUE)
 #       # Extract relevant column from resulting matrix
 #       mpd.values <- mpd.values$mpd.obs.z
 #       # Store calculated mpd values within a matrix
@@ -103,7 +103,7 @@ library(pez)
 # }
 
 # %%% Old version of function, capturing mpd values %%% -----
-phy.d.transform.mpd <- function(phylo,abundance.matrix,d){
+phy.d.transform <- function(phylo,abundance.matrix,d){
   # phylo--the phylogenetic tree to be transformed
   # d--the vector of delta values to utilize for the branch length transformation
   # abundance.matrix--species-sites abundance matrix, used to calculate mpd values
