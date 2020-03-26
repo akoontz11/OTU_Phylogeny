@@ -63,16 +63,18 @@ sim.data <- Filter(is.matrix, sim.data)
 # Extract diversity metrics from untransformed phylogenies (for later comparison)
 sim.MPDs <- lapply(sim.Results, function(x) x$values$MPDs)
 
-# %%% CORRELATIONS OF MPD VALUES BETWEEN SITE AND BASELINE %%% ----
-# Using mapply on worker function calculating correlations between delta values
-t.correls <- mapply(.new.correls, sim.data, sim.MPDs)
-# Match the correlations to the parameters
+# Build results matrix, from which linear model variables will be pulled
 results <- params[rep(1:nrow(params), each=30),]
-results$correl <- as.numeric(t.correls)
 results$delta <- rep(deltas,length(sim.data))
 # Create term for diversification rate (birth rate/death rate) for both intraspecific and sequening error differences
 results$intra.div <- results$intra.birth/results$intra.death
 results$seq.div <- results$seq.birth/results$seq.death
+
+# %%% CORRELATIONS OF MPD VALUES BETWEEN SITE AND BASELINE %%% ----
+# Using mapply on worker function calculating correlations between delta values
+t.correls <- mapply(.new.correls, sim.data, sim.MPDs)
+# Match the correlations to the parameters
+results$correl <- as.numeric(t.correls)
 
 # %%% LINEAR MODELS AND SUMMARIES %%%
 # Orig.transforms: delta, (delta)^2
@@ -91,7 +93,6 @@ summary(s.model.correl)
 # Using mapply on worker function determining number of site rank shiftings
 rank.shifts <- mapply(.ranking.diff, sim.data, sim.MPDs)
 # Match the ranking differences to the parameters
-results <- params[rep(1:nrow(params), each=30),]
 results$rank.shifts <- as.numeric(rank.shifts)
 
 # %%% LINEAR MODELS AND SUMMARIES %%%
@@ -111,7 +112,6 @@ summary(s.model.rankShifts)
 # Using mapply on worker function determining number of site rank shiftings
 v.comps <- mapply(.vertical.comparison, sim.data, sim.MPDs)
 # Match the ranking differences to the parameters
-results <- params[rep(1:nrow(params), each=30),]
 results$v.comps <- as.numeric(v.comps)
 
 # %%% LINEAR MODELS AND SUMMARIES %%%
