@@ -46,6 +46,7 @@ abundance.mapping <- function(oldColumnNames, newColumnNames, rowNames, donor.co
 
 # %%% FUNCTION FOR TESTING TRANSFORMATIONS OVER COMMUNITY SIMULATIONS %%%
 SimulateCommnunity <- function(comm.size,comm.spp,comm.timesteps,comm.migrate,comm.env,comm.abund,comm.stoch,comm.speciate,intra.birth,intra.death,intra.steps,seq.birth,seq.death,seq.steps){
+  browser()
   # SIMULATE AND CLEANUP COMMUNITY
   # Simulate community (using pez function sim.meta.phy.comm). Generate NULL for a DemoCom object that is in error
   DemoCom <- tryCatch(sim.meta.phy.comm(size=comm.size, n.spp=comm.spp, timesteps=comm.timesteps, p.migrate=comm.migrate, env.lam=comm.env, abund.lam=comm.abund, stoch.lam=comm.stoch, p.speciate=comm.speciate),error=function(cond) {return(NULL)})
@@ -100,8 +101,6 @@ SimulateCommnunity <- function(comm.size,comm.spp,comm.timesteps,comm.migrate,co
   orig.MPD <- .mpd(comparative.comm(orig.phy, orig.comm, force.root = 0), abundance.weighted=TRUE)
   # Changing names to match format from phy.d.transform function
   names(orig.MPD) <- paste("Site",1:nrow(orig.comm),sep="_")
-  # Site rankings by diversity
-  orig.rankings <- names(sort(orig.MPD,decreasing = F))
   
   # PACKAGING SIMULATION DATA
   # Export a list containing all simulation data, for each community "type" (original, intra, and seq)
@@ -112,13 +111,14 @@ SimulateCommnunity <- function(comm.size,comm.spp,comm.timesteps,comm.migrate,co
   # MPD matrices, from delta transforms
   community.transforms <- list(orig.transform=orig.test,intra.transform=intra.test,seq.transform=seq.test)
   # Phylogenetic diversity metrics, of original (untransformed) communities/phylogenies
-  original.diversityMetrics <- list(MPDs=orig.MPD,ranks=orig.rankings)
+  original.diversityMetrics <- list(MPDs=orig.MPD)
   # Return data
   simulation.data <- list(phylogenies=community.phylogenies,abundances=community.abundances,transforms=community.transforms,values=original.diversityMetrics)
   return(simulation.data)
 }
-# sim.data <- SimulateCommnunity(comm.size=10, comm.spp=10,comm.timesteps=40,comm.migrate=0.02,comm.env=10,comm.abund=4,comm.stoch=1,comm.speciate=0.06,intra.birth=0.5,intra.death=0.1,intra.steps=1,seq.birth=0.5,seq.death=0.1,seq.steps=1)
-# str(sim.data)
+
+#sim.data <- SimulateCommnunity(comm.size=10, comm.spp=10,comm.timesteps=40,comm.migrate=0.02,comm.env=10,comm.abund=4,comm.stoch=1,comm.speciate=0.06,intra.birth=0.5,intra.death=0.1,intra.steps=1,seq.birth=0.5,seq.death=0.1,seq.steps=1)
+#str(sim.data)
 
 #----
 # SIMULATE AND CLEANUP COMMUNITY
