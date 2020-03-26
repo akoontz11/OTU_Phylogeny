@@ -3,54 +3,54 @@
 library(geiger)
 library(pez)
 
-# Function for capturing ses.mpd values over a series of delta transformations
-phy.d.transform <- function(phylo,abundance.matrix,d){
-  #browser()
-  # phylo--the phylogenetic tree to be transformed
-  # d--the vector of delta values to utilize for the branch length transformation
-  # abundance.matrix--species-sites abundance matrix, used to calculate mpd values
-  # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  # If `phylo` argument is NULL, return an mpd.mat object of NA
-  if(is.null(phylo)){
-    mpd.mat <- NA
-    return(mpd.mat)
-  } else{
-    # Calculate number of sites from species-site abundance matrix
-    nsim <- nrow(abundance.matrix)
-    # Create matrix with which to capture ses.mpd values vector for every loop iteration
-    mpd.mat <- matrix(NA, nrow=nsim, ncol=length(d))
-    colnames(mpd.mat) <- d
-    rownames(mpd.mat) <- paste("Site",1:nsim,sep="_")
-    for(i in 1:length(d)){
-      # Apply phylogenetic transformation to tree
-      s.phylo <- rescale(phylo, "delta", d[i])
-      # Create comparative data object
-      # (Including the force.root argument, in order to handle unrooted phylogenies)
-      c.data <- comparative.comm(s.phylo, abundance.matrix, force.root = 0)
-      # Calculate standard effect size of mean pairwise distance (which incorporates number of taxa)
-      mpd.values <- .ses.mpd(c.data, abundance.weighted=TRUE) 
-      # Extract relevant column from resulting matrix
-      mpd.values <- mpd.values$mpd.obs.z
-      # Store calculated mpd values within a matrix
-      mpd.mat[,i] <- mpd.values
-    }
-    return(mpd.mat)
-  }
-}
+# # Function for capturing ses.mpd values over a series of delta transformations
+# phy.d.transform <- function(phylo,abundance.matrix,d){
+#   #browser()
+#   # phylo--the phylogenetic tree to be transformed
+#   # d--the vector of delta values to utilize for the branch length transformation
+#   # abundance.matrix--species-sites abundance matrix, used to calculate mpd values
+#   # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+#   # If `phylo` argument is NULL, return an mpd.mat object of NA
+#   if(is.null(phylo)){
+#     mpd.mat <- NA
+#     return(mpd.mat)
+#   } else{
+#     # Calculate number of sites from species-site abundance matrix
+#     nsim <- nrow(abundance.matrix)
+#     # Create matrix with which to capture ses.mpd values vector for every loop iteration
+#     mpd.mat <- matrix(NA, nrow=nsim, ncol=length(d))
+#     colnames(mpd.mat) <- d
+#     rownames(mpd.mat) <- paste("Site",1:nsim,sep="_")
+#     for(i in 1:length(d)){
+#       # Apply phylogenetic transformation to tree
+#       s.phylo <- rescale(phylo, "delta", d[i])
+#       # Create comparative data object
+#       # (Including the force.root argument, in order to handle unrooted phylogenies)
+#       c.data <- comparative.comm(s.phylo, abundance.matrix, force.root = 0)
+#       # Calculate standard effect size of mean pairwise distance (which incorporates number of taxa)
+#       mpd.values <- .ses.mpd(c.data, abundance.weighted=TRUE) 
+#       # Extract relevant column from resulting matrix
+#       mpd.values <- mpd.values$mpd.obs.z
+#       # Store calculated mpd values within a matrix
+#       mpd.mat[,i] <- mpd.values
+#     }
+#     return(mpd.mat)
+#   }
+# }
 
-# %%% Demonstration using laja dataset %%% ----
-data(laja)
-data <- comparative.comm(invert.tree, river.sites, invert.traits, river.env)
-plot(invert.tree)
-# Updating species-site abundance matrix
-species.abundances <- round(t(sim.char(invert.tree, 5, model="BM", nsim=10)[,1,]) * 100)
-species.abundances[species.abundances < 0] <- 0
-colnames(species.abundances) <- invert.tree$tip.label
-rownames(species.abundances) <- paste("site_", seq_len(nrow(species.abundances)))
-# Generating a vector of delta values from 0.1 to 3
-deltas <- seq(0.1,3,by=0.1)
-# Demonstrating function
-laja.test <- phy.d.transform(invert.tree, species.abundances, deltas)
+# # %%% Demonstration using laja dataset %%% ----
+# data(laja)
+# data <- comparative.comm(invert.tree, river.sites, invert.traits, river.env)
+# plot(invert.tree)
+# # Updating species-site abundance matrix
+# species.abundances <- round(t(sim.char(invert.tree, 5, model="BM", nsim=10)[,1,]) * 100)
+# species.abundances[species.abundances < 0] <- 0
+# colnames(species.abundances) <- invert.tree$tip.label
+# rownames(species.abundances) <- paste("site_", seq_len(nrow(species.abundances)))
+# # Generating a vector of delta values from 0.1 to 3
+# deltas <- seq(0.1,3,by=0.1)
+# # Demonstrating function
+# laja.test <- phy.d.transform(invert.tree, species.abundances, deltas)
 
 # %%% Plotting version of function, capturing SES.MPD %%% ----
 # # Function for capturing mpd values over series of delta transformations
@@ -103,36 +103,36 @@ laja.test <- phy.d.transform(invert.tree, species.abundances, deltas)
 # }
 
 # %%% Old version of function, capturing mpd values %%% -----
-# phy.d.transform.mpd <- function(phylo,abundance.matrix,d){
-#   # phylo--the phylogenetic tree to be transformed
-#   # d--the vector of delta values to utilize for the branch length transformation
-#   # abundance.matrix--species-sites abundance matrix, used to calculate mpd values
-#   # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-#   # If `phylo` argument is NULL, return an mpd.mat object of NA
-#   if(is.null(phylo)){
-#     mpd.mat <- NA
-#     return(mpd.mat)
-#   } else{
-#     # Calculate number of sites from species-site abundance matrix
-#     nsim <- nrow(abundance.matrix)
-#     # Create matrix with which to capture mpd.values vector for every loop iteration
-#     mpd.mat <- matrix(NA, nrow=nsim, ncol=length(d))
-#     colnames(mpd.mat) <- d
-#     rownames(mpd.mat) <- paste("Site",1:nsim,sep="_")
-#     for(i in 1:length(d)){
-#       # Apply phylogenetic transformation to tree
-#       s.phylo <- rescale(phylo, "delta", d[i])
-#       # Create comparative data object
-#       # (Including the force.root argument, in order to handle unrooted phylogenies)
-#       c.data <- comparative.comm(s.phylo, abundance.matrix, force.root = 0)
-#       # Calculate mean pairwise distance
-#       mpd.values <- .mpd(c.data, abundance.weighted=TRUE) 
-#       # Store calculated mpd values within a matrix
-#       mpd.mat[,i] <- mpd.values
-#     }
-#     return(mpd.mat)
-#   }
-# }
+phy.d.transform.mpd <- function(phylo,abundance.matrix,d){
+  # phylo--the phylogenetic tree to be transformed
+  # d--the vector of delta values to utilize for the branch length transformation
+  # abundance.matrix--species-sites abundance matrix, used to calculate mpd values
+  # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  # If `phylo` argument is NULL, return an mpd.mat object of NA
+  if(is.null(phylo)){
+    mpd.mat <- NA
+    return(mpd.mat)
+  } else{
+    # Calculate number of sites from species-site abundance matrix
+    nsim <- nrow(abundance.matrix)
+    # Create matrix with which to capture mpd.values vector for every loop iteration
+    mpd.mat <- matrix(NA, nrow=nsim, ncol=length(d))
+    colnames(mpd.mat) <- d
+    rownames(mpd.mat) <- paste("Site",1:nsim,sep="_")
+    for(i in 1:length(d)){
+      # Apply phylogenetic transformation to tree
+      s.phylo <- rescale(phylo, "delta", d[i])
+      # Create comparative data object
+      # (Including the force.root argument, in order to handle unrooted phylogenies)
+      c.data <- comparative.comm(s.phylo, abundance.matrix, force.root = 0)
+      # Calculate mean pairwise distance
+      mpd.values <- .mpd(c.data, abundance.weighted=TRUE)
+      # Store calculated mpd values within a matrix
+      mpd.mat[,i] <- mpd.values
+    }
+    return(mpd.mat)
+  }
+}
 # %%% Old, plotting version of function, capturing mpd values %%% ----
 # # Function for capturing mpd values over series of delta transformations
 # phy.d.transform.plot <- function(phylo,abundance.matrix,d){
