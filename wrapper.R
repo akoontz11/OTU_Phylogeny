@@ -30,4 +30,4 @@ sim.Results <- mcMap(function(i) SimulateCommnunity(params$comm.size[i],params$c
 
 # Saving results
 # save.image("simResults.RData")
-save.image("simResults.RData_ExpandedSteps")
+save.image("simResults.RData_20200327")
