@@ -35,7 +35,7 @@ z.transform <- function(data){
 # Worker function for comparing two mpd values: prior to transformation, and at delta=1.0 after intra and seq additions
 .vertical.comparison <- function(x,d){
   # x is vector of mpd values measured after delta transformations; d is original mpd value prior to transformations
-  # The use arguments allows correlations to be caluculated off of all pairs that are present
+  # The use argument allows correlations to be caluculated off of all pairs that are present
   value <- cor(x[,10], d, use="na.or.complete")
   return(value)
 }
@@ -78,15 +78,15 @@ results$correl <- as.numeric(t.correls)
 
 # %%% LINEAR MODELS AND SUMMARIES %%%
 # Orig.transforms: delta, (delta)^2
-o.model.correl <- lm(correl ~ z.transform(exp(delta))+I(z.transform(exp(delta))^2), data=results, na.action=na.omit)
-summary(o.model.correl)
-
-# Intra.transforms: delta, (delta)^2, intra diversification
-i.model.correl <- lm(correl ~ z.transform(exp(delta))+I(z.transform(exp(delta))^2)+z.transform(intra.div), data=results, na.action=na.omit)
-summary(i.model.correl)
+# o.model.correl <- lm(correl ~ z.transform(log(delta))+I(z.transform(log(delta))^2), data=results, na.action=na.omit)
+# summary(o.model.correl)
+# 
+# # Intra.transforms: delta, (delta)^2, intra diversification
+# i.model.correl <- lm(correl ~ z.transform(log(delta))+I(z.transform(log(delta))^2)+z.transform(intra.div), data=results, na.action=na.omit)
+# summary(i.model.correl)
 
 # Seq.transforms: delta, (delta)^2, intra diversification, seq diversification
-s.model.correl <- lm(correl ~ z.transform(exp(delta))+I(z.transform(exp(delta))^2)+z.transform(intra.div)+z.transform(seq.div),data=results,na.action=na.omit)
+s.model.correl <- lm(correl ~ z.transform(log(delta))+I(z.transform(log(delta))^2)+z.transform(intra.div)+z.transform(seq.div),data=results,na.action=na.omit)
 summary(s.model.correl)
 
 # %%% DIFFERENCE IN SITE RANKINGS (I.E. CROSSINGS OVER) BETWEEN SITE AND BASELINE %%% ----
@@ -96,16 +96,16 @@ rank.shifts <- mapply(.ranking.diff, sim.data, sim.MPDs)
 results$rank.shifts <- as.numeric(rank.shifts)
 
 # %%% LINEAR MODELS AND SUMMARIES %%%
-# Orig.transforms: delta, (delta)^2
-o.model.rankShifts <- lm(rank.shifts ~ z.transform(exp(delta))+I(z.transform(exp(delta))^2), data=results, na.action=na.omit)
-summary(o.model.rankShifts)
-
-# Intra.transforms: delta, (delta)^2, intra diversification
-i.model.rankShifts <- lm(rank.shifts ~ z.transform(exp(delta))+I(z.transform(exp(delta))^2)+z.transform(intra.div), data=results, na.action=na.omit)
-summary(i.model.rankShifts)
+# # Orig.transforms: delta, (delta)^2
+# o.model.rankShifts <- lm(rank.shifts ~ z.transform(log(delta))+I(z.transform(log(delta))^2), data=results, na.action=na.omit)
+# summary(o.model.rankShifts)
+# 
+# # Intra.transforms: delta, (delta)^2, intra diversification
+# i.model.rankShifts <- lm(rank.shifts ~ z.transform(log(delta))+I(z.transform(log(delta))^2)+z.transform(intra.div), data=results, na.action=na.omit)
+# summary(i.model.rankShifts)
 
 # Seq.transforms: delta, (delta)^2, intra diversification, seq diversification
-s.model.rankShifts <- lm(rank.shifts ~ z.transform(exp(delta))+I(z.transform(exp(delta))^2)+z.transform(intra.div)+z.transform(seq.div),data=results,na.action=na.omit)
+s.model.rankShifts <- lm(rank.shifts ~ z.transform(log(delta))+I(z.transform(log(delta))^2)+z.transform(intra.div)+z.transform(seq.div),data=results,na.action=na.omit)
 summary(s.model.rankShifts)
 
 # %%% COMPARISON OF ORIGINAL MPD VALUES TO VALUES AFTER BRANCH ADDITION %%% ----
