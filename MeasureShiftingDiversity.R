@@ -77,7 +77,7 @@ t.correls <- mapply(.new.correls, sim.data, sim.MPDs)
 results$correl <- as.numeric(t.correls)
 
 # %%% LINEAR MODELS AND SUMMARIES %%%
-# Orig.transforms: delta, (delta)^2
+# # Orig.transforms: delta, (delta)^2
 # o.model.correl <- lm(correl ~ z.transform(log(delta))+I(z.transform(log(delta))^2), data=results, na.action=na.omit)
 # summary(o.model.correl)
 # 
@@ -86,7 +86,8 @@ results$correl <- as.numeric(t.correls)
 # summary(i.model.correl)
 
 # Seq.transforms: delta, (delta)^2, intra diversification, seq diversification
-s.model.correl <- lm(correl ~ z.transform(log(delta))+I(z.transform(log(delta))^2)+z.transform(intra.div)+z.transform(seq.div),data=results,na.action=na.omit)
+# s.model.correl <- lm(correl ~ z.transform(log(delta))+I(z.transform(log(delta))^2)+z.transform(intra.div)+z.transform(seq.div),data=results,na.action=na.omit)
+s.model.correl <- lm(correl ~ z.transform(log(delta))+z.transform(intra.div)+z.transform(seq.div),data=results,na.action=na.omit)
 summary(s.model.correl)
 
 # %%% DIFFERENCE IN SITE RANKINGS (I.E. CROSSINGS OVER) BETWEEN SITE AND BASELINE %%% ----
@@ -105,7 +106,8 @@ results$rank.shifts <- as.numeric(rank.shifts)
 # summary(i.model.rankShifts)
 
 # Seq.transforms: delta, (delta)^2, intra diversification, seq diversification
-s.model.rankShifts <- lm(rank.shifts ~ z.transform(log(delta))+I(z.transform(log(delta))^2)+z.transform(intra.div)+z.transform(seq.div),data=results,na.action=na.omit)
+# s.model.rankShifts <- lm(rank.shifts ~ z.transform(log(delta))+I(z.transform(log(delta))^2)+z.transform(intra.div)+z.transform(seq.div),data=results,na.action=na.omit)
+s.model.rankShifts <- lm(rank.shifts ~ z.transform(log(delta))+z.transform(intra.div)+z.transform(seq.div),data=results,na.action=na.omit)
 summary(s.model.rankShifts)
 
 # %%% COMPARISON OF ORIGINAL MPD VALUES TO VALUES AFTER BRANCH ADDITION %%% ----
