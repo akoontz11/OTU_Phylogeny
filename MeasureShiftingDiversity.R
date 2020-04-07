@@ -88,6 +88,17 @@ results$correl <- as.numeric(t.correls)
 # Seq.transforms: delta, (delta)^2, intra diversification, seq diversification
 s.model.correl <- lm(correl ~ z.transform(log(delta))+I(z.transform(log(delta))^2)+z.transform(intra.div)+z.transform(seq.div),data=results,na.action=na.omit)
 summary(s.model.correl)
+xtable(s.model.correl)
+
+# %%% PLOTTING %%%
+plot(tapply(s.model.correl$model$correl, results$delta, mean) ~ unique(results$delta), 
+     ylab="correl model terms", xlab="delta", pch=16)
+# plot(tapply(results$correl, results$delta, mean) ~ unique(results$delta), 
+#      ylab="Average correlation coefficient", xlab="delta value", pch=16)
+plot(tapply(s.model.correl$model$correl, results$intra.div, mean) ~ unique(results$intra.div), 
+     ylab="correl model terms", xlab="intra.div", pch=16)
+plot(tapply(s.model.correl$model$correl, results$seq.div, mean) ~ unique(results$seq.div), 
+     ylab="correl model terms", xlab="seq.div", pch=16)
 
 # %%% DIFFERENCE IN SITE RANKINGS (I.E. CROSSINGS OVER) BETWEEN SITE AND BASELINE %%% ----
 # Using mapply on worker function determining number of site rank shiftings
@@ -107,6 +118,17 @@ results$rank.shifts <- as.numeric(rank.shifts)
 # Seq.transforms: delta, (delta)^2, intra diversification, seq diversification
 s.model.rankShifts <- lm(rank.shifts ~ z.transform(log(delta))+I(z.transform(log(delta))^2)+z.transform(intra.div)+z.transform(seq.div),data=results,na.action=na.omit)
 summary(s.model.rankShifts)
+xtable(s.model.rankShifts)
+
+# %%% PLOTTING %%%
+plot(tapply(s.model.rankShifts$model$rank.shifts, results$delta, mean) ~ unique(results$delta), 
+     ylab="rankShifts model terms", xlab="delta", pch=16)
+# plot(tapply(results$rank.shifts, results$delta, mean) ~ unique(results$delta), 
+#      ylab="Average shift in site rankings", xlab="delta value", pch=16)
+plot(tapply(s.model.rankShifts$model$rank.shifts, results$intra.div, mean) ~ unique(results$intra.div), 
+     ylab="rankShifts model terms", xlab="intra.div", pch=16)
+plot(tapply(s.model.rankShifts$model$rank.shifts, results$seq.div, mean) ~ unique(results$seq.div), 
+     ylab="rankShifts model terms", xlab="seq.div", pch=16)
 
 # %%% COMPARISON OF ORIGINAL MPD VALUES TO VALUES AFTER BRANCH ADDITION %%% ----
 # Using mapply on worker function determining number of site rank shiftings
