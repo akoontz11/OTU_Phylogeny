@@ -1,6 +1,7 @@
 # Script for analysis of Bonnie's fungal dataset from CR
 
 library(ape)
+source("../MPDvsDelta.R")
 setwd("/home/akoontz11/OTU_Phylogeny/Microbial_Dataset/")
 
 # Read in and reformat fungal community matrix
@@ -35,24 +36,16 @@ fung.siteShifts <- vector(length=length(deltas))
 # Function for comparing site rankings at each delta value to original site rankings (prior to transformations)
 compare.shifts <- function(x,d){
   # Generate a numeric vector of baseline site rankings (i.e. delta=1.0)
-  baseline.rank <- as.numeric(rank(sort(d,decreasing = F)))
-  # Generate a vector of names of these site rankings
-  baseline.names <- names(sort(d,decreasing = F))
+  baseline.rank <- rank(d)
   # Generate a vector to capture mean changes between rankings
   meanRankChanges <- vector(length = ncol(x))
   for (i in 1:ncol(x)){
-    # Get the names of sites sorted from lowest to highest for the current column (delta value)
-    comparison <- names(sort(x[,i],decreasing = F))
-    # Generate a numeric vector corresponding to how site rankings have changed from "baseline" delta value
-    shifts <- match(baseline.names, comparison)
-    # Calculate absolute changes between two different rankings
-    changes <- abs(shifts - baseline.rank)
-    # Calculate the mean of the absolute changes, and place into vector
-    meanRankChanges[i] <- mean(changes)
+    # Calculate the mean of the absolute changes between two different rankings, and place into vector
+    meanRankChanges[i] <- mean(abs(baseline.rank - rank(x[,i])))
   }
   return(meanRankChanges)
 }
 
 fung.siteShifts <- compare.shifts(fung.test, fung.mpds)
 fung.siteShifts
-plot(fung.siteShifts ~ deltas, xlab="Delta values", ylab="Mean difference in site rankings from original")
+plot(fung.siteShifts ~ deltas, xlab="Delta values", ylab="Mean difference in site rankings from original", pch=16)
