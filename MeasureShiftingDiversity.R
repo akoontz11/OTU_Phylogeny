@@ -1,6 +1,7 @@
 # %%% ANALYSIS OF SIMULATION OUTPUT %%%
 
 setwd("/home/akoontz11/OTU_Phylogeny/")
+library(xtable)
 
 # %%% FUNCTION DECLARATIONS %%% ----
 # Function for standardizing variables in linear models
@@ -85,20 +86,34 @@ results$correl <- as.numeric(t.correls)
 # i.model.correl <- lm(correl ~ z.transform(log(delta))+I(z.transform(log(delta))^2)+z.transform(intra.div), data=results, na.action=na.omit)
 # summary(i.model.correl)
 
-# Seq.transforms: delta, (delta)^2, intra diversification, seq diversification
+# All model terms
 s.model.correl <- lm(correl ~ z.transform(log(delta))+I(z.transform(log(delta))^2)+z.transform(intra.div)+z.transform(seq.div),data=results,na.action=na.omit)
 summary(s.model.correl)
 xtable(s.model.correl)
 
 # %%% PLOTTING %%%
+par(mar=c(5.0, 4.0, 1.0, 2.0) + 0.1)
+
 plot(tapply(s.model.correl$model$correl, results$delta, mean) ~ unique(results$delta), 
-     ylab="correl model terms", xlab="delta", pch=16)
-# plot(tapply(results$correl, results$delta, mean) ~ unique(results$delta), 
-#      ylab="Average correlation coefficient", xlab="delta value", pch=16)
-plot(tapply(s.model.correl$model$correl, results$intra.div, mean) ~ unique(results$intra.div), 
-     ylab="correl model terms", xlab="intra.div", pch=16)
+     ylab="Model terms: correlations", xlab="Delta Value", pch=16)
+
+plot(tapply(s.model.correl$model$correl, results$intra.div, mean) ~ unique(results$intra.div),
+     ylab="Model terms: correlations", xlab="Intraspecific Diversification", pch=16, col="red")
+
 plot(tapply(s.model.correl$model$correl, results$seq.div, mean) ~ unique(results$seq.div), 
-     ylab="correl model terms", xlab="seq.div", pch=16)
+     ylab="Model terms: correlations", xlab="Sequencing Error Diversification", pch=16, col="blue")
+
+# Three plots in one window
+par(mfcol=c(3,1), mar=c(3, 4, 1, 8) + 0.1)
+
+plot(tapply(s.model.correl$model$correl, results$delta, mean) ~ unique(results$delta), 
+     ylab="Model terms: correlations", xlab="Delta Value", pch=16)
+
+plot(tapply(s.model.correl$model$correl, results$intra.div, mean) ~ unique(results$intra.div),
+      ylab="Model terms: correlations", xlab="Intraspecific Diversification", pch=16, col="red")
+
+plot(tapply(s.model.correl$model$correl, results$seq.div, mean) ~ unique(results$seq.div), 
+     ylab="Model terms: correlations", xlab="Sequencing Error Diversification", pch=16, col="blue")
 
 # %%% DIFFERENCE IN SITE RANKINGS (I.E. CROSSINGS OVER) BETWEEN SITE AND BASELINE %%% ----
 # Using mapply on worker function determining number of site rank shiftings
