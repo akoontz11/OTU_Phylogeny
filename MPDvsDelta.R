@@ -36,7 +36,7 @@ phy.d.transform <- function(phylo,abundance.matrix,d){
 
 # %%% Plotting version of function, capturing mpd values %%% ----
 # Function for capturing mpd values over series of delta transformations
-phy.d.transform.plot <- function(phylo,abundance.matrix,d){
+phy.d.transform.plot <- function(phylo,abundance.matrix,d,plot.title,...){
   # phylo--the phylogenetic tree to be transformed
   # d--the vector of delta values to utilize for the branch length transformation
   # abundance.matrix--species-sites abundance matrix, used to calculate mpd values
@@ -56,7 +56,7 @@ phy.d.transform.plot <- function(phylo,abundance.matrix,d){
       # Apply phylogenetic transformation to tree
       s.phylo <- rescale(phylo, "delta", d[i])
       # Plot transformed phylogeny
-      plot(s.phylo, show.tip.label=FALSE, main=c("Delta = ",d[i]))
+      #plot(s.phylo, show.tip.label=FALSE, main=c("Delta = ",d[i]))
       # Create comparative data object
       # Including the force.root argument, in order to handle unrooted phylogenies
       c.data <- comparative.comm(s.phylo, abundance.matrix, force.root = 0)
@@ -69,7 +69,7 @@ phy.d.transform.plot <- function(phylo,abundance.matrix,d){
     # Specifying the range values, removing any NAs
     ymin <- min(mpd.mat, na.rm=T); ymax <- max(mpd.mat,na.rm=T)
     # Plotting the first matrix row (i.e. Site1 values)
-    plot((mpd.mat[1,1:length(d)]) ~ d, xlab="delta", ylab="MPD Values", ylim=c(ymin,ymax), pch=20)
+    plot((mpd.mat[1,1:length(d)]) ~ d, xlab="", ylab="mpd Values", ylim=c(ymin,ymax), main=plot.title, pch=20)
     lines(d, mpd.mat[1,])
     # Below loop iterates through length of the matrix, adding connected points onto the plot
     for(i in 2:nsim){
