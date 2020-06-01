@@ -137,13 +137,15 @@ xtable(s.model.rankShifts)
 
 # %%% PLOTTING %%%
 plot(tapply(s.model.rankShifts$model$rank.shifts, results$delta, mean) ~ unique(results$delta), 
-     ylab="rankShifts model terms", xlab="delta", pch=16)
+     ylab="Model terms: ranking shifts", xlab="Delta", pch=16)
 # plot(tapply(results$rank.shifts, results$delta, mean) ~ unique(results$delta), 
 #      ylab="Average shift in site rankings", xlab="delta value", pch=16)
+
 plot(tapply(s.model.rankShifts$model$rank.shifts, results$intra.div, mean) ~ unique(results$intra.div), 
-     ylab="rankShifts model terms", xlab="intra.div", pch=16)
+     ylab="Model terms: ranking shifts", xlab="Intraspecific Diversification", pch=16, col="red")
+
 plot(tapply(s.model.rankShifts$model$rank.shifts, results$seq.div, mean) ~ unique(results$seq.div), 
-     ylab="rankShifts model terms", xlab="seq.div", pch=16)
+     ylab="Model terms: ranking shifts", xlab="Sequencing Error Diversification", pch=16, col="blue")
 
 # %%% COMPARISON OF ORIGINAL MPD VALUES TO VALUES AFTER BRANCH ADDITION %%% ----
 # Using mapply on worker function determining number of site rank shiftings
