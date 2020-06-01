@@ -119,11 +119,3 @@ compare.shifts <- function(x,d){
 laja.siteShifts <- compare.shifts(laja.test, laja.mpds)
 laja.siteShifts
 plot(laja.siteShifts ~ deltas, xlab="Delta values", ylab="Mean difference in site rankings from original", pch=16)
-
-# Ploting----
-par(mfcol=c(2,1), mar=c(2.5, 5, 2.5, 5) + 0.1, mgp=c(3,1,0))
-# Fungal
-fung.test <- phy.d.transform.plot(fung.phylo, fung.comm, deltas, plot.title="Shift in diversity of fungal communities over Delta values")
-box("figure")
-# Laja
-laja.test <- phy.d.transform.plot(invert.tree, species.abundances, deltas, plot.title="Shift in diversity of Rio Laja macroinvertebrate communities over Delta values")
