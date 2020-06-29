@@ -103,6 +103,20 @@ plot(tapply(s.model.correl$model$correl, results$intra.div, mean) ~ unique(resul
 plot(tapply(s.model.correl$model$correl, results$seq.div, mean) ~ unique(results$seq.div), 
      ylab="Model terms: correlations", xlab="Sequencing Error Diversification", pch=16, col="blue")
 
+# UPDATED PLOTS
+# Plotting raw data
+plot(results$correl ~ results$delta)
+
+# Plotting means with error bars
+correl.medians <- tapply(results$correl, results$delta, median)
+correl.sdevs <-  apply(t.correls, 1, sd)
+
+plot(correl.medians ~ unique(results$delta), pch=16, ylim=range(c(0.1, 1.0)))
+     
+arrows(x0=unique(results$delta), y0=correl.medians-correl.sdevs, 
+       x1=unique(results$delta), y1=correl.medians+correl.sdevs, 
+       code=3, angle=90, length=0.1)
+
 # Three plots in one window
 par(mfcol=c(3,1), mar=c(3, 4, 1, 8) + 0.1)
 
@@ -146,6 +160,22 @@ plot(tapply(s.model.rankShifts$model$rank.shifts, results$intra.div, mean) ~ uni
 
 plot(tapply(s.model.rankShifts$model$rank.shifts, results$seq.div, mean) ~ unique(results$seq.div), 
      ylab="Model terms: ranking shifts", xlab="Sequencing Error Diversification", pch=16, col="blue")
+
+# UPDATED PLOTS
+# Plotting raw data
+plot(results$rank.shifts ~ results$delta)
+
+boxplot(results$rank.shifts ~ results$delta)
+
+# Plotting means with error bars
+rank.shifts.medians <- tapply(results$rank.shifts, results$delta, median)
+rank.shifts.sdevs <-  apply(rank.shifts, 1, sd)
+
+plot(rank.shifts.medians ~ unique(results$delta), pch=16, ylim=range(c(5, 30)))
+
+arrows(x0=unique(results$delta), y0=rank.shifts.means-rank.shifts.sdevs, 
+       x1=unique(results$delta), y1=rank.shifts.means+rank.shifts.sdevs, 
+       code=3, angle=90, length=0.1)
 
 # %%% COMPARISON OF ORIGINAL MPD VALUES TO VALUES AFTER BRANCH ADDITION %%% ----
 # Using mapply on worker function determining number of site rank shiftings
