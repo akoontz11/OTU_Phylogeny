@@ -21,7 +21,7 @@ phy.d.transform <- function(phylo,abundance.matrix,d){
     rownames(mpd.mat) <- paste("Site",1:nsim,sep="_")
     for(i in 1:length(d)){
       # Apply phylogenetic transformation to tree
-      s.phylo <- rescale(phylo, "delta", d[i])
+      s.phylo <- geiger::rescale(phylo, "delta", d[i])
       # Create comparative data object
       # (Including the force.root argument, in order to handle unrooted phylogenies)
       c.data <- comparative.comm(s.phylo, abundance.matrix, force.root = 0)
@@ -54,7 +54,7 @@ phy.d.transform.plot <- function(phylo,abundance.matrix,d,plot.title,...){
     rownames(mpd.mat) <- paste("Site",1:nsim,sep="_")
     for(i in 1:length(d)){
       # Apply phylogenetic transformation to tree
-      s.phylo <- rescale(phylo, "delta", d[i])
+      s.phylo <- geiger::rescale(phylo, "delta", d[i])
       # Plot transformed phylogeny
       #plot(s.phylo, show.tip.label=FALSE, main=c("Delta = ",d[i]))
       # Create comparative data object
