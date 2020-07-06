@@ -29,7 +29,7 @@ fung.mpds <- .mpd(fung.cc, abundance.weighted=TRUE)
 # Build vector of delta values
 deltas <- seq(0.1,3,by=0.1)
 # Transform, building a matrix of mpds with sites as rows and delta values as columns
-fung.test <- phy.d.transform.plot(fung.phylo, fung.comm, deltas, plot.title="Shift in diversity of fungal communities over Delta values")
+fung.test <- phy.d.transform.plot(fung.phylo, fung.comm, deltas, plot.title="")
 
 # %%% MPD CORRELATIONS %%%----
 # Function for measuring correlation between original mpd value and mpd values for each site 
@@ -84,7 +84,7 @@ laja.mpds <- .mpd(laja.cc, abundance.weighted=TRUE)
 deltas <- seq(0.1,3,by=0.1)
 # Demonstrating function
 # laja.test <- phy.d.transform.plot(invert.tree, river.sites, deltas, plot.title="Shift in diversity of Rio Laja communities over delta values")
-laja.test <- phy.d.transform.plot(invert.tree, species.abundances, deltas, plot.title="Shift in diversity of Rio Laja macroinvertebrate communities over Delta values")
+laja.test <- phy.d.transform.plot(invert.tree, species.abundances, deltas, plot.title="")
 
 # %%% MPD CORRELATIONS %%%----
 # Function for measuring correlation between original mpd value and mpd values for each site 
