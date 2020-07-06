@@ -82,60 +82,53 @@ comp.correls <- rep(comp.correls, each=30)
 results$comp.correls <- comp.correls
 
 # %%% LINEAR MODELS AND SUMMARIES %%%
-# # Orig.transforms: delta, (delta)^2
-# o.model.correl <- lm(correl ~ z.transform(log(delta))+I(z.transform(log(delta))^2), data=results, na.action=na.omit)
-# summary(o.model.correl)
-# 
-# # Intra.transforms: delta, (delta)^2, intra diversification
-# i.model.correl <- lm(correl ~ z.transform(log(delta))+I(z.transform(log(delta))^2)+z.transform(intra.div), data=results, na.action=na.omit)
-# summary(i.model.correl)
-
 # All model terms
-s.model.correl <- lm(correl ~ z.transform(log(delta))+I(z.transform(log(delta))^2)+z.transform(intra.div)+z.transform(seq.div),data=results,na.action=na.omit)
+s.model.correl <- lm(correl ~ z.transform(log10(delta))+z.transform(intra.div)+z.transform(seq.div)+z.transform(comm.spp),data=results,na.action=na.omit)
 summary(s.model.correl)
 xtable(s.model.correl)
 
 # %%% PLOTTING %%%
-# par(mar=c(5.0, 4.0, 1.0, 2.0) + 0.1)
-# 
-# plot(tapply(s.model.correl$model$correl, results$delta, mean) ~ unique(results$delta), 
-#      ylab="Model terms: correlations", xlab="Delta Value", pch=16)
-# 
-# plot(tapply(s.model.correl$model$correl, results$intra.div, mean) ~ unique(results$intra.div),
-#      ylab="Model terms: correlations", xlab="Intraspecific Diversification", pch=16, col="red")
-# 
-# plot(tapply(s.model.correl$model$correl, results$seq.div, mean) ~ unique(results$seq.div), 
-#      ylab="Model terms: correlations", xlab="Sequencing Error Diversification", pch=16, col="blue")
-# 
-# # Three plots in one window
-# par(mfcol=c(3,1), mar=c(3, 4, 1, 8) + 0.1)
-# 
-# plot(tapply(s.model.correl$model$correl, results$delta, mean) ~ unique(results$delta), 
-#      ylab="Model terms: correlations", xlab="Delta Value", pch=16)
-# 
-# plot(tapply(s.model.correl$model$correl, results$intra.div, mean) ~ unique(results$intra.div),
-#       ylab="Model terms: correlations", xlab="Intraspecific Diversification", pch=16, col="red")
-# 
-# plot(tapply(s.model.correl$model$correl, results$seq.div, mean) ~ unique(results$seq.div), 
-#      ylab="Model terms: correlations", xlab="Sequencing Error Diversification", pch=16, col="blue")
-
-# UPDATED PLOTS
-# Plotting raw data
+# Plotting raw correl values
+# delta
 plot(results$correl ~ results$delta)
 boxplot(results$correl ~ results$delta)
+# intra.div
+plot(results$correl ~ results$intra.div, col="red")
+boxplot(results$correl ~ results$intra.div)
+# seq.div
+plot(results$correl ~ results$seq.div, col="blue")
+boxplot(results$correl ~ results$seq.div)
 
-# Plotting the medians of correl values minus correl values at delta=1.0, with error bars
-correl.medians <- tapply((results$correl-results$comp.correls), results$delta, median)
+# Plotting medians and standard deviations
+# Plotting the medians of correl values minus correl values at delta=1.0
+correl.d.medians <- tapply((results$correl-results$comp.correls), results$delta, median)
 # Standard deviations of correl values minus correl values at delta = 1.0
-correl.c.sdevs <- tapply((results$correl-results$comp.correls), results$delta, sd)
-# Standard deviations of raw correl values
-#correl.sdevs <-  apply(t.correls, 1, sd)
+correl.d.sdevs <- tapply((results$correl-results$comp.correls), results$delta, sd)
 
-plot(correl.medians ~ unique(results$delta), pch=16, ylim=range(c(-1.0, 1.0)))
-
-arrows(x0=unique(results$delta), y0=correl.medians-correl.c.sdevs, 
-       x1=unique(results$delta), y1=correl.medians+correl.c.sdevs, 
+plot(correl.d.medians ~ unique(results$delta), pch=16, ylim=range(c(-0.25, 0.25)))
+arrows(x0=unique(results$delta), y0=correl.d.medians-correl.d.sdevs, 
+       x1=unique(results$delta), y1=correl.d.medians+correl.d.sdevs, 
        code=3, angle=90, length=0.1)
+
+# Plotting the centered medians of correl values grouped by intraspecific diversification
+correl.i.medians <- tapply(results$correl-results$comp.correls, results$intra.div, median)
+# Standard deviations of centered correl values grouped by intraspecific diversification
+correl.i.sdevs <- tapply(results$correl-results$comp.correls, results$intra.div, sd)
+
+plot(correl.i.medians ~ unique(results$intra.div), pch=16, col="red", ylim=range(c(-0.25, 0.25)))
+arrows(x0=unique(results$intra.div), y0=correl.i.medians-correl.i.sdevs, 
+       x1=unique(results$intra.div), y1=correl.i.medians+correl.i.sdevs, 
+       code=3, angle=90, length=0.1, col="red")
+
+# Plotting the medians of correl values grouped by seq. error diversification
+correl.s.medians <- tapply(results$correl-results$comp.correls, results$seq.div, median)
+# Standard deviations of correl values grouped by seq. error diversification
+correl.s.sdevs <- tapply(results$correl-results$comp.correls, results$seq.div, sd)
+
+plot(correl.s.medians ~ unique(results$seq.div), pch=16, col="blue", ylim=range(c(-0.25, 0.25)))
+arrows(x0=unique(results$seq.div), y0=correl.s.medians-correl.s.sdevs, 
+       x1=unique(results$seq.div), y1=correl.s.medians+correl.s.sdevs, 
+       code=3, angle=90, length=0.1, col="blue")
 
 # %%% DIFFERENCE IN SITE RANKINGS (I.E. CROSSINGS OVER) BETWEEN SITE AND BASELINE %%% ----
 # Using mapply on worker function determining number of site rank shiftings
@@ -148,47 +141,92 @@ comp.rank.shifts <- rep(comp.rank.shifts, each=30)
 results$comp.rank.shifts <- comp.rank.shifts
 
 # %%% LINEAR MODELS AND SUMMARIES %%%
-# # Orig.transforms: delta, (delta)^2
-# o.model.rankShifts <- lm(rank.shifts ~ z.transform(log(delta))+I(z.transform(log(delta))^2), data=results, na.action=na.omit)
-# summary(o.model.rankShifts)
-# 
-# # Intra.transforms: delta, (delta)^2, intra diversification
-# i.model.rankShifts <- lm(rank.shifts ~ z.transform(log(delta))+I(z.transform(log(delta))^2)+z.transform(intra.div), data=results, na.action=na.omit)
-# summary(i.model.rankShifts)
-
 # Seq.transforms: delta, (delta)^2, intra diversification, seq diversification
-s.model.rankShifts <- lm(rank.shifts ~ z.transform(log(delta))+I(z.transform(log(delta))^2)+z.transform(intra.div)+z.transform(seq.div),data=results,na.action=na.omit)
+s.model.rankShifts <- lm(rank.shifts ~ z.transform(log10(delta))+z.transform(intra.div)+z.transform(seq.div)+z.transform(comm.spp),data=results,na.action=na.omit)
 summary(s.model.rankShifts)
 xtable(s.model.rankShifts)
 
 # %%% PLOTTING %%%
-# plot(tapply(s.model.rankShifts$model$rank.shifts, results$delta, mean) ~ unique(results$delta), 
-#      ylab="Model terms: ranking shifts", xlab="Delta", pch=16)
-# 
-# plot(tapply(s.model.rankShifts$model$rank.shifts, results$intra.div, mean) ~ unique(results$intra.div), 
-#      ylab="Model terms: ranking shifts", xlab="Intraspecific Diversification", pch=16, col="red")
-# 
-# plot(tapply(s.model.rankShifts$model$rank.shifts, results$seq.div, mean) ~ unique(results$seq.div), 
-#      ylab="Model terms: ranking shifts", xlab="Sequencing Error Diversification", pch=16, col="blue")
-
-# UPDATED PLOTS
-# Plotting raw data
+# Plotting raw rank.shifts values
+# delta
 plot(results$rank.shifts ~ results$delta)
-
 boxplot(results$rank.shifts ~ results$delta)
+# intra.div
+plot(results$rank.shifts ~ results$intra.div, col="red")
+boxplot(results$rank.shifts ~ results$intra.div)
+# seq.div
+plot(results$rank.shifts ~ results$seq.div, col="blue")
+boxplot(results$rank.shifts ~ results$seq.div)
 
-# Plotting the medians of rank.shifts values minus rank.shifts values at delta=1.0, with error bars
-rank.shifts.medians <- tapply((results$rank.shifts-results$comp.rank.shifts), results$delta, median)
+# Plotting medians and standard deviations
+# Plotting the medians of rank.shifts values minus rank.shifts values at delta=1.0
+rank.shifts.d.medians <- tapply((results$rank.shifts-results$comp.rank.shifts), results$delta, median)
 # Standard deviations of rank.shifts values minus rank.shifts values at delta = 1.0
-rank.shifts.c.sdevs <- tapply((results$rank.shifts-results$comp.rank.shifts), results$delta, sd)
-# Standard deviations of raw correl values
-#rank.shifts.sdevs <-  apply(rank.shifts, 1, sd)
+rank.shifts.d.sdevs <- tapply((results$rank.shifts-results$comp.rank.shifts), results$delta, sd)
 
-plot(rank.shifts.medians ~ unique(results$delta), pch=16, ylim=range(c(-10, 10)))
-
-arrows(x0=unique(results$delta), y0=rank.shifts.medians-rank.shifts.c.sdevs, 
-       x1=unique(results$delta), y1=rank.shifts.medians+rank.shifts.c.sdevs, 
+plot(rank.shifts.d.medians ~ unique(results$delta), pch=16, ylim=range(c(-5, 5)))
+arrows(x0=unique(results$delta), y0=rank.shifts.d.medians-rank.shifts.d.sdevs, 
+       x1=unique(results$delta), y1=rank.shifts.d.medians+rank.shifts.d.sdevs, 
        code=3, angle=90, length=0.1)
+
+# Plotting the centered medians of rank.shifts values grouped by intraspecific diversification
+rank.shifts.i.medians <- tapply((results$rank.shifts-results$comp.rank.shifts), results$intra.div, median)
+# Standard deviations of centered rank.shifts values grouped by intraspecific diversification
+rank.shifts.i.sdevs <- tapply((results$rank.shifts-results$comp.rank.shifts), results$intra.div, sd)
+
+plot(rank.shifts.i.medians ~ unique(results$intra.div), pch=16, col="red", ylim=range(c(-5, 5)))
+arrows(x0=unique(results$intra.div), y0=rank.shifts.i.medians-rank.shifts.i.sdevs, 
+       x1=unique(results$intra.div), y1=rank.shifts.i.medians+rank.shifts.i.sdevs, 
+       code=3, angle=90, length=0.1, col="red")
+
+# Plotting the centered medians of rank.shifts values grouped by seq. error diversification
+rank.shifts.s.medians <- tapply((results$rank.shifts-results$comp.rank.shifts), results$seq.div, median)
+# Standard deviations of centered rank.shifts values grouped by seq. error diversification
+rank.shifts.s.sdevs <- tapply((results$rank.shifts-results$comp.rank.shifts), results$seq.div, sd)
+
+plot(rank.shifts.s.medians ~ unique(results$seq.div), pch=16, col="blue", ylim=range(c(-5, 5)))
+arrows(x0=unique(results$seq.div), y0=rank.shifts.s.medians-rank.shifts.s.sdevs, 
+       x1=unique(results$seq.div), y1=rank.shifts.s.medians+rank.shifts.s.sdevs, 
+       code=3, angle=90, length=0.1, col="blue")
+
+# Four plots: both response variables, grouped both by delta and by simulated error
+par(mfcol=c(2,2))
+
+plot(correl.d.medians ~ unique(results$delta), pch=16, ylim=range(c(-0.25, 0.25)), ylab="Median correlations", xlab="Delta")
+arrows(x0=unique(results$delta), y0=correl.d.medians-correl.d.sdevs, 
+       x1=unique(results$delta), y1=correl.d.medians+correl.d.sdevs, 
+       code=3, angle=90, length=0.1)
+
+plot(correl.i.medians ~ unique(results$intra.div), pch=16, col="purple", ylim=range(c(-0.25, 0.25)), ylab="Median correlations", xlab="Error diversification rate")
+arrows(x0=unique(results$intra.div), y0=correl.i.medians-correl.i.sdevs, 
+       x1=unique(results$intra.div), y1=correl.i.medians+correl.i.sdevs, 
+       code=3, angle=90, length=0.1, col="purple")
+
+plot(rank.shifts.d.medians ~ unique(results$delta), pch=16, ylim=range(c(-5, 5)), ylab="Median site rankings", xlab="Delta")
+arrows(x0=unique(results$delta), y0=rank.shifts.d.medians-rank.shifts.d.sdevs, 
+       x1=unique(results$delta), y1=rank.shifts.d.medians+rank.shifts.d.sdevs, 
+       code=3, angle=90, length=0.1)
+
+plot(rank.shifts.i.medians ~ unique(results$intra.div), pch=16, col="purple", ylim=range(c(-5, 5)), ylab="Median site rankings", xlab="Error diversification rate")
+arrows(x0=unique(results$intra.div), y0=rank.shifts.i.medians-rank.shifts.i.sdevs, 
+       x1=unique(results$intra.div), y1=rank.shifts.i.medians+rank.shifts.i.sdevs, 
+       code=3, angle=90, length=0.1, col="purple")
+
+# %%% PLOTTING RAW MPD VERSUS DELTA %%% ----
+mean.MPDs <- t(sapply(sim.data, function(x) apply(x,2,mean,na.rm="TRUE")))
+str(mean.MPDs)
+yos <- apply(mean.MPDs,2, sd)
+
+plot(apply(mean.MPDs,2, mean) ~ unique(results$delta), pch=18, ylim=c(40,70), ylab="Mean MPDs", xlab="Delta")
+arrows(x0=unique(results$delta), y0=apply(mean.MPDs,2, mean)-yos, 
+       x1=unique(results$delta), y1=apply(mean.MPDs,2, mean)+yos, 
+       code=3, angle=90, length=0.1)
+
+plot(mean.MPDs[1,] ~ unique(results$delta), ylim=c(0,100))
+for(i in 2:length(mean.MPDs)){
+      points(mean.MPDs[i,] ~ unique(results$delta), col=i, pch=20)
+      lines(unique(results$delta), mean.MPDs[i,], col=i)
+      }
 
 # %%% COMPARISON OF ORIGINAL MPD VALUES TO VALUES AFTER BRANCH ADDITION %%% ----
 # Using mapply on worker function determining number of site rank shiftings
