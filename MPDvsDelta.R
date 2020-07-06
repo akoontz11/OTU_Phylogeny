@@ -69,7 +69,7 @@ phy.d.transform.plot <- function(phylo,abundance.matrix,d,plot.title,...){
     # Specifying the range values, removing any NAs
     ymin <- min(mpd.mat, na.rm=T); ymax <- max(mpd.mat,na.rm=T)
     # Plotting the first matrix row (i.e. Site1 values)
-    plot((mpd.mat[1,1:length(d)]) ~ d, xlab="Delta", ylab="mpd Values", ylim=c(ymin,ymax), main=plot.title, pch=20)
+    plot((mpd.mat[1,1:length(d)]) ~ d, xlab="Delta", ylab="MPDs", ylim=c(ymin,ymax), main=plot.title, pch=20)
     lines(d, mpd.mat[1,])
     # Below loop iterates through length of the matrix, adding connected points onto the plot
     for(i in 2:nsim){
