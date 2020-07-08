@@ -119,3 +119,48 @@ compare.shifts <- function(x,d){
 laja.siteShifts <- compare.shifts(laja.test, laja.mpds)
 laja.siteShifts
 plot(laja.siteShifts ~ deltas, xlab="Delta values", ylab="Mean difference in site rankings from original", pch=16)
+# %%% PLOTTING MPD FOR BOTH DATASETS %%%----
+library(RColorBrewer)
+library(viridis)
+# Code derived from plotting code for phy.d.transform.plot, in MPDvsDelta.R
+par(mfcol = c(2, 1), mar = c(0,0,0,0), oma = c(4, 4, .5, .5), 
+    mgp = c(2, 0.6, 0))
+
+# Plotting for CR fungi
+ymin <- min(fung.test, na.rm=T); ymax <- max(fung.test,na.rm=T)
+fung.colors <- brewer.pal(9, "YlOrRd")
+# fung.colors <- magma(10)
+plot((fung.test[1,1:length(deltas)]) ~ deltas, ylim=c(ymin,ymax), pch=20, axes=FALSE)
+lines(deltas, fung.test[1,])
+# Below loop iterates through length of the matrix, adding connected points onto the plot
+for(i in 2:nrow(fung.test)){
+  points((fung.test[i,1:length(deltas)]) ~ deltas,col=fung.colors[i], pch=20)
+  # Capture mpd values for current row of matrix, and connect points
+  y <- (fung.test[i,])
+  lines(deltas,y,col=fung.colors[i])
+}
+axis(1L, labels = FALSE, tck=-0.02)
+axis(1L, labels = FALSE, tck=0.02)
+axis(2L)
+box()
+
+# Plotting for Laja
+ymin <- min(laja.test, na.rm=T); ymax <- max(laja.test,na.rm=T)
+laja.colors <- brewer.pal(9, "Greens")
+# laja.colors <- viridis(10)
+plot((laja.test[1,1:length(deltas)]) ~ deltas, ylim=c(ymin,ymax), pch=20, axes=FALSE)
+lines(deltas, laja.test[1,])
+# Below loop iterates through length of the matrix, adding connected points onto the plot
+for(i in 2:nrow(laja.test)){
+  # points((laja.test[i,1:length(deltas)]) ~ deltas,col=laja.colors[i], pch=20)
+  points((laja.test[i,]) ~ deltas, col=laja.colors[i], pch=20)
+  # Capture mpd values for current row of matrix, and connect points
+  y <- (laja.test[i,])
+  lines(deltas,y,col=laja.colors[i])
+}
+axis(1L, tck=-0.02)
+axis(1L, tck=0.02)
+axis(2L)
+box()
+mtext("Delta", side = 1, outer = TRUE, line = 2.2, cex = 1.5)
+mtext("MPD Values", side = 2, outer = TRUE, line = 2.2, cex = 1.5)
