@@ -2,6 +2,7 @@
 
 setwd("/home/akoontz11/OTU_Phylogeny/")
 library(xtable)
+library(viridis)
 
 # %%% FUNCTION DECLARATIONS %%% ----
 # Function for standardizing variables in linear models
@@ -82,7 +83,7 @@ comp.correls <- rep(comp.correls, each=30)
 results$comp.correls <- comp.correls
 
 # %%% LINEAR MODELS AND SUMMARIES %%%
-# All model terms
+# Model terms: log10(delta), intra diversification, seq diversification, number of initial species
 s.model.correl <- lm(correl ~ z.transform(log10(delta))+z.transform(intra.div)+z.transform(seq.div)+z.transform(comm.spp),data=results,na.action=na.omit)
 summary(s.model.correl)
 xtable(s.model.correl)
@@ -141,7 +142,7 @@ comp.rank.shifts <- rep(comp.rank.shifts, each=30)
 results$comp.rank.shifts <- comp.rank.shifts
 
 # %%% LINEAR MODELS AND SUMMARIES %%%
-# Seq.transforms: delta, (delta)^2, intra diversification, seq diversification
+# Model terms: log10(delta), intra diversification, seq diversification, number of initial species
 s.model.rankShifts <- lm(rank.shifts ~ z.transform(log10(delta))+z.transform(intra.div)+z.transform(seq.div)+z.transform(comm.spp),data=results,na.action=na.omit)
 summary(s.model.rankShifts)
 xtable(s.model.rankShifts)
@@ -202,12 +203,12 @@ arrows(x0=unique(results$intra.div), y0=correl.i.medians-correl.i.sdevs,
        x1=unique(results$intra.div), y1=correl.i.medians+correl.i.sdevs, 
        code=3, angle=90, length=0.1, col="purple")
 
-plot(rank.shifts.d.medians ~ unique(results$delta), pch=16, ylim=range(c(-5, 5)), ylab="Median site rankings", xlab="Delta")
+plot(rank.shifts.d.medians ~ unique(results$delta), pch=16, ylim=range(c(-5, 5)), ylab="Median site ranking shifts", xlab="Delta")
 arrows(x0=unique(results$delta), y0=rank.shifts.d.medians-rank.shifts.d.sdevs, 
        x1=unique(results$delta), y1=rank.shifts.d.medians+rank.shifts.d.sdevs, 
        code=3, angle=90, length=0.1)
 
-plot(rank.shifts.i.medians ~ unique(results$intra.div), pch=16, col="purple", ylim=range(c(-5, 5)), ylab="Median site rankings", xlab="Error diversification rate")
+plot(rank.shifts.i.medians ~ unique(results$intra.div), pch=16, col="purple", ylim=range(c(-5, 5)), ylab="Median site ranking shifts", xlab="Error diversification rate")
 arrows(x0=unique(results$intra.div), y0=rank.shifts.i.medians-rank.shifts.i.sdevs, 
        x1=unique(results$intra.div), y1=rank.shifts.i.medians+rank.shifts.i.sdevs, 
        code=3, angle=90, length=0.1, col="purple")
@@ -223,9 +224,10 @@ arrows(x0=unique(results$delta), y0=apply(mean.MPDs,2, mean)-yos,
        code=3, angle=90, length=0.1)
 
 plot(mean.MPDs[1,] ~ unique(results$delta), ylim=c(0,100))
+sim.colors = magma(700)
 for(i in 2:length(mean.MPDs)){
-      points(mean.MPDs[i,] ~ unique(results$delta), col=i, pch=20)
-      lines(unique(results$delta), mean.MPDs[i,], col=i)
+      points(mean.MPDs[i,] ~ unique(results$delta), col=sim.colors[i], pch=20)
+      lines(unique(results$delta), mean.MPDs[i,], col=sim.colors[i])
       }
 
 # %%% COMPARISON OF ORIGINAL MPD VALUES TO VALUES AFTER BRANCH ADDITION %%% ----
