@@ -191,44 +191,59 @@ arrows(x0=unique(results$seq.div), y0=rank.shifts.s.medians-rank.shifts.s.sdevs,
        code=3, angle=90, length=0.1, col="blue")
 
 # Four plots: both response variables, grouped both by delta and by simulated error
-par(mfcol=c(2,2))
+par(mfcol=c(3,2), mar = c(4,2,0,4), oma = c(0, 4, .5, .5), mgp = c(2, 0.6, 0))
 
-plot(correl.d.medians ~ unique(results$delta), pch=16, ylim=range(c(-0.25, 0.25)), ylab="Median correlations", xlab="Delta")
+plot(correl.d.medians ~ unique(results$delta), pch=16, ylim=range(c(-0.25, 0.25)), ylab="", xlab="Delta")
 arrows(x0=unique(results$delta), y0=correl.d.medians-correl.d.sdevs, 
        x1=unique(results$delta), y1=correl.d.medians+correl.d.sdevs, 
        code=3, angle=90, length=0.1)
 
-plot(correl.i.medians ~ unique(results$intra.div), pch=16, col="purple", ylim=range(c(-0.25, 0.25)), ylab="Median correlations", xlab="Error diversification rate")
+plot(correl.i.medians ~ unique(results$intra.div), pch=16, col="red", ylim=range(c(-0.25, 0.25)), ylab="", xlab="Intraspecific diversification rate")
 arrows(x0=unique(results$intra.div), y0=correl.i.medians-correl.i.sdevs, 
        x1=unique(results$intra.div), y1=correl.i.medians+correl.i.sdevs, 
-       code=3, angle=90, length=0.1, col="purple")
+       code=3, angle=90, length=0.1, col="red")
 
-plot(rank.shifts.d.medians ~ unique(results$delta), pch=16, ylim=range(c(-5, 5)), ylab="Median site ranking shifts", xlab="Delta")
+plot(correl.s.medians ~ unique(results$seq.div), pch=16, col="blue", ylim=range(c(-0.25, 0.25)), ylab="", xlab="Sequencing error diversification rate")
+arrows(x0=unique(results$seq.div), y0=correl.s.medians-correl.s.sdevs, 
+       x1=unique(results$seq.div), y1=correl.s.medians+correl.s.sdevs, 
+       code=3, angle=90, length=0.1, col="blue")
+
+mtext("Median MPD correlations", side = 2, outer = TRUE, line = 2, cex = 1.0, adj = 0.55)
+
+plot(rank.shifts.d.medians ~ unique(results$delta), pch=16, ylim=range(c(-5, 5)), ylab="", xlab="Delta")
 arrows(x0=unique(results$delta), y0=rank.shifts.d.medians-rank.shifts.d.sdevs, 
        x1=unique(results$delta), y1=rank.shifts.d.medians+rank.shifts.d.sdevs, 
        code=3, angle=90, length=0.1)
 
-plot(rank.shifts.i.medians ~ unique(results$intra.div), pch=16, col="purple", ylim=range(c(-5, 5)), ylab="Median site ranking shifts", xlab="Error diversification rate")
+plot(rank.shifts.i.medians ~ unique(results$intra.div), pch=16, col="red", ylim=range(c(-5, 5)), ylab="", xlab="Intraspecific diversification rate")
 arrows(x0=unique(results$intra.div), y0=rank.shifts.i.medians-rank.shifts.i.sdevs, 
        x1=unique(results$intra.div), y1=rank.shifts.i.medians+rank.shifts.i.sdevs, 
-       code=3, angle=90, length=0.1, col="purple")
+       code=3, angle=90, length=0.1, col="red")
+
+plot(rank.shifts.s.medians ~ unique(results$seq.div), pch=16, col="blue", ylim=range(c(-5, 5)), ylab="", xlab="Sequencing error diversification rate")
+arrows(x0=unique(results$seq.div), y0=rank.shifts.s.medians-rank.shifts.s.sdevs, 
+       x1=unique(results$seq.div), y1=rank.shifts.s.medians+rank.shifts.s.sdevs, 
+       code=3, angle=90, length=0.1, col="blue")
+mtext("Median site ranking shifts", side = 2, outer = TRUE, line = -27, cex = 1.0, adj = 0.55)
 
 # %%% PLOTTING RAW MPD VERSUS DELTA %%% ----
+# Capture mean MPD values across sites for each simulation instance
 mean.MPDs <- t(sapply(sim.data, function(x) apply(x,2,mean,na.rm="TRUE")))
-str(mean.MPDs)
-yos <- apply(mean.MPDs,2, sd)
 
-plot(apply(mean.MPDs,2, mean) ~ unique(results$delta), pch=18, ylim=c(40,70), ylab="Mean MPDs", xlab="Delta")
-arrows(x0=unique(results$delta), y0=apply(mean.MPDs,2, mean)-yos, 
-       x1=unique(results$delta), y1=apply(mean.MPDs,2, mean)+yos, 
-       code=3, angle=90, length=0.1)
+# Capture mean MPD values across sites for original communities (prior to transformations)
+mean.MPDs.Original <- sapply(sim.MPDs, mean)
 
-plot(mean.MPDs[1,] ~ unique(results$delta), ylim=c(0,100))
-sim.colors = magma(700)
-for(i in 2:length(mean.MPDs)){
-      points(mean.MPDs[i,] ~ unique(results$delta), col=sim.colors[i], pch=20)
-      lines(unique(results$delta), mean.MPDs[i,], col=sim.colors[i])
-      }
+# Subtract mean.MPDs.Original values from each column of mean.MPDs
+final.MPDs <- matrix(nrow=675, ncol=30, dimnames=dimnames(mean.MPDs))
+for(i in 1:ncol(mean.MPDs)){
+  final.MPDs[,i] <- mean.MPDs[,i] - mean.MPDs.Original
+}
+
+# Plot lines representing centered mean MPD values for each simulation iteration versus delta
+plot(final.MPDs[1,] ~ unique(results$delta), ylim=c(-20,20), type="n", ylab="Mean MPD Values", xlab="Delta")
+for(i in 1:nrow(final.MPDs)){
+  lines(unique(results$delta), final.MPDs[i,], col=rgb(red=0.3, green=0.1, blue=0.4, alpha=0.1))
+}
 
 # %%% COMPARISON OF ORIGINAL MPD VALUES TO VALUES AFTER BRANCH ADDITION %%% ----
 # Using mapply on worker function determining number of site rank shiftings
