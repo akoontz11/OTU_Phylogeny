@@ -1,17 +1,16 @@
-# %%% ANALYSIS OF SIMULATION OUTPUT %%%
+# ANALYSIS OF SIMULATION OUTPUT 
 
-setwd("/home/akoontz11/OTU_Phylogeny/")
 library(xtable)
 library(viridis)
 
-# %%% FUNCTION DECLARATIONS %%% ----
+# %%% Worker functions %%%----
 # Function for standardizing variables in linear models
 z.transform <- function(data){
   s.data <- (data-mean(data))/sd(data)
   return(s.data)
 }
 
-# A worker function that will calculate the correlations between each delta value (x)
+# Function to calculate correlations between each delta value (x)
 # and a "reference" delta value (d, taken prior to transformations)
 .new.correls <- function(x,d){
   value <- numeric(length=ncol(x))
@@ -21,7 +20,7 @@ z.transform <- function(data){
   return(value)
 }
 
-# A worker function that will calculate the difference in site rankings 
+# Function to calculate difference in site rankings 
 .ranking.diff <- function(x,d){
   # Generate a numeric vector of baseline site rankings (i.e. delta=1.0)
   baseline.rank <- rank(d)
@@ -34,7 +33,7 @@ z.transform <- function(data){
   return(meanRankChanges)
 }
 
-# Worker function for comparing two mpd values: prior to transformation, and at delta=1.0 after intra and seq additions
+# Function to compare 2 mpd values: prior to transformation, and at delta=1.0 after intra and seq additions
 .vertical.comparison <- function(x,d){
   # x is vector of mpd values measured after delta transformations; d is original mpd value prior to transformations
   # The use argument allows correlations to be caluculated off of all pairs that are present
@@ -42,7 +41,7 @@ z.transform <- function(data){
   return(value)
 }
 
-# %%% READING IN AND FORMATTING OF SIMULATION DATA %%% ----
+# %%% Read in simulation data %%%----
 # Pared down simulation results (51 MB; excluding instances of death rates > birth rates)
 load("simResults.RData")
 # Generate backup data of simulation variables
@@ -72,8 +71,8 @@ results$delta <- rep(deltas,length(sim.data))
 results$intra.div <- results$intra.birth/results$intra.death
 results$seq.div <- results$seq.birth/results$seq.death
 
-# %%% CORRELATIONS OF MPD VALUES BETWEEN SITE AND BASELINE %%% ----
-# Using mapply on worker function calculating correlations between delta values
+# %%% MPD correlations between site and baseline %%%----
+# Calculate MPD correlations on sim data (using mapply)
 t.correls <- mapply(.new.correls, sim.data, sim.MPDs)
 # Match the correlations to the parameters
 results$correl <- as.numeric(t.correls)
@@ -82,13 +81,13 @@ comp.correls <- results[which(results$delta == 1),18]
 comp.correls <- rep(comp.correls, each=30)
 results$comp.correls <- comp.correls
 
-# %%% LINEAR MODELS AND SUMMARIES %%%
+# Linear modeling
 # Model terms: log10(delta), intra diversification, seq diversification, number of initial species
 s.model.correl <- lm(correl ~ z.transform(log10(delta))+z.transform(intra.div)+z.transform(seq.div)+z.transform(comm.spp),data=results,na.action=na.omit)
 summary(s.model.correl)
 xtable(s.model.correl)
 
-# %%% PLOTTING %%%
+# Plotting
 # Plotting raw correl values
 # delta
 plot(results$correl ~ results$delta)
@@ -131,7 +130,7 @@ arrows(x0=unique(results$seq.div), y0=correl.s.medians-correl.s.sdevs,
        x1=unique(results$seq.div), y1=correl.s.medians+correl.s.sdevs, 
        code=3, angle=90, length=0.1, col="blue")
 
-# %%% DIFFERENCE IN SITE RANKINGS (I.E. CROSSINGS OVER) BETWEEN SITE AND BASELINE %%% ----
+# %%% Ranking differences, between site and baseline %%%----
 # Using mapply on worker function determining number of site rank shiftings
 rank.shifts <- mapply(.ranking.diff, sim.data, sim.MPDs)
 # Match the ranking differences to the parameters
@@ -226,7 +225,7 @@ arrows(x0=unique(results$seq.div), y0=rank.shifts.s.medians-rank.shifts.s.sdevs,
        code=3, angle=90, length=0.1, col="blue")
 mtext("Median site ranking shifts", side = 2, outer = TRUE, line = -27, cex = 1.0, adj = 0.55)
 
-# %%% PLOTTING RAW MPD VERSUS DELTA %%% ----
+# %%% Plot raw MPD vs. delta %%%----
 # Capture mean MPD values across sites for each simulation instance
 mean.MPDs <- t(sapply(sim.data, function(x) apply(x,2,mean,na.rm="TRUE")))
 
@@ -245,7 +244,7 @@ for(i in 1:nrow(final.MPDs)){
   lines(unique(results$delta), final.MPDs[i,], col=rgb(red=0.3, green=0.1, blue=0.4, alpha=0.1))
 }
 
-# %%% COMPARISON OF ORIGINAL MPD VALUES TO VALUES AFTER BRANCH ADDITION %%% ----
+# %%% Compare MPD values before/after branch addition %%%----
 # Using mapply on worker function determining number of site rank shiftings
 v.comps <- mapply(.vertical.comparison, sim.data, sim.MPDs)
 # Match the ranking differences to the parameters
@@ -255,6 +254,6 @@ results$v.comps <- as.numeric(v.comps)
 model.verticalComparison <- lm(v.comps ~ z.transform(intra.div)+z.transform(seq.div), data=results, na.action=na.omit)
 summary(model.verticalComparison)
 
-# %%% BACKUP VARIABLES %%% ----
+# %%% Backup variables %%%----
 sim.Results <- backup
 params <- b.params
