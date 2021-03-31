@@ -15,9 +15,14 @@ generated from the original community/phylogeny, and are similarly transformed. 
 `abundance.mapping` function, which transfer community abundances from original community to 
 communities with populations and sequencing error.
 
+The object generated from a single simulation instance contains 3 community matrices, 3 phylogenies, 3 MPD.matrices (i.e. 
+MPD values recorded after delta transforms, for original phylogenies, phylogenies with intraspecific error, and phylogenies 
+with sequencing error), and a vector of original MPD values prior to any branch additions or transformations.
+
 `wrapper.R` wraps up these prior scripts and calls them in a simple script (i.e. `source(MPDvsDelta.R)`. It then iterates the 
 `SimulateCommunity` function given specified simulation parameters (the params variable) using mcMap 
-(to utilize multiple cores). 
+(to utilize multiple cores). Currently, the only parameters being altered are intraspecific and sequencing error
+birth/death rates, and the initial number of species in the community.
 
 `MeasureShiftingDiversity.R` analyzes the output generated from `wrapper.R` (which is stored in an .Rdata file).
 It contains the code for calculating 2 different response metrics from simulation data: correlations and rank shifts. 

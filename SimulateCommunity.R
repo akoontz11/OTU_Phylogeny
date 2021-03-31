@@ -105,7 +105,3 @@ SimulateCommnunity <- function(comm.size,comm.spp,comm.timesteps,comm.migrate,co
   simulation.data <- list(phylogenies=community.phylogenies,abundances=community.abundances,transforms=community.transforms,values=original.diversityMetrics)
   return(simulation.data)
 }
-
-# Demos----
-#sim.data <- SimulateCommnunity(comm.size=10, comm.spp=10,comm.timesteps=40,comm.migrate=0.02,comm.env=10,comm.abund=4,comm.stoch=1,comm.speciate=0.06,intra.birth=0.5,intra.death=0.1,intra.steps=1,seq.birth=0.5,seq.death=0.1,seq.steps=1)
-#str(sim.data)

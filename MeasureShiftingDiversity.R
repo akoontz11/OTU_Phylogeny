@@ -74,26 +74,20 @@ xtable(s.model.rankShifts)
 
 # %%% Plotting %%%----
 # *** MPD correlations ***
-# RAW VALUES
-# delta
+# Raw correlation values against delta, intraspecific diversification, and seq. err. diversification
 plot(results$correl ~ results$delta)
 boxplot(results$correl ~ results$delta)
-# intra.div
 plot(results$correl ~ results$intra.div, col="red")
 boxplot(results$correl ~ results$intra.div)
-# seq.div
 plot(results$correl ~ results$seq.div, col="blue")
 boxplot(results$correl ~ results$seq.div)
 
 # *** Rank shifts ***
-# RAW VALUES
-# delta
+# Raw rank shifts values against delta, intraspecific diversification, and seq. err. diversification
 plot(results$rank.shifts ~ results$delta)
 boxplot(results$rank.shifts ~ results$delta)
-# intra.div
 plot(results$rank.shifts ~ results$intra.div, col="red")
 boxplot(results$rank.shifts ~ results$intra.div)
-# seq.div
 plot(results$rank.shifts ~ results$seq.div, col="blue")
 boxplot(results$rank.shifts ~ results$seq.div)
 
