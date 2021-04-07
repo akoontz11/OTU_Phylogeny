@@ -17,9 +17,6 @@ source("~/OTU_Phylogeny/SimulateCommunity.R")
 
 # Varying intraspecific/sequencing error birth/death rates, and number of community species
 params <- data.frame(expand.grid(comm.spp=c(5,10,15),intra.birth=seq(0.1,0.5,0.1),intra.death=seq(0.1,0.5,0.1),seq.birth=seq(0.1,0.5,0.1),seq.death=seq(0.1,0.5,0.1)))
-
-str(params)
-
 # Subsetting data.frame to only include instances in which birth >= death parameters (for both intra and seq)
 params <- subset(params, intra.birth >= intra.death)
 params <- subset(params, seq.birth >= seq.death)
