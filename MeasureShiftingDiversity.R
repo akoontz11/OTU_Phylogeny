@@ -4,13 +4,7 @@ library(xtable)
 library(viridis)
 
 # %%% Worker functions %%%----
-# Function for standardizing variables in linear models
-z.transform <- function(data){
-  s.data <- (data-mean(data))/sd(data)
-  return(s.data)
-}
-
-# Function to calculate correlations between each delta value (x)
+# Function to calculate correlations of MPD measurements between each delta value (x)
 # and a "reference" delta value (d, taken prior to transformations)
 .new.correls <- function(x,d){
   value <- numeric(length=ncol(x))
@@ -20,7 +14,7 @@ z.transform <- function(data){
   return(value)
 }
 
-# Function to calculate difference in site rankings 
+# Function to calculate difference in site (MPD) rankings 
 .ranking.diff <- function(x,d){
   # Generate a numeric vector of baseline site rankings (i.e. delta=1.0)
   baseline.rank <- rank(d)
@@ -34,7 +28,6 @@ z.transform <- function(data){
 }
 
 # %%% Read in simulation data %%%----
-# Pared down simulation results (51 MB; excluding instances of death rates > birth rates)
 load("simResults.RData")
 # Generate backup data of simulation variables
 backup <- sim.Results
@@ -57,20 +50,18 @@ results$seq.div <- results$seq.birth/results$seq.death
 t.correls <- mapply(.new.correls, sim.data, sim.MPDs)
 # Match the correlations to the parameters
 results$correl <- as.numeric(t.correls)
-# Model terms: log10(delta), intra diversification, seq diversification, number of initial species
-s.model.correl <- lm(correl ~ z.transform(log10(delta))+z.transform(intra.div)+z.transform(seq.div)+z.transform(comm.spp),data=results,na.action=na.omit)
+# Model effects on MPD correlations
+s.model.correl <- lm(correl ~ scale(log10(delta))+scale(intra.div)+scale(seq.div)+scale(comm.spp),data=results,na.action=na.omit)
 summary(s.model.correl)
-xtable(s.model.correl)
 
 # %%% Ranking differences between site and baseline %%%----
 # Calculate mean number of site rank shifts
 rank.shifts <- mapply(.ranking.diff, sim.data, sim.MPDs)
 # Match the ranking differences to the parameters
 results$rank.shifts <- as.numeric(rank.shifts)
-# Model terms: log10(delta), intra diversification, seq diversification, number of initial species
-s.model.rankShifts <- lm(rank.shifts ~ z.transform(log10(delta))+z.transform(intra.div)+z.transform(seq.div)+z.transform(comm.spp),data=results,na.action=na.omit)
+# Model effects on site diversity rankings
+s.model.rankShifts <- lm(rank.shifts ~ scale(log10(delta))+scale(intra.div)+scale(seq.div)+scale(comm.spp),data=results,na.action=na.omit)
 summary(s.model.rankShifts)
-xtable(s.model.rankShifts)
 
 # %%% Plotting %%%----
 # *** MPD correlations ***
