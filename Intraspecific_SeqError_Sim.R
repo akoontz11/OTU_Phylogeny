@@ -39,13 +39,13 @@ add.branch <- function(tree,birth,death,steps,type=c("pops","seq.err")){
     }
     # Drop extinct branches of the tree, such that only extant leaves are shown
     # Compare the number of extinct tips to the total number of tips
-    if(Ntip(tree)-length(is.extinct(tree))<=1){
-      # If tree has one or less branches remaining, return NULL for the resulting tree
-      tree <- NULL
-      }else{
-        # Otherwise, prune the tree of tips that have gone extinct
-        tree <- drop.extinct(tree)
-        }
+    # if(Ntip(tree)-length(is.extinct(tree))<=1){
+    #   # If tree has one or less branches remaining, return NULL for the resulting tree
+    #   tree <- NULL
+    #   }else{
+    #     # Otherwise, prune the tree of tips that have gone extinct
+    #     tree <- drop.extinct(tree)
+    #     }
     return(tree)
   }
 }
