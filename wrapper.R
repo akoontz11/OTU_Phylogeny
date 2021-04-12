@@ -20,7 +20,7 @@ source("~/OTU_Phylogeny/SimulateCommunity.R")
 
 # Setting death parameters to 0, allowinf for ultrametric phylogenies
 params <- data.frame(expand.grid(comm.spp=c(5,10,15),
-                                 comm.birth=seq(0.1,0.5,0.1),comm.death=seq(0,0.5,0.1),
+                                 comm.birth=seq(0.1,0.5,0.1),comm.death=seq(0,0.2,0.1),
                                  intra.birth=seq(0.1,0.5,0.1),intra.death=seq(0,0.5,0.1),
                                  seq.birth=seq(0.1,0.5,0.1),seq.death=seq(0,0.5,0.1)))
 

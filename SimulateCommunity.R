@@ -112,9 +112,15 @@ SimulateCommnunity <- function(comm.spp,comm.size,comm.birth,comm.death,comm.env
   seq.test <- phy.d.transform(seq.phy, seq.comm, deltas)
   
   # Capture mpd of original phylogenies (for later comparison)----
-  orig.MPD <- .mpd(comparative.comm(orig.phy, orig.comm, force.root = 0), abundance.weighted=TRUE)
+  # If original community is NULL, return NULL for original community MPD values
+  if(is.null(orig.comm)){
+    orig.MPD <- NULL
+  }else{
+  # Capture original MPD values
+  orig.MPD <- tryCatch(.mpd(comparative.comm(orig.phy, orig.comm, force.root = 0), abundance.weighted=TRUE), error=function(cond) {return(NULL)})
   # Change names to match format from phy.d.transform function
   names(orig.MPD) <- paste("Site",1:nrow(orig.comm),sep="_")
+  }
   
   # Export a list containing all simulation data, for each community "type" (original, intra, and seq)----
   # Abundances
@@ -134,6 +140,15 @@ SimulateCommnunity <- function(comm.spp,comm.size,comm.birth,comm.death,comm.env
 #                            comm.env=1, comm.abund=1,intra.birth=0.5,
 #                            intra.death=0.1,intra.steps=3,seq.birth=0.5,
 #                            seq.death=0.1,seq.steps=3)
+# 
+# test <- SimulateCommnunity(comm.spp=5, comm.size=10, comm.birth=0.5, comm.death=0.2,
+#                            comm.env=1, comm.abund=1,intra.birth=0.1,
+#                            intra.death=0.5,intra.steps=3,seq.birth=0.1,
+#                            seq.death=0.5,seq.steps=3)
+# 
+# plot(test$phylogenies$orig.phylo, show.tip.label = FALSE)
+# plot(test$phylogenies$seq.phylo, show.tip.label = FALSE)
+# test$values
 
 # # %%% Simulate communities using sim.meta.phy.comm %%%----
 # SimulateCommnunity <- function(comm.size,comm.spp,comm.timesteps,comm.migrate,comm.env,comm.abund,comm.stoch,comm.speciate,intra.birth,intra.death,intra.steps,seq.birth,seq.death,seq.steps){
