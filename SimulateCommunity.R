@@ -62,10 +62,12 @@ sim.comm <- function(nspp=20, nsite=50, birth=1, death=0, min.lambda=1, env.str=
   comm <- rpois(prod(dim(comm)),as.numeric(comm))
   
   #Format and return
-  comm <- t(matrix(comm, nrow=nspp, ncol=nsite, dimnames=list(tree$tip.label, seq_len(nsite)-1)))
+  comm <- t(matrix(comm, nrow=length(tree$tip.label), ncol=nsite, dimnames=list(tree$tip.label, seq_len(nsite)-1)))
   data <- comparative.comm(tree, comm)
   return(data)
 }
+
+small.test <- sim.comm(nspp=10, nsite=50, birth=0.7, death=0.2)
 
 # %%% Simulate communities using sim.comm %%%----
 SimulateCommnunity <- function(comm.spp,comm.size,comm.birth,comm.death,comm.env,comm.abund,intra.birth,intra.death,intra.steps,seq.birth,seq.death,seq.steps){
