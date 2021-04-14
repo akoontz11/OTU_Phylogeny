@@ -63,6 +63,70 @@ results$rank.shifts <- as.numeric(rank.shifts)
 s.model.rankShifts <- lm(rank.shifts ~ scale(log10(delta))+scale(intra.div)+scale(seq.div)+scale(comm.spp),data=results,na.action=na.omit)
 summary(s.model.rankShifts)
 
+# %%% Non-ultrametric runs %%%----
+load("OTU_Phylogeny/simResults.20210412.RData")
+backup <- sim.Results
+b.params <- params
+
+# Extract MPDs over delta transforms, from communities/phylogenies with intraspecific AND seq. error branches
+sim.data <- lapply(sim.Results, function(x) x$transforms$seq.transform)
+# Separating ultrametric and non-ultrametric results
+is.ultrametric(sim.Results[[1]]$phylogenies$orig.phylo)
+is.ultrametric(sim.Results[[910]]$phylogenies$orig.phylo)
+
+sim.phylos <- lapply(sim.Results, function(x) x$phylogenies)
+
+
+
+lapply(sim.Results[[100]]$phylogenies, is.ultrametric)
+lapply(sim.Results[[910]]$phylogenies, is.ultrametric)
+
+null.test <- function(results){
+  #browser()
+  counter <- 0
+  for(i in 1:length(results)){
+    if(is.null(results[[i]]$phylogenies$orig.phylo)){
+      counter <- (counter + 1)
+    }
+  }
+  return(counter)
+}
+
+
+which(is.ultrametric(sim.Results$phylogenies$orig.phylo))
+
+sim.ultra.data <- Filter(is.ultrametric, sim.data$phylogenies)
+sim.nonultra.data <- Filter(Negate(is.ultrametric), sim.data$phylogenies)
+
+length(sim.Results)
+length(sim.ultra.data)
+length(sim.nonultra.data)
+
+# Extract diversity metrics from untransformed phylogenies, for calculating response metrics
+sim.MPDs <- lapply(sim.Results, function(x) x$values$MPDs)
+
+# Build results matrix, from which linear model variables will be pulled
+results <- params[rep(1:nrow(params), each=30),]
+results$delta <- rep(deltas,length(sim.data))
+# Make subset of ultrametric results (death rates = 0)
+ultra.results <- results[which(results$comm.death == 0),]
+ultra.results <- ultra.results[which(ultra.results$intra.death == 0),]
+ultra.results <- ultra.results[which(ultra.results$seq.death == 0),]
+# Make subset of non-ultrametric results (death rates != 0)
+nonultra.results <- results[which(results$comm.death != 0),]
+nonultra.results <- nonultra.results[which(nonultra.results$intra.death != 0),]
+nonultra.results <- nonultra.results[which(nonultra.results$seq.death != 0),]
+# Create term for diversification (birth rate/death rate) for both intraspecific and seq.err.
+nonultra.results$comm.div <- nonultra.results$comm.birth/nonultra.results$comm.death
+nonultra.results$intra.div <- nonultra.results$intra.birth/nonultra.results$intra.death
+nonultra.results$seq.div <- nonultra.results$seq.birth/nonultra.results$seq.death
+
+sim.Results.DT <- setDT(sim.Results)
+sim.Results.DT <- as.data.table(sim.Results)
+
+
+
+
 # %%% Plotting %%%----
 # *** MPD correlations ***
 # Raw correlation values against delta, intraspecific diversification, and seq. err. diversification

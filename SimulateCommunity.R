@@ -62,27 +62,41 @@ sim.comm <- function(nspp=20, nsite=50, birth=1, death=0, min.lambda=1, env.str=
   data <- comparative.comm(tree, comm)
   return(data)
 }
-# small.test <- sim.comm(nspp=11, nsite=20, birth=0.7, death=0.2)
 
 # %%% Simulate communities using sim.comm %%%----
-SimulateCommnunity <- function(comm.spp,comm.size,comm.birth,comm.death,comm.env,comm.abund,intra.birth,intra.death,intra.steps,seq.birth,seq.death,seq.steps){
-  # Simulate community (using Will's sim.comm function)----
+SimulateCommnunity <- function(comm.spp,comm.size,comm.birth,comm.death,comm.env,comm.abund,
+                               intra.birth,intra.death,intra.steps,seq.birth,seq.death,seq.steps){
+  # Simulate community (using Will's sim.comm function)
   # Generate NULL for a DemoCom object that is in error
   DemoCom <- tryCatch(sim.comm(nspp=comm.spp,nsite=comm.size,birth=comm.birth,death=comm.death,env.str=comm.env, min.lam=comm.abund),error=function(cond) {return(NULL)})
-  # If DemoCom is NULL, then assign NULL to relevant phylogeny/community variables
+  # If DemoCom is NULL, reattempt 100 times
   if(is.null(DemoCom)){
-    orig.phy <- NULL ; orig.comm <- NULL ; species.names <- NULL ; sites <- NULL 
-  }else{
-  
-  # Cleanup community and assign populations
-  # Drop sites with one or less species in them (because mpd needs to measure communities)
-  sim.commun <- DemoCom$comm[apply(DemoCom$comm, 1, function(x) sum(x!=0) > 1),,drop=F]
-  # Drop extinct species from community matrix, and get names of remaining species 
-  orig.comm <- sim.commun[,apply(sim.commun,2,function(x) !all(x==0))]
-  species.names <- colnames(orig.comm)
-  # Trim phylogeny to only contain remaining species (using drop.tip), and get site names
-  orig.phy <- drop.tip(DemoCom$phy, tip = DemoCom$phy$tip.label[!DemoCom$phy$tip.label %in% species.names])
-  sites <- rownames(orig.comm)
+    max.iter <-100
+    for(i in 1:max.iter){
+      DemoCom <- tryCatch(sim.comm(nspp=comm.spp,nsite=comm.size,birth=comm.birth,death=comm.death,env.str=comm.env, min.lam=comm.abund),error=function(cond) {return(NULL)}) 
+      if(!is.null(DemoCom)){
+        break
+      } else {
+        if(i==max.iter){
+          break
+        }
+      }
+    }
+  }
+  # If after 100 times DemoCom is still NULL, assign NULL to other variables
+  if(is.null(DemoCom)){
+    orig.phy <- NULL ; orig.comm <- NULL ; species.names <- NULL ; sites <- NULL   
+    # Otherwise, cleanup community and assign populations
+  } else {
+    # Drop sites with one or less species in them (because mpd needs to measure communities)
+    sim.commun <- DemoCom$comm[apply(DemoCom$comm, 1, function(x) sum(x!=0) > 1),,drop=F]
+    # Drop extinct species from community matrix, and get names of remaining species 
+    # DO WE STILL WANT TO DO THIS?
+    orig.comm <- sim.commun[,apply(sim.commun,2,function(x) !all(x==0))]
+    species.names <- colnames(orig.comm)
+    # Trim phylogeny to only contain remaining species (using drop.tip), and get site names
+    orig.phy <- drop.tip(DemoCom$phy, tip = DemoCom$phy$tip.label[!DemoCom$phy$tip.label %in% species.names])
+    sites <- rownames(orig.comm)
   }
   
   # Add intraspecific differences----
@@ -112,14 +126,10 @@ SimulateCommnunity <- function(comm.spp,comm.size,comm.birth,comm.death,comm.env
   seq.test <- phy.d.transform(seq.phy, seq.comm, deltas)
   
   # Capture mpd of original phylogenies (for later comparison)----
-  # If original community is NULL, return NULL for original community MPD values
-  if(is.null(orig.comm)){
-    orig.MPD <- NULL
-  }else{
-  # Capture original MPD values
   orig.MPD <- tryCatch(.mpd(comparative.comm(orig.phy, orig.comm, force.root = 0), abundance.weighted=TRUE), error=function(cond) {return(NULL)})
   # Change names to match format from phy.d.transform function
-  names(orig.MPD) <- paste("Site",1:nrow(orig.comm),sep="_")
+  if(!is.null(orig.MPD)){
+    names(orig.MPD) <- paste("Site",1:nrow(orig.comm),sep="_")
   }
   
   # Export a list containing all simulation data, for each community "type" (original, intra, and seq)----
@@ -136,19 +146,19 @@ SimulateCommnunity <- function(comm.spp,comm.size,comm.birth,comm.death,comm.env
   return(simulation.data)
 }
 
-# test <- SimulateCommnunity(comm.spp=10, comm.size=10, comm.birth=0.5, comm.death=0.1,
-#                            comm.env=1, comm.abund=1,intra.birth=0.5,
-#                            intra.death=0.1,intra.steps=3,seq.birth=0.5,
-#                            seq.death=0.1,seq.steps=3)
-# 
-# test <- SimulateCommnunity(comm.spp=5, comm.size=10, comm.birth=0.5, comm.death=0.2,
-#                            comm.env=1, comm.abund=1,intra.birth=0.1,
-#                            intra.death=0.5,intra.steps=3,seq.birth=0.1,
-#                            seq.death=0.5,seq.steps=3)
-# 
-# plot(test$phylogenies$orig.phylo, show.tip.label = FALSE)
-# plot(test$phylogenies$seq.phylo, show.tip.label = FALSE)
-# test$values
+test <- SimulateCommnunity(comm.spp=10, comm.size=10, comm.birth=0.5, comm.death=0.1,
+                           comm.env=1, comm.abund=1,intra.birth=0.5,
+                           intra.death=0.1,intra.steps=3,seq.birth=0.5,
+                           seq.death=0.1,seq.steps=3)
+
+test <- SimulateCommnunity(comm.spp=5, comm.size=10, comm.birth=0.5, comm.death=0.2,
+                           comm.env=1, comm.abund=1,intra.birth=0.1,
+                           intra.death=0.5,intra.steps=3,seq.birth=0.1,
+                           seq.death=0.5,seq.steps=3)
+
+plot(test$phylogenies$orig.phylo, show.tip.label = FALSE)
+plot(test$phylogenies$seq.phylo, show.tip.label = FALSE)
+test$values
 
 # # %%% Simulate communities using sim.meta.phy.comm %%%----
 # SimulateCommnunity <- function(comm.size,comm.spp,comm.timesteps,comm.migrate,comm.env,comm.abund,comm.stoch,comm.speciate,intra.birth,intra.death,intra.steps,seq.birth,seq.death,seq.steps){
