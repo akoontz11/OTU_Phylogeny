@@ -18,17 +18,6 @@ source("~/OTU_Phylogeny/SimulateCommunity.R")
 # Varying intraspecific/sequencing error birth/death rates, and number of community species
 # params <- data.frame(expand.grid(comm.spp=c(5,10,15),intra.birth=seq(0.1,0.5,0.1),intra.death=seq(0.1,0.5,0.1),seq.birth=seq(0.1,0.5,0.1),seq.death=seq(0.1,0.5,0.1)))
 
-# Setting death parameters to 0, allowinf for ultrametric phylogenies
-params <- data.frame(expand.grid(comm.spp=c(5,10,15),
-                                 comm.birth=seq(0.1,0.5,0.1),comm.death=seq(0,0.2,0.1),
-                                 intra.birth=seq(0.1,0.5,0.1),intra.death=seq(0,0.5,0.1),
-                                 seq.birth=seq(0.1,0.5,0.1),seq.death=seq(0,0.5,0.1)))
-
-# Subsetting data.frame to only include instances in which birth >= death parameters 
-params <- subset(params, comm.birth >= comm.death)
-params <- subset(params, intra.birth >= intra.death)
-params <- subset(params, seq.birth >= seq.death)
-
 # Running simulation on 12 cores
 # sim.Results <- mcMap(function(i) SimulateCommnunity(comm.size=10,params$comm.spp[i],comm.timesteps=40,
 #                                                     comm.migrate=0.02,comm.env=10,comm.abund=4,
@@ -36,8 +25,35 @@ params <- subset(params, seq.birth >= seq.death)
 #                                                     params$intra.death[i],intra.steps=3,params$seq.birth[i],
 #                                                     params$seq.death[i],seq.steps=3),1:nrow(params),mc.cores=12)
 
+# Saving results
+# save.image("simResults.RData")
 
-# Updated SimulateCommunity fxn
+# Ultrametric and non-ultrametric--------------------------------------------------
+
+# Parameter set for ultrametric phylogenies (no positive death rates)
+ultra.params <- data.frame(expand.grid(comm.spp=c(5,10,15),
+                                comm.birth=seq(0.1,0.5,0.1),
+                                intra.birth=seq(0.1,0.5,0.1),seq.birth=seq(0.1,0.5,0.1)))
+
+# Parameter set for non-ultrametric phylogenies (death rates)
+params <- data.frame(expand.grid(comm.spp=c(5,10,15),
+                                 comm.birth=seq(0.1,0.5,0.1),comm.death=c(0.1,0.2),
+                                 intra.birth=seq(0.1,0.5,0.1),intra.death=seq(0.1,0.5,0.1),
+                                 seq.birth=seq(0.1,0.5,0.1),seq.death=seq(0.1,0.5,0.1)))
+# Subsetting to only include instances in which birth >= death parameters 
+params <- subset(params, comm.birth >= comm.death)
+params <- subset(params, intra.birth >= intra.death)
+params <- subset(params, seq.birth >= seq.death)
+
+
+# Simulations for ultrametric scenarios
+sim.ultraResults <- mcMap(function(i) SimulateCommnunity(ultra.params$comm.spp[i],comm.size=10,ultra.params$comm.birth[i],
+                                                    comm.death=0,comm.env=1, comm.abund=1,
+                                                    ultra.params$intra.birth[i],intra.death=0,intra.steps=3,
+                                                    ultra.params$seq.birth[i],seq.death=0,seq.steps=3),
+                                                    1:nrow(ultra.params),mc.cores=12)
+
+# Simulations for non-ultrametric scenarios
 sim.Results <- mcMap(function(i) SimulateCommnunity(params$comm.spp[i],comm.size=10,params$comm.birth[i],
                                                     params$comm.death[i],comm.env=1, comm.abund=1,
                                                     params$intra.birth[i],params$intra.death[i],intra.steps=3,
@@ -45,6 +61,4 @@ sim.Results <- mcMap(function(i) SimulateCommnunity(params$comm.spp[i],comm.size
                                                     1:nrow(params),mc.cores=12)
 
 
-# Saving results
-# save.image("simResults.RData")
-save.image("simResults.20210414.RData")
+save.image("simResults.20210415.RData")
