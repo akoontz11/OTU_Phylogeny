@@ -64,7 +64,7 @@ s.model.rankShifts <- lm(rank.shifts ~ scale(log10(delta))+scale(intra.div)+scal
 summary(s.model.rankShifts)
 
 # %%% Non-ultrametric runs %%%----
-load("OTU_Phylogeny/simResults.20210412.RData")
+load("OTU_Phylogeny/simResults.20210414.RData")
 backup <- sim.Results
 b.params <- params
 
@@ -86,21 +86,17 @@ null.test <- function(results){
   counter <- 0
   for(i in 1:length(results)){
     if(is.null(results[[i]]$phylogenies$orig.phylo)){
+      cat("Loop", i, '\n')
       counter <- (counter + 1)
     }
   }
   return(counter)
 }
 
+null.test(sim.Results)
 
-which(is.ultrametric(sim.Results$phylogenies$orig.phylo))
+sim.Results[[10]]
 
-sim.ultra.data <- Filter(is.ultrametric, sim.data$phylogenies)
-sim.nonultra.data <- Filter(Negate(is.ultrametric), sim.data$phylogenies)
-
-length(sim.Results)
-length(sim.ultra.data)
-length(sim.nonultra.data)
 
 # Extract diversity metrics from untransformed phylogenies, for calculating response metrics
 sim.MPDs <- lapply(sim.Results, function(x) x$values$MPDs)
