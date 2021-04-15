@@ -73,7 +73,7 @@ SimulateCommnunity <- function(comm.spp,comm.size,comm.birth,comm.death,comm.env
   if(is.null(DemoCom)){
     max.iter <-100
     for(i in 1:max.iter){
-      DemoCom <- tryCatch(sim.comm(nspp=comm.spp,nsite=comm.size,birth=comm.birth,death=comm.death,env.str=comm.env, min.lam=comm.abund),error=function(cond) {return(NULL)}) 
+      DemoCom <- tryCatch(sim.comm(nspp=comm.spp,nsite=comm.size,birth=comm.birth,death=comm.death,env.str=comm.env, min.lam=comm.abund),error=function(cond) {return(NULL)})
       if(!is.null(DemoCom)){
         break
       } else {
@@ -146,19 +146,19 @@ SimulateCommnunity <- function(comm.spp,comm.size,comm.birth,comm.death,comm.env
   return(simulation.data)
 }
 
-test <- SimulateCommnunity(comm.spp=10, comm.size=10, comm.birth=0.5, comm.death=0.1,
-                           comm.env=1, comm.abund=1,intra.birth=0.5,
-                           intra.death=0.1,intra.steps=3,seq.birth=0.5,
-                           seq.death=0.1,seq.steps=3)
+# test <- SimulateCommnunity(comm.spp=10, comm.size=10, comm.birth=0.5, comm.death=0.1,
+#                            comm.env=1, comm.abund=1,intra.birth=0.5,
+#                            intra.death=0.1,intra.steps=3,seq.birth=0.5,
+#                            seq.death=0.1,seq.steps=3)
 
-test <- SimulateCommnunity(comm.spp=5, comm.size=10, comm.birth=0.5, comm.death=0.2,
-                           comm.env=1, comm.abund=1,intra.birth=0.1,
-                           intra.death=0.5,intra.steps=3,seq.birth=0.1,
-                           seq.death=0.5,seq.steps=3)
-
-plot(test$phylogenies$orig.phylo, show.tip.label = FALSE)
-plot(test$phylogenies$seq.phylo, show.tip.label = FALSE)
-test$values
+# test <- SimulateCommnunity(comm.spp=5, comm.size=10, comm.birth=0.5, comm.death=0.2,
+#                            comm.env=1, comm.abund=1,intra.birth=0.1,
+#                            intra.death=0.5,intra.steps=3,seq.birth=0.1,
+#                            seq.death=0.5,seq.steps=3)
+# 
+# plot(test$phylogenies$orig.phylo, show.tip.label = FALSE)
+# plot(test$phylogenies$seq.phylo, show.tip.label = FALSE)
+# test$values
 
 # # %%% Simulate communities using sim.meta.phy.comm %%%----
 # SimulateCommnunity <- function(comm.size,comm.spp,comm.timesteps,comm.migrate,comm.env,comm.abund,comm.stoch,comm.speciate,intra.birth,intra.death,intra.steps,seq.birth,seq.death,seq.steps){
