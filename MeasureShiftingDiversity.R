@@ -27,8 +27,20 @@ library(viridis)
   return(meanRankChanges)
 }
 
-# %%% Read in simulation data %%%----
-load("simResults.RData")
+# Function for reporting how many NULL instances occur for a results matrix
+null.test <- function(results){
+  counter <- 0
+  for(i in 1:length(results)){
+    if(is.null(results[[i]]$phylogenies$orig.phylo)){
+      cat("Loop", i, '\n')
+      counter <- (counter + 1)
+    }
+  }
+  return(counter)
+}
+# %%% Ultrametric runs only %%%----
+# %%% Read in simulation data %%%
+load("OTU_Phylogeny/simResults.RData")
 # Generate backup data of simulation variables
 backup <- sim.Results
 b.params <- params
@@ -45,7 +57,7 @@ results$delta <- rep(deltas,length(sim.data))
 results$intra.div <- results$intra.birth/results$intra.death
 results$seq.div <- results$seq.birth/results$seq.death
 
-# %%% MPD correlations between site and baseline %%%----
+# %%% MPD correlations between site and baseline %%%
 # Calculate MPD correlations on simulation data
 t.correls <- mapply(.new.correls, sim.data, sim.MPDs)
 # Match the correlations to the parameters
@@ -54,7 +66,7 @@ results$correl <- as.numeric(t.correls)
 s.model.correl <- lm(correl ~ scale(log10(delta))+scale(intra.div)+scale(seq.div)+scale(comm.spp),data=results,na.action=na.omit)
 summary(s.model.correl)
 
-# %%% Ranking differences between site and baseline %%%----
+# %%% Ranking differences between site and baseline %%%
 # Calculate mean number of site rank shifts
 rank.shifts <- mapply(.ranking.diff, sim.data, sim.MPDs)
 # Match the ranking differences to the parameters
@@ -64,64 +76,78 @@ s.model.rankShifts <- lm(rank.shifts ~ scale(log10(delta))+scale(intra.div)+scal
 summary(s.model.rankShifts)
 
 # %%% Non-ultrametric runs %%%----
-load("OTU_Phylogeny/simResults.20210414.RData")
+# %%% Read in simulation data %%%
+load("OTU_Phylogeny/simResults.20210415.RData")
+# Generate backup data of simulation variables
 backup <- sim.Results
 b.params <- params
 
-# Extract MPDs over delta transforms, from communities/phylogenies with intraspecific AND seq. error branches
+# NON-ULTRAMETRIC INSTANCES
+# Extract MPD values over delta transformations for "final" community/phylogey set
 sim.data <- lapply(sim.Results, function(x) x$transforms$seq.transform)
-# Separating ultrametric and non-ultrametric results
-is.ultrametric(sim.Results[[1]]$phylogenies$orig.phylo)
-is.ultrametric(sim.Results[[910]]$phylogenies$orig.phylo)
-
-sim.phylos <- lapply(sim.Results, function(x) x$phylogenies)
-
-
-
-lapply(sim.Results[[100]]$phylogenies, is.ultrametric)
-lapply(sim.Results[[910]]$phylogenies, is.ultrametric)
-
-null.test <- function(results){
-  #browser()
-  counter <- 0
-  for(i in 1:length(results)){
-    if(is.null(results[[i]]$phylogenies$orig.phylo)){
-      cat("Loop", i, '\n')
-      counter <- (counter + 1)
-    }
-  }
-  return(counter)
-}
-
-null.test(sim.Results)
-
-sim.Results[[10]]
-
-
-# Extract diversity metrics from untransformed phylogenies, for calculating response metrics
+# Subset parameters matrix by successful (i.e. not NULL) simulation instances
+params <- params[sapply(sim.data, is.matrix),]
+# Remove NAs from simulation data
+sim.data <- sim.data[which(!is.na(sim.data))]
+# Extract original MPD values of each community, prior to branch additions or transformations
 sim.MPDs <- lapply(sim.Results, function(x) x$values$MPDs)
-
+sim.MPDs <- sim.MPDs[sapply(sim.MPDs, Negate(is.null))]
 # Build results matrix, from which linear model variables will be pulled
 results <- params[rep(1:nrow(params), each=30),]
 results$delta <- rep(deltas,length(sim.data))
-# Make subset of ultrametric results (death rates = 0)
-ultra.results <- results[which(results$comm.death == 0),]
-ultra.results <- ultra.results[which(ultra.results$intra.death == 0),]
-ultra.results <- ultra.results[which(ultra.results$seq.death == 0),]
-# Make subset of non-ultrametric results (death rates != 0)
-nonultra.results <- results[which(results$comm.death != 0),]
-nonultra.results <- nonultra.results[which(nonultra.results$intra.death != 0),]
-nonultra.results <- nonultra.results[which(nonultra.results$seq.death != 0),]
-# Create term for diversification (birth rate/death rate) for both intraspecific and seq.err.
-nonultra.results$comm.div <- nonultra.results$comm.birth/nonultra.results$comm.death
-nonultra.results$intra.div <- nonultra.results$intra.birth/nonultra.results$intra.death
-nonultra.results$seq.div <- nonultra.results$seq.birth/nonultra.results$seq.death
+# Create diversification rate terms
+results$intra.div <- results$intra.birth/results$intra.death
+results$seq.div <- results$seq.birth/results$seq.death
 
-sim.Results.DT <- setDT(sim.Results)
-sim.Results.DT <- as.data.table(sim.Results)
+# %%% MPD correlations between site and baseline %%%
+# Calculate MPD correlations on simulation data
+t.correls <- mapply(.new.correls, sim.data, sim.MPDs)
+# Match the correlations to the parameters
+results$correl <- as.numeric(t.correls)
+# Model effects on MPD correlations
+model.correl <- lm(correl ~ scale(log10(delta))+scale(intra.div)+scale(seq.div)+scale(comm.spp),data=results,na.action=na.omit)
+summary(model.correl)
 
+# %%% Ranking differences between site and baseline %%%
+# Calculate mean number of site rank shifts
+rank.shifts <- mapply(.ranking.diff, sim.data, sim.MPDs)
+# Match the ranking differences to the parameters
+results$rank.shifts <- as.numeric(rank.shifts)
+# Model effects on site diversity rankings
+model.rankShifts <- lm(rank.shifts ~ scale(log10(delta))+scale(intra.div)+scale(seq.div)+scale(comm.spp),data=results,na.action=na.omit)
+summary(model.rankShifts)
 
+# ULTRAMETRIC INSTANCES
+# Extract MPD values over delta transformations for "final" community/phylogey set
+sim.ultraData <- lapply(sim.ultraResults, function(x) x$transforms$seq.transform)
+# Subset parameters matrix by successful (i.e. not NULL) simulation instances
+ultra.params <- ultra.params[sapply(sim.ultraData, is.matrix),]
+# Remove NAs from simulation data
+sim.ultraData <- sim.ultraData[which(!is.na(sim.ultraData))]
+# Extract original MPD values of each community, prior to branch additions or transformations
+sim.ultraMPDs <- lapply(sim.ultraResults, function(x) x$values$MPDs)
+sim.ultraMPDs <- sim.ultraMPDs[sapply(sim.ultraMPDs, Negate(is.null))]
+# Build results matrix, from which linear model variables will be pulled
+ultra.results <- ultra.params[rep(1:nrow(ultra.params), each=30),]
+ultra.results$delta <- rep(deltas,length(sim.ultraData))
 
+# %%% MPD correlations between site and baseline %%%
+# Calculate MPD correlations on simulation data
+u.correls <- mapply(.new.correls, sim.ultraData, sim.ultraMPDs)
+# Match the correlations to the parameters
+ultra.results$correl <- as.numeric(u.correls)
+# Model effects on MPD correlations
+u.model.correl <- lm(correl ~ scale(log10(delta))+scale(comm.spp),data=ultra.results,na.action=na.omit)
+summary(u.model.correl)
+
+# %%% Ranking differences between site and baseline %%%
+# Calculate mean number of site rank shifts
+u.rank.shifts <- mapply(.ranking.diff, sim.ultraData, sim.ultraMPDs)
+# Match the ranking differences to the parameters
+ultra.results$rank.shifts <- as.numeric(u.rank.shifts)
+# Model effects on site diversity rankings
+u.model.rankShifts <- lm(rank.shifts ~ scale(log10(delta))+scale(comm.spp),data=ultra.results,na.action=na.omit)
+summary(u.model.rankShifts)
 
 # %%% Plotting %%%----
 # *** MPD correlations ***
