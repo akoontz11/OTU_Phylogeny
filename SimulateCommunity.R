@@ -115,7 +115,7 @@ SimulateCommnunity <- function(comm.spp,comm.size,comm.birth,comm.death,comm.env
   seq.comm <- tryCatch(matrix(nrow=length(sites),ncol=Ntip(seq.phy),dimnames = list(sites,seq.phy$tip.label)),error=function(cond) {return(NULL)})
   individual.names <- colnames(seq.comm)
   # Map abundance values from original community matrix to columns of seq.comm
-  seq.comm <- abundance.mapping(species.names, individual.names, sites, sim.commun, seq.comm)
+  seq.comm <- abundance.mapping(species.names, individual.names, sites, orig.comm, seq.comm)
   
   # Capture mpd values over transformations----
   # Original community
@@ -147,15 +147,14 @@ SimulateCommnunity <- function(comm.spp,comm.size,comm.birth,comm.death,comm.env
 }
 
 # test <- SimulateCommnunity(comm.spp=10, comm.size=10, comm.birth=0.5, comm.death=0.1,
-#                            comm.env=1, comm.abund=1,intra.birth=0.5,
-#                            intra.death=0.1,intra.steps=3,seq.birth=0.5,
-#                            seq.death=0.1,seq.steps=3)
-
-# test <- SimulateCommnunity(comm.spp=5, comm.size=10, comm.birth=0.5, comm.death=0.2,
-#                            comm.env=1, comm.abund=1,intra.birth=0.1,
-#                            intra.death=0.5,intra.steps=3,seq.birth=0.1,
-#                            seq.death=0.5,seq.steps=3)
+#                           comm.env=1, comm.abund=1,intra.birth=0.5,
+#                           intra.death=0.1,intra.steps=3,seq.birth=0.5,
+#                           seq.death=0.1,seq.steps=3)
 # 
+# test <- SimulateCommnunity(comm.spp=5, comm.size=10, comm.birth=0.5, comm.death=0.2,
+#                           comm.env=1, comm.abund=1,intra.birth=0.1,
+#                           intra.death=0.5,intra.steps=3,seq.birth=0.1,
+#                           seq.death=0.5,seq.steps=3)
 # plot(test$phylogenies$orig.phylo, show.tip.label = FALSE)
 # plot(test$phylogenies$seq.phylo, show.tip.label = FALSE)
 # test$values
