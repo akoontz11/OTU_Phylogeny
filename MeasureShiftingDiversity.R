@@ -102,20 +102,18 @@ results$seq.div <- results$seq.birth/results$seq.death
 # %%% MPD correlations between site and baseline %%%
 # Calculate MPD correlations on simulation data
 t.correls <- mapply(.new.correls, sim.data, sim.MPDs)
-# Match the correlations to the parameters
 results$correl <- as.numeric(t.correls)
 # Model effects on MPD correlations
-model.correl <- lm(correl ~ scale(log10(delta))+scale(intra.div)+scale(seq.div)+scale(comm.spp),data=results,na.action=na.omit)
-summary(model.correl)
+n.model.correl <- lm(correl ~ scale(log10(delta))+scale(intra.div)+scale(seq.div)+scale(comm.spp),data=results,na.action=na.omit)
+summary(n.model.correl)
 
 # %%% Ranking differences between site and baseline %%%
 # Calculate mean number of site rank shifts
 rank.shifts <- mapply(.ranking.diff, sim.data, sim.MPDs)
-# Match the ranking differences to the parameters
 results$rank.shifts <- as.numeric(rank.shifts)
 # Model effects on site diversity rankings
-model.rankShifts <- lm(rank.shifts ~ scale(log10(delta))+scale(intra.div)+scale(seq.div)+scale(comm.spp),data=results,na.action=na.omit)
-summary(model.rankShifts)
+n.model.rankShifts <- lm(rank.shifts ~ scale(log10(delta))+scale(intra.div)+scale(seq.div)+scale(comm.spp),data=results,na.action=na.omit)
+summary(n.model.rankShifts)
 
 # ULTRAMETRIC INSTANCES
 # Extract MPD values over delta transformations for "final" community/phylogey set
@@ -134,7 +132,6 @@ ultra.results$delta <- rep(deltas,length(sim.ultraData))
 # %%% MPD correlations between site and baseline %%%
 # Calculate MPD correlations on simulation data
 u.correls <- mapply(.new.correls, sim.ultraData, sim.ultraMPDs)
-# Match the correlations to the parameters
 ultra.results$correl <- as.numeric(u.correls)
 # Model effects on MPD correlations
 u.model.correl <- lm(correl ~ scale(log10(delta))+scale(comm.spp),data=ultra.results,na.action=na.omit)
@@ -143,7 +140,6 @@ summary(u.model.correl)
 # %%% Ranking differences between site and baseline %%%
 # Calculate mean number of site rank shifts
 u.rank.shifts <- mapply(.ranking.diff, sim.ultraData, sim.ultraMPDs)
-# Match the ranking differences to the parameters
 ultra.results$rank.shifts <- as.numeric(u.rank.shifts)
 # Model effects on site diversity rankings
 u.model.rankShifts <- lm(rank.shifts ~ scale(log10(delta))+scale(comm.spp),data=ultra.results,na.action=na.omit)
