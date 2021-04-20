@@ -11,7 +11,7 @@ given a specified vector of values.
 `SimulateCommunity.R` is the primary script, calling the above two commands and `sim.meta.phy.comm` 
 (or `sim.comm`, for non-ultrametric scenarios) to simulate communities/phylogenies, and to transform phylogenies using
 `phy.d.transform`. Communities/phylogenies modeling populations (intra) as well as random sequencing error (seq) are
-generated from the original community/phylogeny, and are similarly transformed. Also in this script is the 
+generated from the original community/phylogeny, and are also transformed. Also in this script is the 
 `abundance.mapping` function, which transfer community abundances from original community to 
 communities with populations and sequencing error.
 
