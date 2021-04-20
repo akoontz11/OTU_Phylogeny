@@ -89,14 +89,15 @@ SimulateCommnunity <- function(comm.spp,comm.size,comm.birth,comm.death,comm.env
     # Otherwise, cleanup community and assign populations
   } else {
     # Drop sites with one or less species in them (because mpd needs to measure communities)
-    sim.commun <- DemoCom$comm[apply(DemoCom$comm, 1, function(x) sum(x!=0) > 1),,drop=F]
+    # sim.commun <- DemoCom$comm[apply(DemoCom$comm, 1, function(x) sum(x!=0) > 1),,drop=F]
     # Drop extinct species from community matrix, and get names of remaining species 
-    # DO WE STILL WANT TO DO THIS?
-    orig.comm <- sim.commun[,apply(sim.commun,2,function(x) !all(x==0))]
+    # orig.comm <- sim.commun[,apply(sim.commun,2,function(x) !all(x==0))]
+    orig.comm <- DemoCom$comm
     species.names <- colnames(orig.comm)
-    # Trim phylogeny to only contain remaining species (using drop.tip), and get site names
-    orig.phy <- drop.tip(DemoCom$phy, tip = DemoCom$phy$tip.label[!DemoCom$phy$tip.label %in% species.names])
     sites <- rownames(orig.comm)
+    # Trim phylogeny to only contain remaining species (using drop.tip), and get site names
+    # orig.phy <- drop.tip(DemoCom$phy, tip = DemoCom$phy$tip.label[!DemoCom$phy$tip.label %in% species.names])
+    orig.phy <- DemoCom$phy
   }
   
   # Add intraspecific differences----
@@ -119,11 +120,11 @@ SimulateCommnunity <- function(comm.spp,comm.size,comm.birth,comm.death,comm.env
   
   # Capture mpd values over transformations----
   # Original community
-  orig.test <- phy.d.transform(orig.phy, orig.comm, deltas)
+  orig.transform <- phy.d.transform(orig.phy, orig.comm, deltas)
   # Community with populations (intraspecific error)
-  intra.test <- phy.d.transform(intra.phy, intra.comm, deltas)
+  intra.transform <- phy.d.transform(intra.phy, intra.comm, deltas)
   # Community with sequencing error
-  seq.test <- phy.d.transform(seq.phy, seq.comm, deltas)
+  seq.transform <- phy.d.transform(seq.phy, seq.comm, deltas)
   
   # Capture mpd of original phylogenies (for later comparison)----
   orig.MPD <- tryCatch(.mpd(comparative.comm(orig.phy, orig.comm, force.root = 0), abundance.weighted=TRUE), error=function(cond) {return(NULL)})
@@ -138,7 +139,7 @@ SimulateCommnunity <- function(comm.spp,comm.size,comm.birth,comm.death,comm.env
   # Phylogenies
   community.phylogenies <- list(orig.phylo=orig.phy,intra.phylo=intra.phy,seq.phylo=seq.phy)
   # MPD matrices, from delta transforms
-  community.transforms <- list(orig.transform=orig.test,intra.transform=intra.test,seq.transform=seq.test)
+  community.transforms <- list(orig.transform=orig.transform,intra.transform=intra.transform,seq.transform=seq.transform)
   # Original MPD values
   original.diversityMetrics <- list(MPDs=orig.MPD)
   # Return data
@@ -146,12 +147,19 @@ SimulateCommnunity <- function(comm.spp,comm.size,comm.birth,comm.death,comm.env
   return(simulation.data)
 }
 
-# test <- SimulateCommnunity(comm.spp=10, comm.size=10, comm.birth=0.5, comm.death=0.1,
-#                           comm.env=1, comm.abund=1,intra.birth=0.5,
-#                           intra.death=0.1,intra.steps=3,seq.birth=0.5,
-#                           seq.death=0.1,seq.steps=3)
+# # Ultrametric test
+# SimulateCommnunity(comm.spp=10, comm.size=10, comm.birth=0.5, comm.death=0,
+#                    comm.env=1, comm.abund=1,intra.birth=0.5,
+#                    intra.death=0.1,intra.steps=3,seq.birth=0.5,
+#                    seq.death=0.1,seq.steps=3)
 # 
-# test <- SimulateCommnunity(comm.spp=5, comm.size=10, comm.birth=0.5, comm.death=0.2,
+# # Non-ultrametric tests
+# SimulateCommnunity(comm.spp=10, comm.size=10, comm.birth=0.5, comm.death=0.1,
+#                            comm.env=1, comm.abund=1,intra.birth=0.5,
+#                            intra.death=0.1,intra.steps=3,seq.birth=0.5,
+#                            seq.death=0.1,seq.steps=3)
+# # High death
+# SimulateCommnunity(comm.spp=5, comm.size=10, comm.birth=0.5, comm.death=0.2,
 #                           comm.env=1, comm.abund=1,intra.birth=0.1,
 #                           intra.death=0.5,intra.steps=3,seq.birth=0.1,
 #                           seq.death=0.5,seq.steps=3)
