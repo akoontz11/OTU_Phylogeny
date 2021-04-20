@@ -77,7 +77,7 @@ summary(s.model.rankShifts)
 
 # %%% Non-ultrametric runs %%%----
 # %%% Read in simulation data %%%
-load("OTU_Phylogeny/simResults.20210415.RData")
+load("OTU_Phylogeny/simResults.20210420.RData")
 # Generate backup data of simulation variables
 backup <- sim.Results
 b.params <- params

@@ -2,14 +2,14 @@
 Scripts used for pipeline analyzing effects of species boundaries on community diversity.
 
 `Intraspecific_SeqError_Sim.R` codes the function used to append branches onto existing phylogenies, 
-using sim.bd.tree.
+using `sim.bd.tree` (from the R package `ape`).
 
 `MPDvsDelta.R` codes for function transforming phylogenies based on Pagel's delta and 
 (given the corresponding comparative.comm object) calculate the MPD of transformed outputs, 
 given a specified vector of values.
 
-`SimulateCommunity.R` is the primary script, and above two commands and `sim.meta.phy.comm` 
-to simulate communities/phylogenies, and to transform phylogenies using
+`SimulateCommunity.R` is the primary script, calling the above two commands and `sim.meta.phy.comm` 
+(or `sim.comm`, for non-ultrametric scenarios) to simulate communities/phylogenies, and to transform phylogenies using
 `phy.d.transform`. Communities/phylogenies modeling populations (intra) as well as random sequencing error (seq) are
 generated from the original community/phylogeny, and are similarly transformed. Also in this script is the 
 `abundance.mapping` function, which transfer community abundances from original community to 
