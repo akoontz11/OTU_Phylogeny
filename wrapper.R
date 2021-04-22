@@ -61,4 +61,4 @@ sim.Results <- mcMap(function(i) SimulateCommnunity(params$comm.spp[i],comm.size
                                                     1:nrow(params),mc.cores=12)
 
 
-save.image("simResults.20210420.RData")
+save.image("simResults/simResults.RData")
