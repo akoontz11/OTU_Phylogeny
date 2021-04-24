@@ -48,15 +48,15 @@ sim.comm <- function(nspp=20, nsite=50, birth=1, death=0, min.lambda=1, env.str=
   intercept <- rnorm(nspp, sd=5)
   slope <- rnorm(nspp, sd=5)
   env <- (seq_len(nsite)-1) / (sd(seq_len(nsite)-1)) * env.str
-  
+
   #Calculate lambdas per species-site, draw from Poisson
   comm <- outer(intercept, rep(1,nsite)) + outer(slope, env)
   if(any(comm < 0)){
     # warning("Negative lambdas; applying zero correction")
     comm[comm < 0] <- 0
-  }    
+  }
   comm <- rpois(prod(dim(comm)),as.numeric(comm))
-  
+
   #Format and return
   comm <- t(matrix(comm, nrow=nspp, ncol=nsite, dimnames=list(tree$tip.label, seq_len(nsite)-1)))
   data <- comparative.comm(tree, comm)
@@ -85,12 +85,12 @@ SimulateCommnunity <- function(comm.spp,comm.size,comm.birth,comm.death,comm.env
   }
   # If after 100 times DemoCom is still NULL, assign NULL to other variables
   if(is.null(DemoCom)){
-    orig.phy <- NULL ; orig.comm <- NULL ; species.names <- NULL ; sites <- NULL   
+    orig.phy <- NULL ; orig.comm <- NULL ; species.names <- NULL ; sites <- NULL
     # Otherwise, cleanup community and assign populations
   } else {
     # Drop sites with one or less species in them (because mpd needs to measure communities)
     # sim.commun <- DemoCom$comm[apply(DemoCom$comm, 1, function(x) sum(x!=0) > 1),,drop=F]
-    # Drop extinct species from community matrix, and get names of remaining species 
+    # Drop extinct species from community matrix, and get names of remaining species
     # orig.comm <- sim.commun[,apply(sim.commun,2,function(x) !all(x==0))]
     orig.comm <- DemoCom$comm
     species.names <- colnames(orig.comm)
@@ -99,16 +99,16 @@ SimulateCommnunity <- function(comm.spp,comm.size,comm.birth,comm.death,comm.env
     # orig.phy <- drop.tip(DemoCom$phy, tip = DemoCom$phy$tip.label[!DemoCom$phy$tip.label %in% species.names])
     orig.phy <- DemoCom$phy
   }
-  
+
   # Add intraspecific differences----
   intra.phy <- add.branch(orig.phy,birth=intra.birth,death=intra.death,steps=intra.steps,"pops")
   # Create an empty matrix for the intra.phy
   # (tryCatch statement included to account for trees in which all species have gone extinct)
   intra.comm <- tryCatch(matrix(nrow=length(sites),ncol=Ntip(intra.phy),dimnames = list(sites,intra.phy$tip.label)),error=function(cond) {return(NULL)})
   population.names <- colnames(intra.comm)
-  # Map abundance values from original community matrix to columns of intra.comm 
+  # Map abundance values from original community matrix to columns of intra.comm
   intra.comm <- abundance.mapping(species.names, population.names, sites, orig.comm, intra.comm)
-  
+
   # Add sequencing error----
   seq.phy <- add.branch(intra.phy,birth=seq.birth,death=seq.death,steps=seq.steps,"seq.err")
   # Create an empty matrix for the seq.phy
@@ -117,7 +117,7 @@ SimulateCommnunity <- function(comm.spp,comm.size,comm.birth,comm.death,comm.env
   individual.names <- colnames(seq.comm)
   # Map abundance values from original community matrix to columns of seq.comm
   seq.comm <- abundance.mapping(species.names, individual.names, sites, orig.comm, seq.comm)
-  
+
   # Capture mpd values over transformations----
   # Original community
   orig.transform <- phy.d.transform(orig.phy, orig.comm, deltas)
@@ -125,14 +125,14 @@ SimulateCommnunity <- function(comm.spp,comm.size,comm.birth,comm.death,comm.env
   intra.transform <- phy.d.transform(intra.phy, intra.comm, deltas)
   # Community with sequencing error
   seq.transform <- phy.d.transform(seq.phy, seq.comm, deltas)
-  
+
   # Capture mpd of original phylogenies (for later comparison)----
   orig.MPD <- tryCatch(.mpd(comparative.comm(orig.phy, orig.comm, force.root = 0), abundance.weighted=TRUE), error=function(cond) {return(NULL)})
   # Change names to match format from phy.d.transform function
   if(!is.null(orig.MPD)){
     names(orig.MPD) <- paste("Site",1:nrow(orig.comm),sep="_")
   }
-  
+
   # Export a list containing all simulation data, for each community "type" (original, intra, and seq)----
   # Abundances
   community.abundances <- list(orig.community=orig.comm,intra.community=intra.comm,seq.community=seq.comm)
@@ -152,7 +152,7 @@ SimulateCommnunity <- function(comm.spp,comm.size,comm.birth,comm.death,comm.env
 #                    comm.env=1, comm.abund=1,intra.birth=0.5,
 #                    intra.death=0.1,intra.steps=3,seq.birth=0.5,
 #                    seq.death=0.1,seq.steps=3)
-# 
+#
 # # Non-ultrametric tests
 # SimulateCommnunity(comm.spp=10, comm.size=10, comm.birth=0.5, comm.death=0.1,
 #                            comm.env=1, comm.abund=1,intra.birth=0.5,
@@ -169,14 +169,14 @@ SimulateCommnunity <- function(comm.spp,comm.size,comm.birth,comm.death,comm.env
 
 # # %%% Simulate communities using sim.meta.phy.comm %%%----
 # SimulateCommnunity <- function(comm.size,comm.spp,comm.timesteps,comm.migrate,comm.env,comm.abund,comm.stoch,comm.speciate,intra.birth,intra.death,intra.steps,seq.birth,seq.death,seq.steps){
-#   # Simulate community (using pez function sim.meta.phy.comm)----
+# Simulate community (using pez function sim.meta.phy.comm)
 #   # Generate NULL for a DemoCom object that is in error
 #   DemoCom <- tryCatch(sim.meta.phy.comm(size=comm.size, n.spp=comm.spp, timesteps=comm.timesteps, p.migrate=comm.migrate, env.lam=comm.env, abund.lam=comm.abund, stoch.lam=comm.stoch, p.speciate=comm.speciate),error=function(cond) {return(NULL)})
 #   # If DemoCom is NULL, then assign NULL to relevant phylogeny/community variables
 #   if(is.null(DemoCom)){
 #     orig.phy <- NULL ; orig.comm <- NULL ; species.names <- NULL ; sites <- NULL
 #   }else{
-#     
+#
 #     # Cleanup community and assign populations
 #     # Drop sites with one or less species in them (because mpd needs to measure communities)
 #     sim.comm <- DemoCom$comm[apply(DemoCom$comm, 1, function(x) sum(x!=0) > 1),,drop=F]
@@ -187,8 +187,8 @@ SimulateCommnunity <- function(comm.spp,comm.size,comm.birth,comm.death,comm.env
 #     orig.phy <- drop.tip(DemoCom$phy, tip = DemoCom$phy$tip.label[!DemoCom$phy$tip.label %in% species.names])
 #     sites <- rownames(orig.comm)
 #   }
-#   
-#   # Add intraspecific differences----
+#
+# Add intraspecific differences
 #   intra.phy <- add.branch(orig.phy,birth=intra.birth,death=intra.death,steps=intra.steps,"pops")
 #   # Create an empty matrix for the intra.phy
 #   # (tryCatch statement included to account for trees in which all species have gone extinct)
@@ -196,8 +196,8 @@ SimulateCommnunity <- function(comm.spp,comm.size,comm.birth,comm.death,comm.env
 #   population.names <- colnames(intra.comm)
 #   # Map abundance values from original community matrix to columns of intra.comm
 #   intra.comm <- abundance.mapping(species.names, population.names, sites, orig.comm, intra.comm)
-#   
-#   # Add sequencing error----
+#
+# Add sequencing error
 #   seq.phy <- add.branch(intra.phy,birth=seq.birth,death=seq.death,steps=seq.steps,"seq.err")
 #   # Create an empty matrix for the seq.phy
 #   # (tryCatch statement included to account for trees in which all species have gone extinct)
@@ -205,21 +205,21 @@ SimulateCommnunity <- function(comm.spp,comm.size,comm.birth,comm.death,comm.env
 #   individual.names <- colnames(seq.comm)
 #   # Map abundance values from original community matrix to columns of seq.comm
 #   seq.comm <- abundance.mapping(species.names, individual.names, sites, sim.comm, seq.comm)
-#   
-#   # Capture mpd values over transformations----
+#
+# Capture mpd values over transformations
 #   # Original community
 #   orig.test <- phy.d.transform(orig.phy, orig.comm, deltas)
 #   # Community with populations (intraspecific error)
 #   intra.test <- phy.d.transform(intra.phy, intra.comm, deltas)
 #   # Community with sequencing error
 #   seq.test <- phy.d.transform(seq.phy, seq.comm, deltas)
-#   
-#   # Capture mpd of original phylogenies (for later comparison)----
+#
+# Capture mpd of original phylogenies (for later comparison)
 #   orig.MPD <- .mpd(comparative.comm(orig.phy, orig.comm, force.root = 0), abundance.weighted=TRUE)
 #   # Change names to match format from phy.d.transform function
 #   names(orig.MPD) <- paste("Site",1:nrow(orig.comm),sep="_")
-#   
-#   # Export a list containing all simulation data, for each community "type" (original, intra, and seq)----
+#
+# Export a list containing all simulation data, for each community "type" (original, intra, and seq)
 #   # Abundances
 #   community.abundances <- list(orig.community=orig.comm,intra.community=intra.comm,seq.community=seq.comm)
 #   # Phylogenies

@@ -7,7 +7,6 @@ library(viridis)
 # Function to calculate correlations of MPD measurements between each delta value (x)
 # and a "reference" delta value (d, taken prior to transformations)
 .new.correls <- function(x,d){
-  browser()
   value <- numeric(length=ncol(x))
   for (i in 1:ncol(x)){
     value[i] <- cor(x[,i],d, use="na.or.complete")
@@ -41,7 +40,7 @@ null.test <- function(results){
 }
 # %%% Ultrametric runs only %%%----
 # %%% Read in simulation data %%%
-load("OTU_Phylogeny/simResults.RData")
+load("OTU_Phylogeny/simResults/simResults.ULTRA_ONLY.RData")
 # Generate backup data of simulation variables
 backup <- sim.Results
 b.params <- params
