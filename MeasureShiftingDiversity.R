@@ -77,7 +77,7 @@ summary(s.model.rankShifts)
 
 # %%% Non-ultrametric runs %%%----
 # %%% Read in simulation data %%%
-load("OTU_Phylogeny/simResults/simResults.20210420.RData")
+load("OTU_Phylogeny/simResults/simResults.RData")
 # Generate backup data of simulation variables
 backup <- sim.Results
 b.params <- params
@@ -144,6 +144,73 @@ ultra.results$rank.shifts <- as.numeric(u.rank.shifts)
 # Model effects on site diversity rankings
 u.model.rankShifts <- lm(rank.shifts ~ scale(log10(delta))+scale(comm.spp),data=ultra.results,na.action=na.omit)
 summary(u.model.rankShifts)
+
+# %%% Non-ultrametric, SESmpd %%%----
+# %%% Read in simulation data %%%
+load("OTU_Phylogeny/simResults/simResults.NON_ULTRA.SESMPD.RData")
+# Generate backup data of simulation variables
+backup <- sim.Results
+b.params <- params
+
+# NON-ULTRAMETRIC INSTANCES
+# Extract MPD values over delta transformations for "final" community/phylogey set
+sim.data <- lapply(sim.Results, function(x) x$transforms$seq.transform)
+# Subset parameters matrix by successful (i.e. not NULL) simulation instances
+params <- params[sapply(sim.data, is.matrix),]
+# Remove NAs from simulation data
+sim.data <- sim.data[which(!is.na(sim.data))]
+# Extract original MPD values of each community, prior to branch additions or transformations
+sim.SESMPDs <- lapply(sim.Results, function(x) x$values$SESmpds)
+sim.SESMPDs <- sim.SESMPDs[sapply(sim.SESMPDs, Negate(is.null))]
+# Build results matrix, from which linear model variables will be pulled
+results <- params[rep(1:nrow(params), each=30),]
+results$delta <- rep(deltas,length(sim.data))
+
+# %%% MPD correlations between site and baseline %%%
+# Calculate MPD correlations on simulation data
+t.correls <- mapply(.new.correls, sim.data, sim.SESMPDs)
+results$correl <- as.numeric(t.correls)
+# Model effects on MPD correlations
+n.model.correl <- lm(correl ~ scale(log10(delta)),data=results,na.action=na.omit)
+summary(n.model.correl)
+
+# %%% Ranking differences between site and baseline %%%
+# Calculate mean number of site rank shifts
+rank.shifts <- mapply(.ranking.diff, sim.data, sim.SESMPDs)
+results$rank.shifts <- as.numeric(rank.shifts)
+# Model effects on site diversity rankings
+n.model.rankShifts <- lm(rank.shifts ~ scale(log10(delta)),data=results,na.action=na.omit)
+summary(n.model.rankShifts)
+
+# # ULTRAMETRIC INSTANCES
+# # Extract MPD values over delta transformations for "final" community/phylogey set
+# sim.ultraData <- lapply(sim.ultraResults, function(x) x$transforms$seq.transform)
+# # Subset parameters matrix by successful (i.e. not NULL) simulation instances
+# ultra.params <- ultra.params[sapply(sim.ultraData, is.matrix),]
+# # Remove NAs from simulation data
+# sim.ultraData <- sim.ultraData[which(!is.na(sim.ultraData))]
+# # Extract original MPD values of each community, prior to branch additions or transformations
+# sim.ultraMPDs <- lapply(sim.ultraResults, function(x) x$values$MPDs)
+# sim.ultraMPDs <- sim.ultraMPDs[sapply(sim.ultraMPDs, Negate(is.null))]
+# # Build results matrix, from which linear model variables will be pulled
+# ultra.results <- ultra.params[rep(1:nrow(ultra.params), each=30),]
+# ultra.results$delta <- rep(deltas,length(sim.ultraData))
+# 
+# # %%% MPD correlations between site and baseline %%%
+# # Calculate MPD correlations on simulation data
+# u.correls <- mapply(.new.correls, sim.ultraData, sim.ultraMPDs)
+# ultra.results$correl <- as.numeric(u.correls)
+# # Model effects on MPD correlations
+# u.model.correl <- lm(correl ~ scale(log10(delta))+scale(comm.spp),data=ultra.results,na.action=na.omit)
+# summary(u.model.correl)
+# 
+# # %%% Ranking differences between site and baseline %%%
+# # Calculate mean number of site rank shifts
+# u.rank.shifts <- mapply(.ranking.diff, sim.ultraData, sim.ultraMPDs)
+# ultra.results$rank.shifts <- as.numeric(u.rank.shifts)
+# # Model effects on site diversity rankings
+# u.model.rankShifts <- lm(rank.shifts ~ scale(log10(delta))+scale(comm.spp),data=ultra.results,na.action=na.omit)
+# summary(u.model.rankShifts)
 
 # %%% Plotting %%%----
 # *** MPD correlations ***
