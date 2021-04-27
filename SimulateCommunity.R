@@ -91,17 +91,16 @@ SimulateCommnunity <- function(comm.spp,comm.size,comm.birth,comm.death,comm.env
     orig.comm <- DemoCom$comm[apply(DemoCom$comm, 1, function(x) sum(x!=0) > 1),,drop=F]
     # Drop extinct species from community matrix, and get names of remaining species
     orig.comm <- orig.comm[,apply(orig.comm,2,function(x) !all(x==0))]
-    # orig.comm <- DemoCom$comm
     species.names <- colnames(orig.comm)
     sites <- rownames(orig.comm)
     # Trim phylogeny to only contain remaining species (using drop.tip), and get site names
     orig.phy <- drop.tip(DemoCom$phy, tip = DemoCom$phy$tip.label[!DemoCom$phy$tip.label %in% species.names])
-    # orig.phy <- DemoCom$phy
+    # Need a catch here for communities with few species/sites. Either repeat all the steps above, or return NULL
   }
   
   # Add intraspecific differences----
   intra.phy <- add.branch(orig.phy,birth=intra.birth,death=intra.death,steps=intra.steps,"pops")
-  # Create an empty matrix for the intra.phy
+  # Create an empty matrix for the intra community
   # (tryCatch statement included to account for trees in which all species have gone extinct)
   intra.comm <- tryCatch(matrix(nrow=length(sites),ncol=Ntip(intra.phy),dimnames = list(sites,intra.phy$tip.label)),error=function(cond) {return(NULL)})
   population.names <- colnames(intra.comm)
@@ -110,7 +109,7 @@ SimulateCommnunity <- function(comm.spp,comm.size,comm.birth,comm.death,comm.env
   
   # Add sequencing error----
   seq.phy <- add.branch(intra.phy,birth=seq.birth,death=seq.death,steps=seq.steps,"seq.err")
-  # Create an empty matrix for the seq.phy
+  # Create an empty matrix for the seq. error community
   # (tryCatch statement included to account for trees in which all species have gone extinct)
   seq.comm <- tryCatch(matrix(nrow=length(sites),ncol=Ntip(seq.phy),dimnames = list(sites,seq.phy$tip.label)),error=function(cond) {return(NULL)})
   individual.names <- colnames(seq.comm)
