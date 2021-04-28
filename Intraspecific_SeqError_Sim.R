@@ -6,7 +6,7 @@ library(phytools)
 
 # New function, rescaling tree----
 # Append trees onto phylogeny tips. birth, death, steps are fed to sim.bdtree. type determines populations or seq. error
-add.branch <- function(tree,birth,death,steps,type=c("pops","seq.err")){
+add.branch <- function(tree,birth,death,type=c("pops","seq.err")){
   type <- match.arg(type)
   # If argument `tree` is without branches (i.e. NULL), return a tree that is NULL. Otherwise, add branches to it.
   if(is.null(tree)){
@@ -16,12 +16,11 @@ add.branch <- function(tree,birth,death,steps,type=c("pops","seq.err")){
     # Make copy of original tree, to keep track of the tip names on the original tree
     # Also, get longest branch of original tree (for rescaling later)
     orig.tree <- tree
-    old.max.depth <- max(orig.tree$edge.length)
+    old.max.depth <- max(branching.times(orig.tree))
     for(i in 1:tips){
       orig.tip <- orig.tree$tip.label[i]
       # Generate a new tree to be added onto the tip of the original tree, based on arguments
-      # new.tree <- sim.bdtree(b=birth, d=death, stop="time", t=steps)
-      new.tree <- sim.bdtree(b=birth, d=death, stop="time", t=steps)
+      new.tree <- sim.bdtree(b=birth, d=death, stop="time", t=1)
       # Rename new tree tip labels
       # Get number of tips of new tree
       new.tips <- Ntip(new.tree)
@@ -42,11 +41,11 @@ add.branch <- function(tree,birth,death,steps,type=c("pops","seq.err")){
       # (where always equals 1, because with every addition, next "open" tip becomes tip number 1)
     }
     # Get longest branch of new tree
-    new.max.depth <- max(tree$edge.length)
+    new.max.depth <- max(branching.times(tree))
     # If the maximum branch lengths are different, rescale the new tree to the maximum edge length of the old tree
-    if(old.max.depth != new.max.depth){
-      tree$edge.length <- (tree$edge.length)*(old.max.depth/new.max.depth)
-    }
+    # if(old.max.depth != new.max.depth){
+    #   tree$edge.length <- (tree$edge.length)*(old.max.depth/new.max.depth)
+    # }
     return(tree)
   }
 }

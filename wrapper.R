@@ -85,11 +85,11 @@ params <- data.frame(expand.grid(intra.birth=seq(0.1,0.3,0.1),seq.birth=seq(0.1,
 #                                                     1:nrow(params),mc.cores=6)
 
 # Ultrametric
-sim.Results <- mcMap(function(i) SimulateCommnunity(comm.spp=10,comm.size=10,comm.birth=0.5,
-                                                         comm.death=0,comm.env=1, comm.abund=1,
-                                                         params$intra.birth[i],intra.death=0.1,intra.steps=3,
-                                                         params$seq.birth[i],seq.death=0.1,seq.steps=3),
-                                                         1:nrow(params),mc.cores=6)
+sim.Results <- mcMap(function(i) SimulateCommnunity(comm.spp=20,comm.size=10,
+                                                    comm.birth=0.5,comm.death=0,tree.ratio=4,
+                                                    params$intra.birth[i],intra.death=0.1,
+                                                    params$seq.birth[i],seq.death=0.1,
+                                                    1:nrow(params),mc.cores=6))
 
 # Saving results
-save.image("simResults/simResults.NON_ULTRA.SESMPD.RData")
+save.image("simResults/simResults.RData")

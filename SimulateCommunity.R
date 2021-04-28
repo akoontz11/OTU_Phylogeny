@@ -4,8 +4,7 @@ library(pez)
 library(ape)
 library(geiger)
 
-# %%% Abundance mapping function %%%----
-# Function for mapping abundance values from one community matrix to a newer, expanded matrix
+# %%% Function mapping abundance values from one community matrix to a newer, expanded matrix %%%----
 abundance.mapping <- function(oldColumnNames, newColumnNames, rowNames, donor.comm, recip.comm){
   # If `donor.com` argument is empty, column names will be NULL; return the recip.comm argument as NULL
   if(is.null(oldColumnNames)){
@@ -40,39 +39,45 @@ abundance.mapping <- function(oldColumnNames, newColumnNames, rowNames, donor.co
   }
 }
 
-# %%% sim.comm function %%%----
-sim.comm <- function(nspp=20, nsite=50, birth=1, death=0, min.lambda=1, env.str=1){
-  #Setup tree, whole-species probabilities, and environmental gradient
+# %%% Function generating original (interspecific) phylogenies and communities %%%----
+sim.comm <- function(nspp=20, nsite=50, birth=1, death=0, tree.ratio=5){
+  # Setup tree and environmental gradient
   tree <- sim.bdtree(n=nspp, b=birth, d=death)
   nspp <- length(tree$tip.label)
   intercept <- rnorm(nspp, sd=5)
   slope <- rnorm(nspp, sd=5)
-  env <- (seq_len(nsite)-1) / (sd(seq_len(nsite)-1)) * env.str
+  env <- (seq_len(nsite)-1) / (sd(seq_len(nsite)-1))
+  
+  # cat(max(branching.times(tree)), "\n")
+  tree$edge.length <- tree$edge.length*(tree.ratio/max(branching.times(tree)))
+  # The below line prints the total tree depth
+  # cat(max(branching.times(tree)), "\n")
 
-  #Calculate lambdas per species-site, draw from Poisson
+  # Create community values, based on nsite and env.str arguments
+  # This is over-involved; a simpler generation of comm would be more suitable
   comm <- outer(intercept, rep(1,nsite)) + outer(slope, env)
   if(any(comm < 0)){
-    # warning("Negative lambdas; applying zero correction")
     comm[comm < 0] <- 0
   }
   comm <- rpois(prod(dim(comm)),as.numeric(comm))
 
-  #Format and return
+  # Format and return
   comm <- t(matrix(comm, nrow=nspp, ncol=nsite, dimnames=list(tree$tip.label, seq_len(nsite)-1)))
   data <- comparative.comm(tree, comm)
   return(data)
 }
-# %%% Simulate communities: sim.comm, SESmpd %%%----
-SimulateCommnunity <- function(comm.spp,comm.size,comm.birth,comm.death,comm.env,comm.abund,
-                               intra.birth,intra.death,intra.steps,seq.birth,seq.death,seq.steps){
-  # Simulate community (using Will's sim.comm function)
+
+# %%% Simulating communities: sim.comm, SESmpd %%%----
+SimulateCommnunity <- function(comm.spp,comm.size,comm.birth,comm.death,tree.ratio,
+                               intra.birth,intra.death,seq.birth,seq.death){
+  # Simulate community (using sim.comm function)
   # Generate NULL for a DemoCom object that is in error
-  DemoCom <- tryCatch(sim.comm(nspp=comm.spp,nsite=comm.size,birth=comm.birth,death=comm.death,env.str=comm.env, min.lam=comm.abund),error=function(cond) {return(NULL)})
+  DemoCom <- tryCatch(sim.comm(nspp=comm.spp,nsite=comm.size,birth=comm.birth,death=comm.death,tree.ratio=tree.ratio),error=function(cond) {return(NULL)})
   # If DemoCom is NULL, reattempt 100 times
   if(is.null(DemoCom)){
     max.iter <-100
     for(i in 1:max.iter){
-      DemoCom <- tryCatch(sim.comm(nspp=comm.spp,nsite=comm.size,birth=comm.birth,death=comm.death,env.str=comm.env, min.lam=comm.abund),error=function(cond) {return(NULL)})
+      DemoCom <- tryCatch(sim.comm(nspp=comm.spp,nsite=comm.size,birth=comm.birth,death=comm.death,tree.ratio=tree.ratio),error=function(cond) {return(NULL)})
       if(!is.null(DemoCom)){
         break
       } else {
@@ -93,13 +98,15 @@ SimulateCommnunity <- function(comm.spp,comm.size,comm.birth,comm.death,comm.env
     orig.comm <- orig.comm[,apply(orig.comm,2,function(x) !all(x==0))]
     species.names <- colnames(orig.comm)
     sites <- rownames(orig.comm)
+    browser()
     # Trim phylogeny to only contain remaining species (using drop.tip), and get site names
     orig.phy <- drop.tip(DemoCom$phy, tip = DemoCom$phy$tip.label[!DemoCom$phy$tip.label %in% species.names])
-    # Need a catch here for communities with few species/sites. Either repeat all the steps above, or return NULL
+    # Need a catch here for communities with few species/sites after removals above.
+    # A loop break, for if result is not NULL; otherwise, loop back to first DemoCom line
   }
   
   # Add intraspecific differences----
-  intra.phy <- add.branch(orig.phy,birth=intra.birth,death=intra.death,steps=intra.steps,"pops")
+  intra.phy <- add.branch(orig.phy,birth=intra.birth,death=intra.death,"pops")
   # Create an empty matrix for the intra community
   # (tryCatch statement included to account for trees in which all species have gone extinct)
   intra.comm <- tryCatch(matrix(nrow=length(sites),ncol=Ntip(intra.phy),dimnames = list(sites,intra.phy$tip.label)),error=function(cond) {return(NULL)})
@@ -108,7 +115,7 @@ SimulateCommnunity <- function(comm.spp,comm.size,comm.birth,comm.death,comm.env
   intra.comm <- abundance.mapping(species.names, population.names, sites, orig.comm, intra.comm)
   
   # Add sequencing error----
-  seq.phy <- add.branch(intra.phy,birth=seq.birth,death=seq.death,steps=seq.steps,"seq.err")
+  seq.phy <- add.branch(intra.phy,birth=seq.birth,death=seq.death,"seq.err")
   # Create an empty matrix for the seq. error community
   # (tryCatch statement included to account for trees in which all species have gone extinct)
   seq.comm <- tryCatch(matrix(nrow=length(sites),ncol=Ntip(seq.phy),dimnames = list(sites,seq.phy$tip.label)),error=function(cond) {return(NULL)})
@@ -145,25 +152,21 @@ SimulateCommnunity <- function(comm.spp,comm.size,comm.birth,comm.death,comm.env
   simulation.data <- list(phylogenies=community.phylogenies,abundances=community.abundances,transforms=community.transforms,values=original.diversityMetrics)
   return(simulation.data)
 }
-# # Ultrametric test
-# SimulateCommnunity(comm.spp=10, comm.size=10, comm.birth=0.5, comm.death=0,
-#                    comm.env=1, comm.abund=1,intra.birth=0.5,
-#                    intra.death=0.1,intra.steps=3,seq.birth=0.5,
-#                    seq.death=0.1,seq.steps=3)
-# 
-# # Non-ultrametric tests
-# SimulateCommnunity(comm.spp=10, comm.size=10, comm.birth=0.5, comm.death=0.1,
-#                            comm.env=1, comm.abund=1,intra.birth=0.5,
-#                            intra.death=0.1,intra.steps=3,seq.birth=0.5,
-#                            seq.death=0.1,seq.steps=3)
-# # High death
-# SimulateCommnunity(comm.spp=5, comm.size=10, comm.birth=0.5, comm.death=0.2,
-#                           comm.env=1, comm.abund=1,intra.birth=0.1,
-#                           intra.death=0.5,intra.steps=3,seq.birth=0.1,
-#                           seq.death=0.5,seq.steps=3)
-# plot(test$phylogenies$orig.phylo, show.tip.label = FALSE)
-# plot(test$phylogenies$seq.phylo, show.tip.label = FALSE)
-# test$values
+# Ultrametric test
+SimulateCommnunity(comm.spp=10, comm.size=10, comm.birth=0.5, comm.death=0, tree.ratio=4,
+                   intra.birth=0.5, intra.death=0.1,
+                   seq.birth=0.5, seq.death=0.1)
+
+# Non-ultrametric test
+SimulateCommnunity(comm.spp=10, comm.size=10, comm.birth=0.5, comm.death=0.1, tree.ratio=4,
+                   intra.birth=0.5, intra.death=0.1,
+                   seq.birth=0.5, seq.death=0.1)
+
+# High death test
+SimulateCommnunity(comm.spp=5, comm.size=10, comm.birth=0.5, comm.death=0.2, tree.ratio=3,
+                   intra.birth=0.1, intra.death=0.5,
+                   seq.birth=0.1, seq.death=0.5)
+
 # # %%% Simulate communities using sim.comm %%%----
 # SimulateCommnunity <- function(comm.spp,comm.size,comm.birth,comm.death,comm.env,comm.abund,
 #                                intra.birth,intra.death,intra.steps,seq.birth,seq.death,seq.steps){
