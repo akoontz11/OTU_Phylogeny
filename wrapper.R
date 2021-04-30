@@ -69,27 +69,35 @@ source("~/OTU_Phylogeny/SimulateCommunity.R")
 
 # (Non-)ultrametric scenarios, SESmpd--------------------------------------------------
 
-# Varying intraspecific/sequencing error birth/death rates, and number of community species
-params <- data.frame(expand.grid(intra.birth=seq(0.1,0.3,0.1),seq.birth=seq(0.1,0.3,0.1)))
-
-# Subsetting to only include instances in which birth >= death parameters
-# params <- subset(params, intra.birth >= intra.death)
-# params <- subset(params, seq.birth >= seq.death)
-
-# Running simulation on 6 cores
-# Non-ultrametric
-# sim.Results <- mcMap(function(i) SimulateCommnunity(comm.spp=10,comm.size=10,comm.birth=0.5,
-#                                                     comm.death=0.1,comm.env=1, comm.abund=1,
-#                                                     params$intra.birth[i],intra.death=0.1,intra.steps=3,
-#                                                     params$seq.birth[i],seq.death=0.1,seq.steps=3),
-#                                                     1:nrow(params),mc.cores=6)
-
 # Ultrametric
-sim.Results <- mcMap(function(i) SimulateCommnunity(comm.spp=20,comm.size=10,
-                                                    comm.birth=0.5,comm.death=0,tree.ratio=4,
-                                                    params$intra.birth[i],intra.death=0.1,
-                                                    params$seq.birth[i],seq.death=0.1,
-                                                    1:nrow(params),mc.cores=6))
+# Varying inter/intra/seq birth rates and tree ratios
+ultra.params <- data.frame(expand.grid(inter.birth=seq(0.1,0.5,0.1),
+                                 intra.birth=seq(0.1,0.5,0.1),
+                                 seq.birth=seq(0.1,0.5,0.1),
+                                 tree.ratio=seq(2,5,1)))
+
+# Running simulation
+sim.ultra.Results <- mcMap(function(i) SimulateCommunity(comm.spp=30,comm.size=10,
+                                                         ultra.params$inter.birth[i],inter.death=0,
+                                                         ultra.params$intra.birth[i],intra.death=0,
+                                                         ultra.params$seq.birth[i],seq.death=0,
+                                                         ultra.params$tree.ratio[i]),
+                           1:nrow(ultra.params), mc.cores=24)
+
+# Non-ultrametric
+# Varying inter/intra/seq birth/death rates and tree ratios
+params <- data.frame(expand.grid(inter.birth=seq(0.1,0.5,0.1), inter.death=seq(0.1,0.5,0.1),
+                                 intra.birth=seq(0.1,0.5,0.1), intra.death=seq(0.1,0.5,0.1),
+                                 seq.birth=seq(0.1,0.5,0.1), seq.death=seq(0.1,0.5,0.1),
+                                 tree.ratio=seq(2,5,1)))
+
+# Running simulation
+sim.Results <- mcMap(function(i) SimulateCommunity(comm.spp=30, comm.size=10,
+                                                   params$inter.birth[i], params$inter.death[i],
+                                                   params$intra.birth[i], params$intra.death[i],
+                                                   params$seq.birth[i], params$seq.death[i],
+                                                   params$tree.ratio[i]),
+                     1:nrow(params), mc.cores=24)
 
 # Saving results
 save.image("simResults/simResults.RData")
