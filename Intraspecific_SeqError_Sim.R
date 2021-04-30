@@ -42,10 +42,11 @@ add.branch <- function(tree,birth,death,type=c("pops","seq.err")){
     }
     # Get longest branch of new tree
     new.max.depth <- max(branching.times(tree))
-    # If the maximum branch lengths are different, rescale the new tree to the maximum edge length of the old tree
-    # if(old.max.depth != new.max.depth){
-    #   tree$edge.length <- (tree$edge.length)*(old.max.depth/new.max.depth)
-    # }
+    # To maintain interspecific to intra/seq ratios, new tree must be one branch length unit longer than old tree
+    if(new.max.depth != (old.max.depth+1)){
+      # If not, scale the new tree to make it so
+      tree$edge.length <- (tree$edge.length)*((old.max.depth+1)/new.max.depth)
+    }
     return(tree)
   }
 }
