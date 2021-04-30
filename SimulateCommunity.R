@@ -48,10 +48,8 @@ sim.comm <- function(nspp=20, nsite=50, birth=1, death=0, tree.ratio=5){
   slope <- rnorm(nspp, sd=5)
   env <- (seq_len(nsite)-1) / (sd(seq_len(nsite)-1))
   
-  # cat(max(branching.times(tree)), "\n")
+  # Rescale interspecific tree according to tree.ratio parameter, to control for ratio of inter/intra/seq variation
   tree$edge.length <- tree$edge.length*(tree.ratio/max(branching.times(tree)))
-  # The below line prints the total tree depth
-  # cat(max(branching.times(tree)), "\n")
 
   # Create community values, based on nsite and env.str arguments
   # This is over-involved; a simpler generation of comm would be more suitable
@@ -68,41 +66,58 @@ sim.comm <- function(nspp=20, nsite=50, birth=1, death=0, tree.ratio=5){
 }
 
 # %%% Simulating communities: sim.comm, SESmpd %%%----
-SimulateCommnunity <- function(comm.spp,comm.size,comm.birth,comm.death,tree.ratio,
-                               intra.birth,intra.death,seq.birth,seq.death){
-  # Simulate community (using sim.comm function)
-  # Generate NULL for a DemoCom object that is in error
-  DemoCom <- tryCatch(sim.comm(nspp=comm.spp,nsite=comm.size,birth=comm.birth,death=comm.death,tree.ratio=tree.ratio),error=function(cond) {return(NULL)})
-  # If DemoCom is NULL, reattempt 100 times
-  if(is.null(DemoCom)){
-    max.iter <-100
-    for(i in 1:max.iter){
-      DemoCom <- tryCatch(sim.comm(nspp=comm.spp,nsite=comm.size,birth=comm.birth,death=comm.death,tree.ratio=tree.ratio),error=function(cond) {return(NULL)})
-      if(!is.null(DemoCom)){
-        break
-      } else {
-        if(i==max.iter){
+SimulateCommunity <- function(comm.spp,comm.size,inter.birth,inter.death,
+                              intra.birth,intra.death,seq.birth,seq.death,
+                              tree.ratio){
+  # Simulate community (using sim.comm function); loop to account for NULL results
+  for(i in 1:20){
+    # Generate NULL for a DemoCom object that is in error
+    DemoCom <- tryCatch(sim.comm(nspp=comm.spp,nsite=comm.size,birth=inter.birth,death=inter.death,tree.ratio=tree.ratio),error=function(cond) {return(NULL)})
+    # If DemoCom is NULL, reattempt 10 times
+    if(is.null(DemoCom)){
+      max.iter <-10
+      for(j in 1:max.iter){
+        DemoCom <- tryCatch(sim.comm(nspp=comm.spp,nsite=comm.size,birth=inter.birth,death=inter.death,tree.ratio=tree.ratio),error=function(cond) {return(NULL)})
+        if(!is.null(DemoCom)){
           break
+        } else {
+          if(j==max.iter){
+            break
+          }
         }
       }
     }
+    # If after 10 times DemoCom is still NULL, assign NULL to other variables
+    if(is.null(DemoCom)){
+      orig.phy <- NULL ; orig.comm <- NULL ; species.names <- NULL ; sites <- NULL
+      # Otherwise, cleanup community and assign populations
+    } else {
+      # Drop sites with one or less species in them (because mpd needs to measure communities)
+      orig.comm <- DemoCom$comm[apply(DemoCom$comm, 1, function(x) sum(x!=0) > 1),,drop=F]
+      # Drop extinct species from community matrix, and get names of remaining species
+      orig.comm <- orig.comm[,apply(orig.comm,2,function(x) !all(x==0))]
+      species.names <- colnames(orig.comm)
+      sites <- rownames(orig.comm)
+      # Trim phylogeny to only contain remaining species (using drop.tip), and get site names
+      orig.phy <- drop.tip(DemoCom$phy, tip = DemoCom$phy$tip.label[!DemoCom$phy$tip.label %in% species.names])
+    }
+    
+    # If, after trimming phylogeny and cleaning community, phylogeny is NULL, assign NULL to community as well
+    if(is.null(orig.phy)){
+      orig.comm <- NULL ; species.names <- NULL ; sites <- NULL
+    } else {
+      # If orig.phy has two or less species, SESmpd will return NULL. Repeat, with more species
+      if(length(species.names) >= 2){
+        next
+      } else {
+        # Otherwise, break out of larger loop
+        break
+      }
+    }
   }
-  # If after 100 times DemoCom is still NULL, assign NULL to other variables
-  if(is.null(DemoCom)){
-    orig.phy <- NULL ; orig.comm <- NULL ; species.names <- NULL ; sites <- NULL
-    # Otherwise, cleanup community and assign populations
-  } else {
-    # Drop sites with one or less species in them (because mpd needs to measure communities)
-    orig.comm <- DemoCom$comm[apply(DemoCom$comm, 1, function(x) sum(x!=0) > 1),,drop=F]
-    # Drop extinct species from community matrix, and get names of remaining species
-    orig.comm <- orig.comm[,apply(orig.comm,2,function(x) !all(x==0))]
-    species.names <- colnames(orig.comm)
-    sites <- rownames(orig.comm)
-    browser()
-    # Trim phylogeny to only contain remaining species (using drop.tip), and get site names
-    orig.phy <- drop.tip(DemoCom$phy, tip = DemoCom$phy$tip.label[!DemoCom$phy$tip.label %in% species.names])
-    # Need a catch here for communities with few species/sites after removals above.
-    # A loop break, for if result is not NULL; otherwise, loop back to first DemoCom line
+  # If orig.phy length no longer conforms to specified tree.ratio, scale it
+  if(max(branching.times(orig.phy)) != tree.ratio){
+    orig.phy$edge.length <- orig.phy$edge.length*(tree.ratio/max(branching.times(orig.phy)))
   }
   
   # Add intraspecific differences----
@@ -138,7 +153,6 @@ SimulateCommnunity <- function(comm.spp,comm.size,comm.birth,comm.death,tree.rat
   if(!is.null(orig.SESmpd)){
     names(orig.SESmpd) <- paste("Site",1:nrow(orig.comm),sep="_")
   }
-  
   # Export a list containing all simulation data, for each community "type" (original, intra, and seq)----
   # Abundances
   community.abundances <- list(orig.community=orig.comm,intra.community=intra.comm,seq.community=seq.comm)
@@ -152,20 +166,25 @@ SimulateCommnunity <- function(comm.spp,comm.size,comm.birth,comm.death,tree.rat
   simulation.data <- list(phylogenies=community.phylogenies,abundances=community.abundances,transforms=community.transforms,values=original.diversityMetrics)
   return(simulation.data)
 }
-# Ultrametric test
-SimulateCommnunity(comm.spp=10, comm.size=10, comm.birth=0.5, comm.death=0, tree.ratio=4,
-                   intra.birth=0.5, intra.death=0.1,
-                   seq.birth=0.5, seq.death=0.1)
-
-# Non-ultrametric test
-SimulateCommnunity(comm.spp=10, comm.size=10, comm.birth=0.5, comm.death=0.1, tree.ratio=4,
-                   intra.birth=0.5, intra.death=0.1,
-                   seq.birth=0.5, seq.death=0.1)
-
-# High death test
-SimulateCommnunity(comm.spp=5, comm.size=10, comm.birth=0.5, comm.death=0.2, tree.ratio=3,
-                   intra.birth=0.1, intra.death=0.5,
-                   seq.birth=0.1, seq.death=0.5)
+# # Ultrametric (no death)
+# SimulateCommunity(comm.spp=10, comm.size=10, inter.birth=0.5, inter.death=0, tree.ratio=4,
+#                   intra.birth=0.5, intra.death=0,
+#                   seq.birth=0.5, seq.death=0)
+# 
+# # Non-ultrametric interspecific tree
+# SimulateCommunity(comm.spp=10, comm.size=10, inter.birth=0.5, inter.death=0.2, tree.ratio=4,
+#                   intra.birth=0.5, intra.death=0,
+#                   seq.birth=0.5, seq.death=0)
+# 
+# # Non-ultrametric intra/seq branches
+# SimulateCommunity(comm.spp=10, comm.size=10, inter.birth=0.5, inter.death=0, tree.ratio=4,
+#                   intra.birth=0.5, intra.death=0.2,
+#                   seq.birth=0.5, seq.death=0.2)
+# 
+# # Non-ultrametric inter/intra/seq (high death)
+# SimulateCommunity(comm.spp=5, comm.size=10, inter.birth=0.5, inter.death=0.2, tree.ratio=3,
+#                   intra.birth=0.1, intra.death=0.5,
+#                   seq.birth=0.1, seq.death=0.5)
 
 # # %%% Simulate communities using sim.comm %%%----
 # SimulateCommnunity <- function(comm.spp,comm.size,comm.birth,comm.death,comm.env,comm.abund,
