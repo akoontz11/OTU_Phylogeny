@@ -5,19 +5,19 @@ library(viridis)
 
 # %%% Worker functions %%%----
 # Function to calculate correlations of MPD measurements between each delta value (x)
-# and a "reference" delta value (d, taken prior to transformations)
-.new.correls <- function(x,d){
+# and "reference" MPD values (r, taken prior to transformations)
+.new.correls <- function(x,r){
   value <- numeric(length=ncol(x))
   for (i in 1:ncol(x)){
-    value[i] <- cor(x[,i],d, use="na.or.complete")
+    value[i] <- cor(x[,i],r, use="na.or.complete")
   }
   return(value)
 }
 
 # Function to calculate difference in site (MPD) rankings 
-.ranking.diff <- function(x,d){
-  # Generate a numeric vector of baseline site rankings (i.e. delta=1.0)
-  baseline.rank <- rank(d)
+.ranking.diff <- function(x,r){
+  # Generate a numeric vector of baseline site rankings (i.e. prior to transformations)
+  baseline.rank <- rank(r)
   # Generate a vector to capture mean changes between rankings
   meanRankChanges <- vector(length = ncol(x))
   for (i in 1:ncol(x)){
@@ -147,7 +147,7 @@ summary(u.model.rankShifts)
 
 # %%% Non-ultrametric, SESmpd %%%----
 # %%% Read in simulation data %%%
-load("OTU_Phylogeny/simResults/simResults.NON_ULTRA.SESMPD.RData")
+load("OTU_Phylogeny/simResults/simResults.RData")
 # Generate backup data of simulation variables
 backup <- sim.Results
 b.params <- params
@@ -160,15 +160,15 @@ params <- params[sapply(sim.data, is.matrix),]
 # Remove NAs from simulation data
 sim.data <- sim.data[which(!is.na(sim.data))]
 # Extract original MPD values of each community, prior to branch additions or transformations
-sim.SESMPDs <- lapply(sim.Results, function(x) x$values$SESmpds)
-sim.SESMPDs <- sim.SESMPDs[sapply(sim.SESMPDs, Negate(is.null))]
+sim.SESmpds <- lapply(sim.Results, function(x) x$values$SESmpds)
+sim.SESmpds <- sim.SESmpds[sapply(sim.SESmpds, Negate(is.null))]
 # Build results matrix, from which linear model variables will be pulled
 results <- params[rep(1:nrow(params), each=30),]
 results$delta <- rep(deltas,length(sim.data))
 
 # %%% MPD correlations between site and baseline %%%
 # Calculate MPD correlations on simulation data
-t.correls <- mapply(.new.correls, sim.data, sim.SESMPDs)
+t.correls <- mapply(.new.correls, sim.data, sim.SESmpds)
 results$correl <- as.numeric(t.correls)
 # Model effects on MPD correlations
 n.model.correl <- lm(correl ~ scale(log10(delta)),data=results,na.action=na.omit)
@@ -176,7 +176,7 @@ summary(n.model.correl)
 
 # %%% Ranking differences between site and baseline %%%
 # Calculate mean number of site rank shifts
-rank.shifts <- mapply(.ranking.diff, sim.data, sim.SESMPDs)
+rank.shifts <- mapply(.ranking.diff, sim.data, sim.SESmpds)
 results$rank.shifts <- as.numeric(rank.shifts)
 # Model effects on site diversity rankings
 n.model.rankShifts <- lm(rank.shifts ~ scale(log10(delta)),data=results,na.action=na.omit)
@@ -319,6 +319,19 @@ for(i in 1:ncol(mean.MPDs)){
 plot(final.MPDs[1,] ~ unique(results$delta), ylim=c(-20,20), type="n", ylab="Mean MPD Values", xlab="Delta")
 for(i in 1:nrow(final.MPDs)){
   lines(unique(results$delta), final.MPDs[i,], col=rgb(red=0.3, green=0.1, blue=0.4, alpha=0.1))
+}
+
+# Plot SESmpd means for each site over delta values
+ymin <- min(sapply(sim.data, min)); ymax <- max(sapply(sim.data, max))
+for(i in 1:length(sim.data)){
+  means <- apply(sim.data[[i]], 2, mean)
+  if(i == 1){
+    plot(means ~ deltas, xlab="Delta", ylab="SESmpd", ylim=c(ymin,ymax), pch=20, col=i)
+    lines(deltas, means, col=i)
+  } else {
+    points(means ~ deltas, col=i, pch=20)
+    lines(deltas, means, col=i)
+  }
 }
 
 # %%% Backup variables %%%----
