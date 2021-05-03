@@ -41,6 +41,15 @@ abundance.mapping <- function(oldColumnNames, newColumnNames, rowNames, donor.co
 
 # %%% Function generating original (interspecific) phylogenies and communities %%%----
 sim.comm <- function(nspp=20, nsite=50, birth=1, death=0, tree.ratio=5){
+  # Check for correct length of tree ratio parameter
+  if(length(tree.ratio) != 3){
+    stop("Tree ratio parameter must be length 3 (specifying inter:intra:seq branch lengths")
+  }
+  # Warn user if tree ratios violate inter:intra:seq branch length assumptions
+  if(tree.ratio[2] > tree.ratio[1] | tree.ratio[3] > tree.ratio[1] | tree.ratio[3] > tree.ratio[2]){
+    warning("Specified branch length ratios are in violation of inter>intra>seq assumption")
+  }
+  
   # Setup tree and environmental gradient
   tree <- sim.bdtree(n=nspp, b=birth, d=death)
   nspp <- length(tree$tip.label)

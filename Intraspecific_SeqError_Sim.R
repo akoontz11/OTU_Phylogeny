@@ -6,7 +6,7 @@ library(phytools)
 
 # New function, rescaling tree----
 # Append trees onto phylogeny tips. birth, death, steps are fed to sim.bdtree. type determines populations or seq. error
-add.branch <- function(tree,birth,death,type=c("pops","seq.err")){
+add.branch <- function(tree,birth,death,tree.ratio, type=c("pops","seq.err")){
   type <- match.arg(type)
   # If argument `tree` is without branches (i.e. NULL), return a tree that is NULL. Otherwise, add branches to it.
   if(is.null(tree)){
