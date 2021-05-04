@@ -40,12 +40,11 @@ add.branch <- function(tree,birth,death,tree.ratio, type=c("pops","seq.err")){
       tree <- bind.tree(tree,new.tree,where=1)
       # (where always equals 1, because with every addition, next "open" tip becomes tip number 1)
     }
-    # Get longest branch of new tree
-    new.max.depth <- max(branching.times(tree))
-    # To maintain interspecific to intra/seq ratios, new tree must be one branch length unit longer than old tree
-    if(new.max.depth != (old.max.depth+1)){
-      # If not, scale the new tree to make it so
-      tree$edge.length <- (tree$edge.length)*((old.max.depth+1)/new.max.depth)
+    # Scale the resulting tree based on the values specified in the tree ratio vector
+    if(type=="seq.err"){
+      tree$edge.length <- (tree$edge.length)*(tree.ratio[3]/max(branching.times(tree)))
+    } else {
+      tree$edge.length <- (tree$edge.length)*(tree.ratio[2]/max(branching.times(tree)))
     }
     return(tree)
   }
