@@ -136,10 +136,7 @@ summary(u.model.rankShifts)
 
 # %%% Non-ultrametric, SESmpd %%%----
 # %%% Read in simulation data %%%
-load("OTU_Phylogeny/simResults/simResults_20210503_2.RData")
-# Generate backup data of simulation variables
-backup <- sim.Results
-b.params <- params
+load("OTU_Phylogeny/simResults/simResults_20210504.RData")
 
 # NON-ULTRAMETRIC INSTANCES
 # Remove errored instances (to be addressed later)
