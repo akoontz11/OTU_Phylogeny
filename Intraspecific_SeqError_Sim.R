@@ -21,6 +21,12 @@ add.branch <- function(tree,birth,death,tree.ratio, type=c("pops","seq.err")){
       orig.tip <- orig.tree$tip.label[i]
       # Generate a new tree to be added onto the tip of the original tree, based on arguments
       new.tree <- sim.bdtree(b=birth, d=death, stop="time", t=1)
+      # Scale the resulting branches based on the values specified in the tree ratio vector
+      if(type=="seq.err"){
+        new.tree$edge.length <- (new.tree$edge.length)*(tree.ratio[3]/max(branching.times(new.tree)))
+      } else {
+        new.tree$edge.length <- (new.tree$edge.length)*(tree.ratio[2]/max(branching.times(new.tree)))
+      }
       # Rename new tree tip labels
       # Get number of tips of new tree
       new.tips <- Ntip(new.tree)
@@ -39,12 +45,6 @@ add.branch <- function(tree,birth,death,tree.ratio, type=c("pops","seq.err")){
       }
       tree <- bind.tree(tree,new.tree,where=1)
       # (where always equals 1, because with every addition, next "open" tip becomes tip number 1)
-    }
-    # Scale the resulting tree based on the values specified in the tree ratio vector
-    if(type=="seq.err"){
-      tree$edge.length <- (tree$edge.length)*(tree.ratio[3]/max(branching.times(tree)))
-    } else {
-      tree$edge.length <- (tree$edge.length)*(tree.ratio[2]/max(branching.times(tree)))
     }
     return(tree)
   }
