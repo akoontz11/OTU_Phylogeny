@@ -188,22 +188,22 @@ SimulateCommunity <- function(comm.spp,comm.size,inter.birth,inter.death,
 }
   
 # # Ultrametric (no death)
-# SimulateCommunity(comm.spp=20, comm.size=10, inter.birth=0.5, inter.death=0, tree.ratio=c(25,2,0.5),
+# test <- SimulateCommunity(comm.spp=15, comm.size=10, inter.birth=0.5, inter.death=0, tree.ratio=c(25,2,0.5),
 #                   intra.birth=0.5, intra.death=0,
 #                   seq.birth=0.5, seq.death=0)
 # 
 # # Non-ultrametric interspecific tree
-# SimulateCommunity(comm.spp=20, comm.size=10, inter.birth=0.5, inter.death=0.2, tree.ratio=c(25,2,0.5),
+# SimulateCommunity(comm.spp=15, comm.size=10, inter.birth=0.5, inter.death=0.2, tree.ratio=c(25,2,0.5),
 #                   intra.birth=0.5, intra.death=0,
 #                   seq.birth=0.5, seq.death=0)
 # 
 # # Non-ultrametric intra/seq branches
-# SimulateCommunity(comm.spp=20, comm.size=10, inter.birth=0.5, inter.death=0, tree.ratio=c(25,2,0.5),
+# SimulateCommunity(comm.spp=15, comm.size=10, inter.birth=0.5, inter.death=0, tree.ratio=c(25,2,0.5),
 #                   intra.birth=0.5, intra.death=0.2,
 #                   seq.birth=0.5, seq.death=0.2)
 # 
 # # Non-ultrametric inter/intra/seq (high death)
-# test <- SimulateCommunity(comm.spp=20, comm.size=10, inter.birth=0.5, inter.death=0.2, tree.ratio=c(25,2,0.5),
+# test <- SimulateCommunity(comm.spp=15, comm.size=10, inter.birth=0.5, inter.death=0.2, tree.ratio=c(25,2,0.5),
 #                   intra.birth=0.1, intra.death=0.5,
 #                   seq.birth=0.1, seq.death=0.5)
 
