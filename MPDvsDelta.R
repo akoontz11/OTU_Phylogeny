@@ -24,7 +24,7 @@ phy.d.transform <- function(phylo,abundance.matrix,d){
       # (Including the force.root argument, in order to handle unrooted phylogenies)
       c.data <- comparative.comm(s.phylo, abundance.matrix, force.root = 0)
       # Calculate standard effect sizes of mean pairwise distances
-      ses.mpd.values <- .ses.mpd(c.data, abundance.weighted=TRUE)
+      ses.mpd.values <- .ses.mpd(c.data, abundance.weighted=TRUE, permute=99)
       ses.mpd.values <- ses.mpd.values$mpd.obs.z
       # Store calculated SESmpd values within a matrix
       ses.mpd.mat[,i] <- ses.mpd.values
