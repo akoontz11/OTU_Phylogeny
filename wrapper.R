@@ -76,7 +76,7 @@ ultra.params <- data.frame(expand.grid(inter.birth=seq(0.1,0.5,0.1),
                                        seq.birth=seq(0.1,0.5,0.1)))
 
 # Running simulation
-sim.ultra.Results <- mcMap(function(i) SimulateCommunity(comm.spp=30,comm.size=10,
+sim.ultra.Results <- mcMap(function(i) SimulateCommunity(comm.spp=15,comm.size=10,
                                                          ultra.params$inter.birth[i],inter.death=0,
                                                          ultra.params$intra.birth[i],intra.death=0,
                                                          ultra.params$seq.birth[i],seq.death=0,
@@ -89,9 +89,8 @@ params <- data.frame(expand.grid(inter.birth=seq(0.1,0.5,0.1), inter.death=seq(0
                                  intra.birth=seq(0.1,0.5,0.1), intra.death=seq(0.1,0.2,0.1),
                                  seq.birth=seq(0.1,0.5,0.1), seq.death=seq(0.1,0.2,0.1)))
 
-
 # Running simulation
-sim.Results <- mcMap(function(i) SimulateCommunity(comm.spp=30, comm.size=10,
+sim.Results <- mcMap(function(i) SimulateCommunity(comm.spp=15, comm.size=10,
                                                    params$inter.birth[i], params$inter.death[i],
                                                    params$intra.birth[i], params$intra.death[i],
                                                    params$seq.birth[i], params$seq.death[i],
@@ -100,4 +99,4 @@ sim.Results <- mcMap(function(i) SimulateCommunity(comm.spp=30, comm.size=10,
 
 
 # Saving results
-save.image("simResults/simResults_20210504.RData")
+save.image("simResults/simResults_20210506.RData")
