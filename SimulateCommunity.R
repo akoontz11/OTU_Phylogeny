@@ -94,7 +94,7 @@ SimulateCommunity <- function(comm.spp,comm.size,inter.birth,inter.death,
   }
   # Simulate community (using sim.comm function)
   # Generate NULL for a DemoCom object that is in error
-  max.iter.large <- 10
+  max.iter.large <- 5
   for(i in 1:max.iter.large){
     DemoCom <- sim.comm(nspp=comm.spp,nsite=comm.size,birth=inter.birth,death=inter.death,tree.ratio=tree.ratio)
     if(is.null(DemoCom)){
@@ -203,9 +203,9 @@ SimulateCommunity <- function(comm.spp,comm.size,inter.birth,inter.death,
 #                   seq.birth=0.5, seq.death=0.2)
 # 
 # # Non-ultrametric inter/intra/seq (high death)
-# test <- SimulateCommunity(comm.spp=15, comm.size=10, inter.birth=0.5, inter.death=0.2, tree.ratio=c(25,2,0.5),
-#                   intra.birth=0.1, intra.death=0.5,
-#                   seq.birth=0.1, seq.death=0.5)
+# test <- SimulateCommunity(comm.spp=15, comm.size=10, inter.birth=0.2, inter.death=0.2, tree.ratio=c(25,2,0.5),
+#                   intra.birth=0.2, intra.death=0.2,
+#                   seq.birth=0.2, seq.death=0.2)
 
 # # %%% Simulate communities using sim.comm %%%----
 # SimulateCommnunity <- function(comm.spp,comm.size,comm.birth,comm.death,comm.env,comm.abund,
