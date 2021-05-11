@@ -4,41 +4,6 @@ library(pez)
 library(ape)
 library(geiger)
 
-# %%% Function mapping abundance values from one community matrix to a newer, expanded matrix %%%----
-abundance.mapping <- function(oldColumnNames, newColumnNames, rowNames, donor.comm, recip.comm){
-  # If `donor.com` argument is empty, column names will be NULL; return the recip.comm argument as NULL
-  if(is.null(oldColumnNames)){
-    recip.comm <- NULL
-    return(recip.comm)
-  }else{
-    # For each column in the donor matrix, and each site, get recipient matrix column derived from "current" donor matrix column
-    for(i in 1:length(oldColumnNames)){
-      for(j in 1:length(rowNames)){
-        current.species <- grep(oldColumnNames[i],newColumnNames)
-        # If no existing columns are derived from the "current" column in the donor (i.e. extinction), skip over that column
-        if(length(current.species) == 0){
-          next
-        } else {
-          # If there's only one derived column, that column receives abundance values
-          # (This if statement is necessary because of the unintuitive behavior of `sample` for vectors of length 1...)
-          if (length(current.species) == 1){
-            lucky.column <- current.species
-          } else {
-            # If there are multiple columns derived from the "current" column, randomly select one of them
-            lucky.column <- sample(x=current.species, size=1)
-          }
-          # The abundance values in the chosen ("lucky") column get the donor abundance values
-          recip.comm[j,lucky.column] <- donor.comm[j,i]
-          # Remove the "lucky.column" from vector of populations. Remaining columns get abundances of 0
-          current.species <- current.species[!current.species %in% lucky.column]
-          recip.comm[j,current.species] <- 0
-        }
-      }
-    }
-    return(recip.comm)
-  }
-}
-
 # %%% Function generating original (interspecific) phylogenies and communities %%%----
 sim.comm <- function(nspp=20, nsite=50, birth=1, death=0, tree.ratio=c(20,1,0.5)){
   # Set iteration variable, to repeat tree generation if necessary
@@ -79,6 +44,40 @@ sim.comm <- function(nspp=20, nsite=50, birth=1, death=0, tree.ratio=c(20,1,0.5)
   return(data)
 }
 
+# %%% Function mapping abundance values from one community matrix to a newer, expanded matrix %%%----
+abundance.mapping <- function(oldColumnNames, newColumnNames, rowNames, donor.comm, recip.comm){
+  # If `donor.com` argument is empty, column names will be NULL; return the recip.comm argument as NULL
+  if(is.null(oldColumnNames)){
+    recip.comm <- NULL
+    return(recip.comm)
+  }else{
+    # For each column in the donor matrix, and each site, get recipient matrix column derived from "current" donor matrix column
+    for(i in 1:length(oldColumnNames)){
+      for(j in 1:length(rowNames)){
+        current.species <- grep(oldColumnNames[i],newColumnNames)
+        # If no existing columns are derived from the "current" column in the donor (i.e. extinction), skip over that column
+        if(length(current.species) == 0){
+          next
+        } else {
+          # If there's only one derived column, that column receives abundance values
+          # (This if statement is necessary because of the unintuitive behavior of `sample` for vectors of length 1...)
+          if (length(current.species) == 1){
+            lucky.column <- current.species
+          } else {
+            # If there are multiple columns derived from the "current" column, randomly select one of them
+            lucky.column <- sample(x=current.species, size=1)
+          }
+          # The abundance values in the chosen ("lucky") column get the donor abundance values
+          recip.comm[j,lucky.column] <- donor.comm[j,i]
+          # Remove the "lucky.column" from vector of populations. Remaining columns get abundances of 0
+          current.species <- current.species[!current.species %in% lucky.column]
+          recip.comm[j,current.species] <- 0
+        }
+      }
+    }
+    return(recip.comm)
+  }
+}
 
 # %%% Simulating communities: sim.comm, SESmpd %%%----
 SimulateCommunity <- function(comm.spp,comm.size,inter.birth,inter.death,
@@ -188,22 +187,22 @@ SimulateCommunity <- function(comm.spp,comm.size,inter.birth,inter.death,
 }
   
 # # Ultrametric (no death)
-# test <- SimulateCommunity(comm.spp=15, comm.size=10, inter.birth=0.5, inter.death=0, tree.ratio=c(25,2,0.5),
+# test <- SimulateCommunity(comm.spp=50, comm.size=10, inter.birth=0.5, inter.death=0, tree.ratio=c(25,1,0.5),
 #                   intra.birth=0.5, intra.death=0,
 #                   seq.birth=0.5, seq.death=0)
 # 
 # # Non-ultrametric interspecific tree
-# SimulateCommunity(comm.spp=15, comm.size=10, inter.birth=0.5, inter.death=0.2, tree.ratio=c(25,2,0.5),
+# SimulateCommunity(comm.spp=50, comm.size=10, inter.birth=0.5, inter.death=0.2, tree.ratio=c(25,1,0.5),
 #                   intra.birth=0.5, intra.death=0,
 #                   seq.birth=0.5, seq.death=0)
 # 
 # # Non-ultrametric intra/seq branches
-# SimulateCommunity(comm.spp=15, comm.size=10, inter.birth=0.5, inter.death=0, tree.ratio=c(25,2,0.5),
+# SimulateCommunity(comm.spp=50, comm.size=10, inter.birth=0.5, inter.death=0, tree.ratio=c(25,1,0.5),
 #                   intra.birth=0.5, intra.death=0.2,
 #                   seq.birth=0.5, seq.death=0.2)
 # 
 # # Non-ultrametric inter/intra/seq (high death)
-# test <- SimulateCommunity(comm.spp=15, comm.size=10, inter.birth=0.2, inter.death=0.2, tree.ratio=c(25,2,0.5),
+# test <- SimulateCommunity(comm.spp=50, comm.size=10, inter.birth=0.2, inter.death=0.2, tree.ratio=c(25,1,0.5),
 #                   intra.birth=0.2, intra.death=0.2,
 #                   seq.birth=0.2, seq.death=0.2)
 
