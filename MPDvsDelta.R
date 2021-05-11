@@ -111,7 +111,7 @@ phy.d.transform <- function(phylo,abundance.matrix,d){
 #   }
 # }
 
-# # %%% Plotting version of function, capturing mpd values %%% ----
+# # %%% Plotting version of MPD function %%% ----
 # # Function for capturing mpd values over series of delta transformations
 # phy.d.transform.plot <- function(phylo,abundance.matrix,d,plot.title,...){
 #   # phylo--the phylogenetic tree to be transformed
@@ -172,3 +172,4 @@ phy.d.transform <- function(phylo,abundance.matrix,d){
 # deltas <- seq(0.1,3,by=0.1)
 # # Demonstrating function
 # laja.test <- phy.d.transform(invert.tree, species.abundances, deltas)
+# laja.test.plot <- phy.d.transform.plot(invert.tree, species.abundances, deltas, "Laja")
