@@ -10,7 +10,7 @@ sim.comm <- function(nspp=20, nsite=50, birth=1, death=0, tree.ratio=c(20,1,0.5)
   max.iter <- 10
   # Setup tree and environmental gradient
   for(j in 1:max.iter){
-    tree <- sim.bdtree(n=nspp, b=birth, d=death)
+    tree <- sim.bdtree(b=birth, d=death, n=nspp)
     nspp <- length(tree$tip.label)
     intercept <- rnorm(nspp, sd=5)
     slope <- rnorm(nspp, sd=5)
@@ -24,7 +24,9 @@ sim.comm <- function(nspp=20, nsite=50, birth=1, death=0, tree.ratio=c(20,1,0.5)
         return(data)
       } else {
         next
-      }
+      } # Otherwise, continue with the working tree
+    } else {
+      break
     }
   }
   # Rescale interspecific tree according to tree.ratio parameter, to control for ratio of inter/intra/seq variation
@@ -187,17 +189,17 @@ SimulateCommunity <- function(comm.spp,comm.size,inter.birth,inter.death,
 }
   
 # # Ultrametric (no death)
-# test <- SimulateCommunity(comm.spp=50, comm.size=10, inter.birth=0.5, inter.death=0, tree.ratio=c(25,1,0.5),
+# test <- SimulateCommunity(comm.spp=200, comm.size=10, inter.birth=1, inter.death=0, tree.ratio=c(25,1,0.5),
 #                   intra.birth=0.5, intra.death=0,
 #                   seq.birth=0.5, seq.death=0)
 # 
 # # Non-ultrametric interspecific tree
-# SimulateCommunity(comm.spp=50, comm.size=10, inter.birth=0.5, inter.death=0.2, tree.ratio=c(25,1,0.5),
+# test <- SimulateCommunity(comm.spp=50, comm.size=10, inter.birth=0.5, inter.death=0.2, tree.ratio=c(25,1,0.5),
 #                   intra.birth=0.5, intra.death=0,
 #                   seq.birth=0.5, seq.death=0)
 # 
 # # Non-ultrametric intra/seq branches
-# SimulateCommunity(comm.spp=50, comm.size=10, inter.birth=0.5, inter.death=0, tree.ratio=c(25,1,0.5),
+# test <- SimulateCommunity(comm.spp=50, comm.size=10, inter.birth=0.5, inter.death=0, tree.ratio=c(25,1,0.5),
 #                   intra.birth=0.5, intra.death=0.2,
 #                   seq.birth=0.5, seq.death=0.2)
 # 
