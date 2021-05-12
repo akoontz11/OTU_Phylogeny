@@ -11,6 +11,9 @@ phy.d.transform <- function(phylo,abundance.matrix,d){
     ses.mpd.mat <- NA
     return(ses.mpd.mat)
   } else{
+    if(Ntip(phylo) >= 5000){
+      warning("Calculating SESmpd on phylogeny with 5,000 or more tips!")
+    }
     # Calculate number of sites from species-site abundance matrix
     nsim <- nrow(abundance.matrix)
     # Create matrix with which to capture mpd.values vector for every loop iteration
