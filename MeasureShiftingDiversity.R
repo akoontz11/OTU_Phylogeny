@@ -136,7 +136,7 @@ summary(u.model.rankShifts)
 
 # %%% Non-ultrametric, SESmpd %%%----
 # %%% Read in simulation data %%%
-load("OTU_Phylogeny/simResults/simResults_20210511.RData")
+load("OTU_Phylogeny/simResults/simResults_20210512.RData")
 
 # NON-ULTRAMETRIC INSTANCES
 # Remove params rows of instances in error
