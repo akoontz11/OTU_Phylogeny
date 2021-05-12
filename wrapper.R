@@ -81,6 +81,7 @@ params <- subset(params, seq.birth >= seq.death)
 
 # Running simulation
 sim.Results <- mcMap(function(i) SimulateCommunity(params$comm.spp[i], comm.size=50,
+                                                   inter.birth=1, inter.death=0, 
                                                    params$intra.birth[i], params$intra.death[i],
                                                    params$seq.birth[i], params$seq.death[i],
                                                    tree.ratio=c(25,1,0.5)),
