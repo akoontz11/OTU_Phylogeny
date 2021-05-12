@@ -70,35 +70,33 @@ source("~/OTU_Phylogeny/SimulateCommunity.R")
 # (Non-)ultrametric scenarios, SESmpd--------------------------------------------------
 
 # Non-ultrametric
-# Varying inter/intra/seq birth/death rates
-params <- data.frame(expand.grid(comm.spp=seq(50,100,200), 
-                                 intra.birth=seq(0.1,0.3,0.1), intra.death=seq(0.1,0.2,0.1),
-                                 seq.birth=seq(0.1,0.3,0.1), seq.death=seq(0.1,0.2,0.1)))
+# Varying initial species and intra/seq birth/death rates
+params <- data.frame(expand.grid(comm.spp=c(50,100,200), 
+                                 intra.birth=seq(0.1,0.2,0.1), intra.death=seq(0.1,0.2,0.1),
+                                 seq.birth=seq(0.1,0.2,0.1), seq.death=seq(0.1,0.2,0.1)))
 
-# Subsetting to only include instances in which birth > death parameters
-params <- subset(params, intra.birth > intra.death)
-params <- subset(params, seq.birth > seq.death)
+# Subsetting to only include instances in which birth >= death parameters
+params <- subset(params, intra.birth >= intra.death)
+params <- subset(params, seq.birth >= seq.death)
 
 # Running simulation
 sim.Results <- mcMap(function(i) SimulateCommunity(params$comm.spp[i], comm.size=50,
                                                    params$intra.birth[i], params$intra.death[i],
                                                    params$seq.birth[i], params$seq.death[i],
                                                    tree.ratio=c(25,1,0.5)),
-                     1:nrow(params), mc.cores=20)
+                     1:nrow(params), mc.cores=24)
 
 # Ultrametric
-# Varying inter/intra/seq birth rates
-ultra.params <- data.frame(expand.grid(comm.spp=seq(50,100,200),
-                                       intra.birth=seq(0.1,0.3,0.1),
-                                       seq.birth=seq(0.1,0.3,0.1)))
+# Varying initial species
+ultra.params <- data.frame(expand.grid(comm.spp=c(50,100,200)))
 
 # Running simulation
 sim.ultra.Results <- mcMap(function(i) SimulateCommunity(ultra.params$comm.spp[i],comm.size=50,
                                                          inter.birth=1,inter.death=0,
-                                                         ultra.params$intra.birth[i],intra.death=0,
-                                                         ultra.params$seq.birth[i],seq.death=0,
+                                                         intra.birth=0.1,intra.death=0,
+                                                         seq.birth=0.1,seq.death=0,
                                                          tree.ratio=c(25,1,0.5)),
-                           1:nrow(ultra.params), mc.cores=20)
+                           1:nrow(ultra.params), mc.cores=24)
 
 # Saving results
-save.image("simResults/simResults_20210511.RData")
+save.image("simResults/simResults_20210512.RData")
