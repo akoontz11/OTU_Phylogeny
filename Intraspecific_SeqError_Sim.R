@@ -21,28 +21,40 @@ add.branch <- function(tree,birth,death,tree.ratio, type=c("pops","seq.err")){
       orig.tip <- orig.tree$tip.label[i]
       # Generate a new tree to be added onto the tip of the original tree, based on arguments
       new.tree <- sim.bdtree(b=birth, d=death, stop="time", t=1)
+      # if(!is.ultrametric(new.tree)){
+      #   browser()
+      # }
       # Scale the resulting branches based on the values specified in the tree ratio vector
       if(type=="seq.err"){
-        new.tree$edge.length <- (new.tree$edge.length)*(tree.ratio[3]/max(branching.times(new.tree)))
+        if(max(branching.times(new.tree)) < 1){
+          new.tree$edge.length <- new.tree$edge.length * (tree.ratio[3]/max(new.tree$edge.length))
+        } else {
+          new.tree$edge.length <- new.tree$edge.length * (tree.ratio[3]/max(branching.times(new.tree)))
+        }
       } else {
-        new.tree$edge.length <- (new.tree$edge.length)*(tree.ratio[2]/max(branching.times(new.tree)))
+        #browser()
+        if(max(branching.times(new.tree)) < 1){
+          new.tree$edge.length <- new.tree$edge.length * (tree.ratio[2]/max(new.tree$edge.length))
+        } else {
+          new.tree$edge.length <- new.tree$edge.length * (tree.ratio[2]/max(branching.times(new.tree)))
+        }
       }
       # Rename new tree tip labels
-      # Get number of tips of new tree
-      new.tips <- Ntip(new.tree)
-      # For each tip in new tree, get the current tip, and reformat its name
-      for (j in 1:new.tips){
-        cur.tip <- new.tree$tip.label[j]
-        # The `type` argument denotes whether to add a "p" or an "e" to the new tips, for populations or seq. error.
-        if(type=="seq.err"){
-          cur.tip <- sub("s","e",cur.tip)
-        } else{
-          cur.tip <- sub("s","p",cur.tip)
-        }
-        new.name <- paste0(orig.tip,"--",cur.tip)
-        # Add that new name to the tip of the new tree
-        new.tree$tip.label[j] <- new.name
-      }
+      # # Get number of tips of new tree
+      # new.tips <- Ntip(new.tree)
+      # # For each tip in new tree, get the current tip, and reformat its name
+      # for (j in 1:new.tips){
+      #   cur.tip <- new.tree$tip.label[j]
+      #   # The `type` argument denotes whether to add a "p" or an "e" to the new tips, for populations or seq. error.
+      #   if(type=="seq.err"){
+      #     cur.tip <- sub("s","e",cur.tip)
+      #   } else{
+      #     cur.tip <- sub("s","p",cur.tip)
+      #   }
+      #   new.name <- paste0(orig.tip,"--",cur.tip)
+      #   # Add that new name to the tip of the new tree
+      #   new.tree$tip.label[j] <- new.name
+      # }
       tree <- bind.tree(tree,new.tree,where=1)
       # (where always equals 1, because with every addition, next "open" tip becomes tip number 1)
     }
