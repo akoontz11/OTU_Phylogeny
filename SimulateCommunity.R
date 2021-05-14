@@ -159,55 +159,54 @@ SimulateCommunity <- function(comm.spp,comm.size,inter.birth,inter.death,
   # Map abundance values from original community matrix to columns of seq.comm
   seq.comm <- abundance.mapping(species.names, individual.names, sites, orig.comm, seq.comm)
   
-  # # Capture SESmpd values over transformations----
-  # # Original community
-  # orig.transform <- phy.d.transform(orig.phy, orig.comm, deltas)
-  # # Community with populations (intraspecific error)
-  # intra.transform <- phy.d.transform(intra.phy, intra.comm, deltas)
-  # # Community with sequencing error
-  # seq.transform <- phy.d.transform(seq.phy, seq.comm, deltas)
-  # 
-  # # Capture mpd of original phylogenies (for later comparison)----
-  # orig.SESmpd <- tryCatch(.ses.mpd(comparative.comm(orig.phy, orig.comm, force.root = 0), abundance.weighted=TRUE), error=function(cond) {return(NULL)})
-  # orig.SESmpd <- orig.SESmpd$mpd.obs.z
-  # # Change names to match format from phy.d.transform function
-  # if(!is.null(orig.SESmpd)){
-  #   names(orig.SESmpd) <- paste("Site",1:nrow(orig.comm),sep="_")
-  # }
+  # Capture SESmpd values over transformations----
+  # Original community
+  orig.transform <- phy.d.transform(orig.phy, orig.comm, deltas)
+  # Community with populations (intraspecific error)
+  intra.transform <- phy.d.transform(intra.phy, intra.comm, deltas)
+  # Community with sequencing error
+  seq.transform <- phy.d.transform(seq.phy, seq.comm, deltas)
+
+  # Capture mpd of original phylogenies (for later comparison)----
+  orig.SESmpd <- tryCatch(.ses.mpd(comparative.comm(orig.phy, orig.comm, force.root = 0), abundance.weighted=TRUE), error=function(cond) {return(NULL)})
+  orig.SESmpd <- orig.SESmpd$mpd.obs.z
+  # Change names to match format from phy.d.transform function
+  if(!is.null(orig.SESmpd)){
+    names(orig.SESmpd) <- paste("Site",1:nrow(orig.comm),sep="_")
+  }
   # Export a list containing all simulation data, for each community "type" (original, intra, and seq)----
   # Abundances
   community.abundances <- list(orig.community=orig.comm,intra.community=intra.comm,seq.community=seq.comm)
   # Phylogenies
   community.phylogenies <- list(orig.phylo=orig.phy,intra.phylo=intra.phy,seq.phylo=seq.phy)
-  # # MPD matrices, from delta transforms
-  # community.transforms <- list(orig.transform=orig.transform,intra.transform=intra.transform,seq.transform=seq.transform)
-  # # Original MPD values
-  # original.diversityMetrics <- list(SESmpds=orig.SESmpd)
+  # MPD matrices, from delta transforms
+  community.transforms <- list(orig.transform=orig.transform,intra.transform=intra.transform,seq.transform=seq.transform)
+  # Original MPD values
+  original.diversityMetrics <- list(SESmpds=orig.SESmpd)
   # Return data
-  # simulation.data <- list(phylogenies=community.phylogenies,abundances=community.abundances,transforms=community.transforms,values=original.diversityMetrics)
-  simulation.data <- list(phylogenies=community.phylogenies,abundances=community.abundances)
+  simulation.data <- list(phylogenies=community.phylogenies,abundances=community.abundances,transforms=community.transforms,values=original.diversityMetrics)
   return(simulation.data)
 }
   
-# Ultrametric (no death)
-test <- SimulateCommunity(comm.spp=200, comm.size=50, inter.birth=1, inter.death=0, tree.ratio=c(25,1,0.5),
-                  intra.birth=0.5, intra.death=0,
-                  seq.birth=0.5, seq.death=0)
-
-# Non-ultrametric intra/seq branches
-test <- SimulateCommunity(comm.spp=200, comm.size=50, inter.birth=1, inter.death=0, tree.ratio=c(25,2,0.5),
-                  intra.birth=0.1, intra.death=0.1,
-                  seq.birth=0.1, seq.death=0.1)
-
-# Test for fixing intra branch lengths
-test <- SimulateCommunity(comm.spp=30, comm.size=50, inter.birth=1, inter.death=0, tree.ratio=c(3,2,1),
-                          intra.birth=0.3, intra.death=0.2,
-                          seq.birth=0.1, seq.death=0.1)
-
-# Non-ultrametric inter/intra/seq (high death)
-test <- SimulateCommunity(comm.spp=50, comm.size=50, inter.birth=1, inter.death=0, tree.ratio=c(25,1,0.5),
-                  intra.birth=0.2, intra.death=0.2,
-                  seq.birth=0.2, seq.death=0.2)
+# # Ultrametric (no death)
+# test <- SimulateCommunity(comm.spp=200, comm.size=50, inter.birth=1, inter.death=0, tree.ratio=c(25,1,0.5),
+#                   intra.birth=0.5, intra.death=0,
+#                   seq.birth=0.5, seq.death=0)
+# 
+# # Non-ultrametric intra/seq branches
+# test <- SimulateCommunity(comm.spp=200, comm.size=50, inter.birth=1, inter.death=0, tree.ratio=c(25,2,0.5),
+#                   intra.birth=0.2, intra.death=0.1,
+#                   seq.birth=0.2, seq.death=0.1)
+# 
+# # Test for fixing intra branch lengths
+# test <- SimulateCommunity(comm.spp=30, comm.size=50, inter.birth=1, inter.death=0, tree.ratio=c(10,4,2),
+#                           intra.birth=0.3, intra.death=0.2,
+#                           seq.birth=0.1, seq.death=0.1)
+# 
+# # Non-ultrametric inter/intra/seq (high death)
+# test <- SimulateCommunity(comm.spp=50, comm.size=50, inter.birth=1, inter.death=0, tree.ratio=c(25,1,0.5),
+#                   intra.birth=0.2, intra.death=0.2,
+#                   seq.birth=0.2, seq.death=0.2)
 
 # # %%% Simulate communities using sim.comm %%%----
 # SimulateCommnunity <- function(comm.spp,comm.size,comm.birth,comm.death,comm.env,comm.abund,
