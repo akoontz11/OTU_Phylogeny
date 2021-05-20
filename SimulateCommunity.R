@@ -5,7 +5,7 @@ library(ape)
 library(geiger)
 
 # %%% Function generating original (interspecific) phylogenies and communities %%%----
-sim.comm <- function(nspp=20, nsite=50, birth=1, death=0, tree.ratio=c(20,1,0.5)){
+sim.comm <- function(nspp=20, nsite=50, birth=1, death=0, inter.ratio=25){
   # Set iteration variable, to repeat tree generation if necessary
   max.iter <- 10
   # Setup tree and environmental gradient
@@ -30,7 +30,7 @@ sim.comm <- function(nspp=20, nsite=50, birth=1, death=0, tree.ratio=c(20,1,0.5)
     }
   }
   # Rescale interspecific tree according to tree.ratio parameter, to control for ratio of inter/intra/seq variation
-  tree$edge.length <- tree$edge.length*(tree.ratio[1]/max(branching.times(tree)))
+  tree$edge.length <- tree$edge.length*(inter.ratio/max(branching.times(tree)))
  
   # Create community values, based on nsite and env.str arguments
   # This is over-involved; a simpler generation of comm would be more suitable
@@ -84,20 +84,16 @@ abundance.mapping <- function(oldColumnNames, newColumnNames, rowNames, donor.co
 # %%% Simulating communities: sim.comm, SESmpd %%%----
 SimulateCommunity <- function(comm.spp,comm.size,inter.birth,inter.death,
                               intra.birth,intra.death,seq.birth,seq.death,
-                              tree.ratio){
-  # Check for correct length of tree ratio parameter
-  if(length(tree.ratio) != 3){
-    stop("Tree ratio parameter must be length 3 (specifying inter:intra:seq branch lengths)")
-  }
+                              inter.ratio, intra.ratio, seq.ratio){
   # Warn user if tree ratios violate inter:intra:seq branch length assumptions
-  if(tree.ratio[2] > tree.ratio[1] | tree.ratio[3] > tree.ratio[1] | tree.ratio[3] > tree.ratio[2]){
-    warning("Specified branch length ratios are in violation assumption")
+  if(intra.ratio > inter.ratio | seq.ratio > intra.ratio | seq.ratio > inter.ratio){
+    warning("Specified branch length ratios violate inter > intra > seq assumption")
   }
   # Simulate community (using sim.comm function)
   # Generate NULL for a DemoCom object that is in error
   max.iter.large <- 5
   for(i in 1:max.iter.large){
-    DemoCom <- sim.comm(nspp=comm.spp,nsite=comm.size,birth=inter.birth,death=inter.death,tree.ratio=tree.ratio)
+    DemoCom <- sim.comm(nspp=comm.spp,nsite=comm.size,birth=inter.birth,death=inter.death,inter.ratio=inter.ratio)
     if(is.null(DemoCom)){
       # If DemoCom is still NULL, assign NULL to other variables
       orig.phy <- NULL ; orig.comm <- NULL ; species.names <- NULL ; sites <- NULL
@@ -134,15 +130,15 @@ SimulateCommunity <- function(comm.spp,comm.size,inter.birth,inter.death,
     }
   }
   
-  # If orig.phy length no longer conforms to specified tree.ratio, scale it
+  # If orig.phy length no longer conforms to specified inter.ratio, scale it
   if(!is.null(orig.phy)){
-    if(max(branching.times(orig.phy)) != tree.ratio[1]){
-      orig.phy$edge.length <- orig.phy$edge.length*(tree.ratio[1]/max(branching.times(orig.phy)))
+    if(max(branching.times(orig.phy)) != inter.ratio){
+      orig.phy$edge.length <- orig.phy$edge.length*(inter.ratio/max(branching.times(orig.phy)))
     }
   }
   
   # Add intraspecific differences----
-  intra.phy <- add.branch(orig.phy,birth=intra.birth,death=intra.death,tree.ratio=tree.ratio,"pops")
+  intra.phy <- add.branch(orig.phy,birth=intra.birth,death=intra.death,branch.ratio=intra.ratio,"pops")
   # Create an empty matrix for the intra community
   # (tryCatch statement included to account for trees in which all species have gone extinct)
   intra.comm <- tryCatch(matrix(nrow=length(sites),ncol=Ntip(intra.phy),dimnames = list(sites,intra.phy$tip.label)),error=function(cond) {return(NULL)})
@@ -151,7 +147,7 @@ SimulateCommunity <- function(comm.spp,comm.size,inter.birth,inter.death,
   intra.comm <- abundance.mapping(species.names, population.names, sites, orig.comm, intra.comm)
   
   # Add sequencing error----
-  seq.phy <- add.branch(intra.phy,birth=seq.birth,death=seq.death,tree.ratio=tree.ratio,"seq.err")
+  seq.phy <- add.branch(intra.phy,birth=seq.birth,death=seq.death,branch.ratio=seq.ratio,"seq.err")
   # Create an empty matrix for the seq. error community
   # (tryCatch statement included to account for trees in which all species have gone extinct)
   seq.comm <- tryCatch(matrix(nrow=length(sites),ncol=Ntip(seq.phy),dimnames = list(sites,seq.phy$tip.label)),error=function(cond) {return(NULL)})
@@ -174,39 +170,39 @@ SimulateCommunity <- function(comm.spp,comm.size,inter.birth,inter.death,
   if(!is.null(orig.SESmpd)){
     names(orig.SESmpd) <- paste("Site",1:nrow(orig.comm),sep="_")
   }
-  # Export a list containing all simulation data, for each community "type" (original, intra, and seq)----
+  # Export a list containing all simulation data, for each community "type" (inter, intra, and seq)----
   # Abundances
-  community.abundances <- list(orig.community=orig.comm,intra.community=intra.comm,seq.community=seq.comm)
+  community.abundances <- list(inter.community=orig.comm,intra.community=intra.comm,seq.community=seq.comm)
   # Phylogenies
-  community.phylogenies <- list(orig.phylo=orig.phy,intra.phylo=intra.phy,seq.phylo=seq.phy)
+  community.phylogenies <- list(inter.phylo=orig.phy,intra.phylo=intra.phy,seq.phylo=seq.phy)
   # MPD matrices, from delta transforms
-  community.transforms <- list(orig.transform=orig.transform,intra.transform=intra.transform,seq.transform=seq.transform)
+  community.transforms <- list(inter.transform=orig.transform,intra.transform=intra.transform,seq.transform=seq.transform)
   # Original MPD values
   original.diversityMetrics <- list(SESmpds=orig.SESmpd)
   # Return data
   simulation.data <- list(phylogenies=community.phylogenies,abundances=community.abundances,transforms=community.transforms,values=original.diversityMetrics)
   return(simulation.data)
 }
-  
+
 # # Ultrametric (no death)
-# test <- SimulateCommunity(comm.spp=200, comm.size=50, inter.birth=1, inter.death=0, tree.ratio=c(25,1,0.5),
-#                   intra.birth=0.5, intra.death=0,
-#                   seq.birth=0.5, seq.death=0)
+# test <- SimulateCommunity(comm.spp=50, comm.size=50, inter.birth=1, inter.death=0,
+#                   intra.birth=0.5, intra.death=0, seq.birth=0.5, seq.death=0,
+#                   inter.ratio=25, intra.ratio=1, seq.ratio=0.5)
 # 
 # # Non-ultrametric intra/seq branches
-# test <- SimulateCommunity(comm.spp=200, comm.size=50, inter.birth=1, inter.death=0, tree.ratio=c(25,2,0.5),
-#                   intra.birth=0.2, intra.death=0.1,
-#                   seq.birth=0.2, seq.death=0.1)
+# test <- SimulateCommunity(comm.spp=50, comm.size=50, inter.birth=1, inter.death=0,
+#                           intra.birth=0.2, intra.death=0.1, seq.birth=0.2, seq.death=0.1,
+#                           inter.ratio=25, intra.ratio=1, seq.ratio=0.5)
 # 
 # # Test for fixing intra branch lengths
-# test <- SimulateCommunity(comm.spp=30, comm.size=50, inter.birth=1, inter.death=0, tree.ratio=c(10,4,2),
-#                           intra.birth=0.3, intra.death=0.2,
-#                           seq.birth=0.1, seq.death=0.1)
+# test <- SimulateCommunity(comm.spp=50, comm.size=50, inter.birth=1, inter.death=0,
+#                           intra.birth=0.5, intra.death=0, seq.birth=0.5, seq.death=0,
+#                           inter.ratio=25, intra.ratio=0, seq.ratio=0)
 # 
 # # Non-ultrametric inter/intra/seq (high death)
-# test <- SimulateCommunity(comm.spp=50, comm.size=50, inter.birth=1, inter.death=0, tree.ratio=c(25,1,0.5),
-#                   intra.birth=0.2, intra.death=0.2,
-#                   seq.birth=0.2, seq.death=0.2)
+# test <- SimulateCommunity(comm.spp=50, comm.size=50, inter.birth=1, inter.death=0,
+#                           intra.birth=0.2, intra.death=0.2, seq.birth=0.2, seq.death=0.2,
+#                           inter.ratio=25, intra.ratio=1, seq.ratio=0.5)
 
 # # %%% Simulate communities using sim.comm %%%----
 # SimulateCommnunity <- function(comm.spp,comm.size,comm.birth,comm.death,comm.env,comm.abund,
