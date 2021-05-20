@@ -69,29 +69,35 @@ source("~/OTU_Phylogeny/SimulateCommunity.R")
 
 # (Non-)ultrametric scenarios, SESmpd--------------------------------------------------
 
-# Non-ultrametric
-# Varying initial species and intra/seq birth/death rates
+# Non-ultrametric params
+# Varying initial species, intra/seq birth/death rates, and branch ratios
 params <- data.frame(expand.grid(comm.spp=c(50,100,200), 
-                                 intra.birth=seq(0.3,0.5,0.1), intra.death=seq(0.1,0.3,0.1),
-                                 seq.birth=seq(0.3,0.5,0.1), seq.death=seq(0.1,0.3,0.1)))
-
+                                 intra.birth=seq(0.3,0.5,0.1), intra.death=seq(0.1,0.2,0.1),
+                                 seq.birth=seq(0.3,0.5,0.1), seq.death=seq(0.1,0.2,0.1),
+                                 intra.ratio=seq(0,1,.2), seq.ratio=seq(0,1,.2)))
+# Scale seq error, to make only as large as intra variation
+params$seq.ratio <- params$intra.ratio * params$seq.ratio
 # Subsetting to only include instances in which birth >= death parameters
-params <- subset(params, intra.birth >= intra.death)
-params <- subset(params, seq.birth >= seq.death)
+# params <- subset(params, intra.birth >= intra.death)
+# params <- subset(params, seq.birth >= seq.death)
 
 # Running simulation
 sim.Results <- mcMap(function(i) SimulateCommunity(params$comm.spp[i], comm.size=50,
                                                    inter.birth=1, inter.death=0, 
                                                    params$intra.birth[i], params$intra.death[i],
                                                    params$seq.birth[i], params$seq.death[i],
-                                                   tree.ratio=c(25,1,0.5)),
+                                                   inter.ratio=25, 
+                                                   params$intra.ratio[i], params$seq.ratio[i]),
                      1:nrow(params), mc.cores=24)
 
-# Ultrametric
-# Varying initial species
+# Ultrametric params
+# Varying initial species, birth rates, and branch ratios
 ultra.params <- data.frame(expand.grid(comm.spp=c(50,100,200),
-                                       intra.birth=seq(0.1,0.3,0.1),
-                                       seq.birth=seq(0.1,0.3,0.1)))
+                                       intra.birth=seq(0.1,0.3,0.1), seq.birth=seq(0.1,0.3,0.1),
+                                       intra.ratio=seq(0,1,.2), seq.ratio=seq(0,1,.2)))
+# Scale seq error, to make only as large as intra variation
+ultra.params$seq.ratio <- ultra.params$intra.ratio * ultra.params$seq.ratio
+
 
 # Running simulation
 sim.ultra.Results <- mcMap(function(i) SimulateCommunity(ultra.params$comm.spp[i],comm.size=50,
@@ -100,8 +106,10 @@ sim.ultra.Results <- mcMap(function(i) SimulateCommunity(ultra.params$comm.spp[i
                                                          intra.death=0,
                                                          seq.birth=ultra.params$seq.birth[i],
                                                          seq.death=0,
-                                                         tree.ratio=c(25,1,0.5)),
+                                                         inter.ratio=25,
+                                                         intra.ratio=ultra.params$intra.ratio[i],
+                                                         seq.ratio=ultra.params$seq.ratio[i]),
                            1:nrow(ultra.params), mc.cores=24)
 
 # Saving results
-save.image("simResults/simResults_20210514.RData")
+save.image("simResults/simResults_20210520.RData")
