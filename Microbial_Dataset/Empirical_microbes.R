@@ -24,16 +24,17 @@ plot(fung.phylo, show.tip.label=T)
 # Create comparative comm object
 fung.cc <- comparative.comm(fung.phylo, fung.comm, force.root = 0)
 # Calculate mean pairwise distance value (for each of 24 sites in community)
-fung.mpds <- .mpd(fung.cc, abundance.weighted=TRUE) 
+fung.ses.mpds <- .ses.mpd(fung.cc, abundance.weighted=TRUE) 
+fung.ses.mpds <- fung.ses.mpds$mpd.obs.z
 
 # Build vector of delta values
 deltas <- seq(0.1,3,by=0.1)
 # Transform, building a matrix of mpds with sites as rows and delta values as columns
 fung.test <- phy.d.transform.plot(fung.phylo, fung.comm, deltas, plot.title="")
 
-# %%% MPD CORRELATIONS %%%----
-# Function for measuring correlation between original mpd value and mpd values for each site 
-mpd.correls <- function(x,d){
+# %%% SESmpd CORRELATIONS %%%----
+# Function for measuring correlation between original SESmpd value and SESmpd values for each site 
+SESmpd.correls <- function(x,d){
   value <- numeric(length=ncol(x))
   for (i in 1:ncol(x)){
     value[i] <- cor(x[,i],d, use="na.or.complete")
@@ -41,9 +42,9 @@ mpd.correls <- function(x,d){
   return(value)
 }
 # Measure correlations for each delta value
-fung.correl <- mpd.correls(fung.test, fung.mpds)
+fung.correl <- SESmpd.correls(fung.test, fung.ses.mpds)
 fung.correl
-plot(fung.correl ~ deltas, xlab="Delta values", ylab="Correlations to original mpd", pch=16)
+plot(fung.correl ~ deltas, xlab="Delta values", ylab="Correlations to original SESmpd", pch=16)
 
 # %%% SHIFTS IN SITE RANKINGS %%%----
 # Declare vector to receive average ranking changes
@@ -61,7 +62,7 @@ compare.shifts <- function(x,d){
   return(meanRankChanges)
 }
 
-fung.siteShifts <- compare.shifts(fung.test, fung.mpds)
+fung.siteShifts <- compare.shifts(fung.test, fung.ses.mpds)
 fung.siteShifts
 plot(fung.siteShifts ~ deltas, xlab="Delta values", ylab="Mean difference in site rankings from original", pch=16)
 
@@ -78,17 +79,17 @@ rownames(species.abundances) <- paste("site_", seq_len(nrow(species.abundances))
 # Create comparative comm object
 laja.cc <- comparative.comm(invert.tree, river.sites, invert.traits, river.env)
 # Calculate mean pairwise distance value
-laja.mpds <- .mpd(laja.cc, abundance.weighted=TRUE) 
+laja.ses.mpds <- .ses.mpd(laja.cc, abundance.weighted=TRUE) 
+laja.ses.mpds <- laja.ses.mpds$mpd.obs.z
 
 # Generating a vector of delta values from 0.1 to 3
 deltas <- seq(0.1,3,by=0.1)
 # Demonstrating function
-# laja.test <- phy.d.transform.plot(invert.tree, river.sites, deltas, plot.title="Shift in diversity of Rio Laja communities over delta values")
 laja.test <- phy.d.transform.plot(invert.tree, species.abundances, deltas, plot.title="")
 
 # %%% MPD CORRELATIONS %%%----
-# Function for measuring correlation between original mpd value and mpd values for each site 
-mpd.correls <- function(x,d){
+# Function for measuring correlation between original SESmpd value and SESmpd values for each site 
+SESmpd.correls <- function(x,d){
   value <- numeric(length=ncol(x))
   for (i in 1:ncol(x)){
     value[i] <- cor(x[,i],d, use="na.or.complete")
@@ -96,9 +97,9 @@ mpd.correls <- function(x,d){
   return(value)
 }
 # Measure correlations for each delta value
-laja.correl <- mpd.correls(laja.test, laja.mpds)
+laja.correl <- SESmpd.correls(laja.test, laja.ses.mpds)
 laja.correl
-plot(laja.correl ~ deltas, xlab="Delta values", ylab="Correlations to original mpd", pch=16)
+plot(laja.correl ~ deltas, xlab="Delta values", ylab="Correlations to original SESmpd", pch=16)
 
 # %%% SHIFTS IN SITE RANKINGS %%%----
 # Declare vector to receive average ranking changes
@@ -116,20 +117,24 @@ compare.shifts <- function(x,d){
   return(meanRankChanges)
 }
 
-laja.siteShifts <- compare.shifts(laja.test, laja.mpds)
+laja.siteShifts <- compare.shifts(laja.test, laja.ses.mpds)
 laja.siteShifts
-plot(laja.siteShifts ~ deltas, xlab="Delta values", ylab="Mean difference in site rankings from original", pch=16)
+plot(laja.siteShifts ~ deltas, xlab="Delta", ylab="Mean rank shifts", pch=16, )
+
 # %%% PLOTTING MPD FOR BOTH DATASETS %%%----
 library(RColorBrewer)
 library(viridis)
 # Code derived from plotting code for phy.d.transform.plot, in MPDvsDelta.R
+
+# Raw values
+# Plotting parameters: two rows, one column
 par(mfcol = c(2, 1), mar = c(0,0,0,0), oma = c(4, 4, .5, .5), 
     mgp = c(2, 0.6, 0))
-
-# Plotting for CR fungi
-ymin <- min(fung.test, na.rm=T); ymax <- max(fung.test,na.rm=T)
+# CR fungi
+ymin <- min(fung.test, na.rm=T)-0.5; ymax <- max(fung.test,na.rm=T)+0.5
 fung.colors <- brewer.pal(9, "YlOrRd")
-# fung.colors <- magma(10)
+# plot((fung.test[1,1:length(deltas)]) ~ deltas, ylim=c(ymin,ymax), pch=20, axes=FALSE,
+#      xlab="Delta", ylab="SESmpd", main="Costa Rican fungal communities")
 plot((fung.test[1,1:length(deltas)]) ~ deltas, ylim=c(ymin,ymax), pch=20, axes=FALSE)
 lines(deltas, fung.test[1,])
 # Below loop iterates through length of the matrix, adding connected points onto the plot
@@ -143,16 +148,15 @@ axis(1L, labels = FALSE, tck=-0.02)
 axis(1L, labels = FALSE, tck=0.02)
 axis(2L)
 box()
-
-# Plotting for Laja
-ymin <- min(laja.test, na.rm=T); ymax <- max(laja.test,na.rm=T)
+# Laja
+ymin <- min(laja.test, na.rm=T)-0.5; ymax <- max(laja.test,na.rm=T)+0.5
 laja.colors <- brewer.pal(9, "Greens")
-# laja.colors <- viridis(10)
+# plot((laja.test[1,1:length(deltas)]) ~ deltas, ylim=c(ymin,ymax), pch=20, axes=FALSE, 
+#      xlab="Delta", ylab="SESmpd", main="Laja")
 plot((laja.test[1,1:length(deltas)]) ~ deltas, ylim=c(ymin,ymax), pch=20, axes=FALSE)
 lines(deltas, laja.test[1,])
 # Below loop iterates through length of the matrix, adding connected points onto the plot
 for(i in 2:nrow(laja.test)){
-  # points((laja.test[i,1:length(deltas)]) ~ deltas,col=laja.colors[i], pch=20)
   points((laja.test[i,]) ~ deltas, col=laja.colors[i], pch=20)
   # Capture mpd values for current row of matrix, and connect points
   y <- (laja.test[i,])
@@ -163,4 +167,31 @@ axis(1L, tck=0.02)
 axis(2L)
 box()
 mtext("Delta", side = 1, outer = TRUE, line = 2.2, cex = 1.5)
-mtext("MPD Values", side = 2, outer = TRUE, line = 2.2, cex = 1.5)
+mtext("SESmpd", side = 2, outer = TRUE, line = 2.2, cex = 1.5)
+
+# Plotting rank shifts per site
+# Plotting parameters: two rows, one column
+par(mfcol = c(2, 1), mar = c(0,0,0,0), oma = c(4, 4, .5, 0.5), 
+    mgp = c(2, 0.6, 0), xpd=FALSE)
+# CR fungi
+fung.siteShifts <- compare.shifts(fung.test, fung.ses.mpds)
+ymin <- min(fung.siteShifts)-0.5; ymax <- max(fung.siteShifts)+0.5
+plot(fung.siteShifts ~ deltas, axes=FALSE, pch=20, col=fung.colors[6], ylim=c(ymin,ymax))
+axis(1L, labels = FALSE, tck=-0.02)
+axis(1L, labels = FALSE, tck=0.02)
+axis(2L)
+box()
+# text(x = 2.2, y = 2.0, "Costa Rica \n fungal data", cex=0.8)
+mtext("Costa Rica \n fungal data", side = 1, outer = FALSE, line = -1.0, adj=0, cex = 0.95, at=c(6.5,2.1))
+# Laja
+laja.siteShifts <- compare.shifts(laja.test, laja.ses.mpds)
+ymin <- min(laja.siteShifts)-0.5; ymax <- max(laja.siteShifts)+0.5
+plot(laja.siteShifts ~ deltas, axes=FALSE, pch=20, col=laja.colors[6], ylim=c(ymin,ymax))
+axis(1L, tck=-0.02)
+axis(1L, tck=0.02)
+axis(2L)
+box()
+# text(x = 2.2, y = 2.0, "Laja data", cex=0.8)
+mtext("Laja \n macroinvertebrate data", side = 1, outer = FALSE, line = -1.0, adj=0, cex = 0.95, at=c(6.5,2.1))
+mtext("Delta", side = 1, outer = TRUE, line = 2.2, cex = 1.3)
+mtext("Mean rank shifts", side = 2, outer = TRUE, line = 2.2, cex = 1.3)
