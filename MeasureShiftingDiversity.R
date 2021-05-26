@@ -442,6 +442,19 @@ for(i in 2:nrow(u.mean.SESmpds)){
         col=rgb(red=0.3, green=0.1, blue=0.4, alpha=0.1))
 }
 
+# Power analysis figure
+nu.correl.seq <- lm(correl.seq ~ (I(scale(log10(delta))^2)+scale(log10(delta)))*
+                      (scale(intra.ratio)+scale(seq.ratio)+scale(comm.spp)+
+                         scale(intra.div)+scale(seq.div)+scale(tips)),data=results,na.action=na.omit)
+
+grid <- expand.grid(unique(results$intra.ratio), unique(results$seq.ratio))
+d <- setNames(data.frame(grid), c("Intra branches", "Seq branches"))
+vals <- predict(nu.correl.seq, newdata = d)
+
+nu.rankShifts.seq <- lm(rank.shifts.seq ~ (I(scale(log10(delta))^2)+scale(log10(delta)))*
+                          (scale(intra.ratio)+scale(seq.ratio)+scale(comm.spp)+
+                             scale(intra.div)+scale(seq.div)+scale(tips)),data=results,na.action=na.omit)
+
 # # Troubleshooting
 # plot(apply(sim.data[[25]], 2, mean) ~ deltas, xlab="Delta", ylab="SESmpd", main="Non-ultrametric, instance 25", ylim=c(-1.5,1.5), pch=20, col=4)
 # lines(deltas, apply(sim.data[[25]], 2, mean), col=4)
