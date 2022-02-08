@@ -2,6 +2,7 @@
 
 library(xtable)
 library(viridis)
+library(ape) # Required for Ntip fxn
 
 # %%% Worker functions %%%----
 # Function to calculate correlations of MPD measurements between each delta value (x)
@@ -27,9 +28,10 @@ library(viridis)
   return(meanRankChanges)
 }
 
-# %%% Ultrametric runs only %%%----
+# %%% Ultrametric runs only, MPD -- Outdated %%%----
 # %%% Read in simulation data %%%
-load("OTU_Phylogeny/simResults/simResults.ULTRA_ONLY.RData")
+# load("OTU_Phylogeny/simResults/simResults.ULTRA_ONLY.RData")
+load("Documents/OTU_Phylogeny/simResults/simResults_20210514.RData") # Is this ultrametric only dataset?
 # Generate backup data of simulation variables
 backup <- sim.Results
 b.params <- params
@@ -64,9 +66,10 @@ results$rank.shifts <- as.numeric(rank.shifts)
 s.model.rankShifts <- lm(rank.shifts ~ scale(log10(delta))+scale(intra.div)+scale(seq.div)+scale(comm.spp),data=results,na.action=na.omit)
 summary(s.model.rankShifts)
 
-# %%% Non-ultrametric runs %%%----
+# %%% Non-ultrametric runs, MPD -- Outdated %%%----
 # %%% Read in simulation data %%%
-load("OTU_Phylogeny/simResults/simResults.RData")
+# load("OTU_Phylogeny/simResults/simResults.RData")
+load("Documents/OTU_Phylogeny/simResults/simResults_20210514.RData")
 # Generate backup data of simulation variables
 backup <- sim.Results
 b.params <- params
@@ -136,7 +139,8 @@ summary(u.model.rankShifts)
 
 # %%% Non-ultrametric, SESmpd %%%----
 # %%% Read in simulation data %%%
-load("OTU_Phylogeny/simResults/simResults_20210520.RData")
+# load("OTU_Phylogeny/simResults/simResults_20210520.RData")
+load("Documents/OTU_Phylogeny/simResults/simResults_20210520.RData")
 # Generate backup data of simulation variables
 nu.backup <- sim.Results 
 u.backup <- sim.ultra.Results 
@@ -283,121 +287,13 @@ u.rankShifts.seq <- lm(rank.shifts.seq ~ (I(scale(log10(delta))^2)+scale(log10(d
 summary(u.rankShifts.seq)
 xtable(u.rankShifts.seq, caption="")
 
-# %%% Plotting--Old %%%----
-# *** MPD correlations ***
-# Raw correlation values against delta, intraspecific diversification, and seq. err. diversification
-plot(results$correl ~ results$delta)
-boxplot(results$correl ~ results$delta)
-plot(results$correl ~ results$intra.div, col="red")
-boxplot(results$correl ~ results$intra.div)
-plot(results$correl ~ results$seq.div, col="blue")
-boxplot(results$correl ~ results$seq.div)
-
-# *** Rank shifts ***
-# Raw rank shifts values against delta, intraspecific diversification, and seq. err. diversification
-plot(results$rank.shifts ~ results$delta)
-boxplot(results$rank.shifts ~ results$delta)
-plot(results$rank.shifts ~ results$intra.div, col="red")
-boxplot(results$rank.shifts ~ results$intra.div)
-plot(results$rank.shifts ~ results$seq.div, col="blue")
-boxplot(results$rank.shifts ~ results$seq.div)
-
-# *** 6 plots: both response metrics, with median and standard deviation values ***
-par(mfcol=c(3,2), mar = c(4,2,0,4), oma = c(0, 4, .5, .5), mgp = c(2, 0.6, 0))
-
-# MPD CORRELATIONS
-# Include correl response metric value at delta=1.0 in the results matrix, for each simulation instance. 
-comp.correls <- results[which(results$delta == 1),18]
-comp.correls <- rep(comp.correls, each=30)
-results$comp.correls <- comp.correls
-
-# Calculate median/sd of correl values MINUS values at delta=1.0, for original 
-correl.d.medians <- tapply((results$correl-results$comp.correls), results$delta, median)
-correl.d.sdevs <- tapply((results$correl-results$comp.correls), results$delta, sd)
-
-plot(correl.d.medians ~ unique(results$delta), pch=16, ylim=range(c(-0.25, 0.25)), ylab="", xlab="Delta")
-arrows(x0=unique(results$delta), y0=correl.d.medians-correl.d.sdevs, 
-       x1=unique(results$delta), y1=correl.d.medians+correl.d.sdevs, 
-       code=3, angle=90, length=0.1)
-
-# Calculate median/sd of correl values MINUS values at delta=1.0, for intraspecific transforms
-correl.i.medians <- tapply(results$correl-results$comp.correls, results$intra.div, median)
-correl.i.sdevs <- tapply(results$correl-results$comp.correls, results$intra.div, sd)
-
-plot(correl.i.medians ~ unique(results$intra.div), pch=16, col="red", ylim=range(c(-0.25, 0.25)), ylab="", xlab="Intraspecific diversification rate")
-arrows(x0=unique(results$intra.div), y0=correl.i.medians-correl.i.sdevs, 
-       x1=unique(results$intra.div), y1=correl.i.medians+correl.i.sdevs, 
-       code=3, angle=90, length=0.1, col="red")
-
-# Calculate median/sd of correl values MINUS values at delta=1.0, for seq. err. transforms
-correl.s.medians <- tapply(results$correl-results$comp.correls, results$seq.div, median)
-correl.s.sdevs <- tapply(results$correl-results$comp.correls, results$seq.div, sd)
-
-plot(correl.s.medians ~ unique(results$seq.div), pch=16, col="blue", ylim=range(c(-0.25, 0.25)), ylab="", xlab="Sequencing error diversification rate")
-arrows(x0=unique(results$seq.div), y0=correl.s.medians-correl.s.sdevs, 
-       x1=unique(results$seq.div), y1=correl.s.medians+correl.s.sdevs, 
-       code=3, angle=90, length=0.1, col="blue")
-mtext("Median MPD correlations", side = 2, outer = TRUE, line = 2, cex = 1.0, adj = 0.55)
-
-# RANK SHIFTS
-# Include response delta=1.0 values in the results matrix, for each simulation instance
-comp.rank.shifts <- results[which(results$delta == 1),20]
-comp.rank.shifts <- rep(comp.rank.shifts, each=30)
-results$comp.rank.shifts <- comp.rank.shifts
-
-# Calculate median/sd of rank.shifts values MINUS values at delta=1.0, for original 
-rank.shifts.d.medians <- tapply((results$rank.shifts-results$comp.rank.shifts), results$delta, median)
-rank.shifts.d.sdevs <- tapply((results$rank.shifts-results$comp.rank.shifts), results$delta, sd)
-
-plot(rank.shifts.d.medians ~ unique(results$delta), pch=16, ylim=range(c(-5, 5)), ylab="", xlab="Delta")
-arrows(x0=unique(results$delta), y0=rank.shifts.d.medians-rank.shifts.d.sdevs, 
-       x1=unique(results$delta), y1=rank.shifts.d.medians+rank.shifts.d.sdevs, 
-       code=3, angle=90, length=0.1)
-
-# Calculate median/sd of rank.shifts values MINUS values at delta=1.0, for intraspecific transforms 
-rank.shifts.i.medians <- tapply((results$rank.shifts-results$comp.rank.shifts), results$intra.div, median)
-rank.shifts.i.sdevs <- tapply((results$rank.shifts-results$comp.rank.shifts), results$intra.div, sd)
-
-plot(rank.shifts.i.medians ~ unique(results$intra.div), pch=16, col="red", ylim=range(c(-5, 5)), ylab="", xlab="Intraspecific diversification rate")
-arrows(x0=unique(results$intra.div), y0=rank.shifts.i.medians-rank.shifts.i.sdevs, 
-       x1=unique(results$intra.div), y1=rank.shifts.i.medians+rank.shifts.i.sdevs, 
-       code=3, angle=90, length=0.1, col="red")
-
-# Calculate median/sd of rank.shifts values MINUS values at delta=1.0, for seq. err. transforms 
-rank.shifts.s.medians <- tapply((results$rank.shifts-results$comp.rank.shifts), results$seq.div, median)
-rank.shifts.s.sdevs <- tapply((results$rank.shifts-results$comp.rank.shifts), results$seq.div, sd)
-
-plot(rank.shifts.s.medians ~ unique(results$seq.div), pch=16, col="blue", ylim=range(c(-5, 5)), ylab="", xlab="Sequencing error diversification rate")
-arrows(x0=unique(results$seq.div), y0=rank.shifts.s.medians-rank.shifts.s.sdevs, 
-       x1=unique(results$seq.div), y1=rank.shifts.s.medians+rank.shifts.s.sdevs, 
-       code=3, angle=90, length=0.1, col="blue")
-mtext("Median site ranking shifts", side = 2, outer = TRUE, line = -27, cex = 1.0, adj = 0.55)
-
-# *** Plot raw MPD vs. delta ***
-# Capture mean MPD values across sites for each simulation instance
-mean.MPDs <- t(sapply(sim.data, function(x) apply(x,2,mean,na.rm="TRUE")))
-
-# Capture mean MPD values across sites for original communities (prior to transformations)
-mean.MPDs.Original <- sapply(sim.MPDs, mean)
-
-# Subtract mean.MPDs.Original values from each column of mean.MPDs
-final.MPDs <- matrix(nrow=675, ncol=30, dimnames=dimnames(mean.MPDs))
-for(i in 1:ncol(mean.MPDs)){
-  final.MPDs[,i] <- mean.MPDs[,i] - mean.MPDs.Original
-}
-
-# Plot lines representing centered mean MPD values for each simulation iteration versus delta
-plot(final.MPDs[1,] ~ unique(results$delta), ylim=c(-20,20), type="n", ylab="Mean MPD Values", xlab="Delta")
-for(i in 1:nrow(final.MPDs)){
-  lines(unique(results$delta), final.MPDs[i,], col=rgb(red=0.3, green=0.1, blue=0.4, alpha=0.1))
-}
-# %%% SESmpd Analysis Plots %%%----
+# %%% SESmpd Analysis Plots: raw values and power analysis %%%----
 # 1 row, 2 columns
 par(mfcol=c(2,1))
 
 # SESmpd values of seq trees over delta
 # Plot SESmpd means for each site over delta values--non-ultrametric
-# ymin <- min(sapply(sim.data, min)); ymax <- max(sapply(sim.data, max))
+ymin <- min(sapply(sim.data, min)); ymax <- max(sapply(sim.data, max))
 for(i in 1:length(sim.data)){
   means <- apply(sim.data[[i]], 2, mean)
   if(i == 1){
@@ -447,9 +343,15 @@ nu.correl.seq <- lm(correl.seq ~ (I(scale(log10(delta))^2)+scale(log10(delta)))*
                       (scale(intra.ratio)+scale(seq.ratio)+scale(comm.spp)+
                          scale(intra.div)+scale(seq.div)+scale(tips)),data=results,na.action=na.omit)
 
+nu.correl.seq <- lm(correl.seq ~ (I(scale(log10(delta))^2)+scale(log10(delta)))*
+                      (scale(intra.ratio)+scale(seq.ratio)+scale(comm.spp)+
+                         scale(intra.div)+scale(seq.div)+scale(tips)),data=results,na.action=na.omit)
+
 grid <- expand.grid(unique(results$intra.ratio), unique(results$seq.ratio))
 d <- setNames(data.frame(grid), c("Intra branches", "Seq branches"))
 vals <- predict(nu.correl.seq, newdata = d)
+# Generating error: "Error in scale(log10(delta)) : object 'delta' not found" 
+# (...even though delta is in the results data.frame. So, why isn't it being seen?)
 
 nu.rankShifts.seq <- lm(rank.shifts.seq ~ (I(scale(log10(delta))^2)+scale(log10(delta)))*
                           (scale(intra.ratio)+scale(seq.ratio)+scale(comm.spp)+
@@ -530,6 +432,7 @@ nu.rankShifts.seq <- lm(rank.shifts.seq ~ (I(scale(log10(delta))^2)+scale(log10(
 # plot(sim.Results[[32]]$phylogenies$seq.phylo, show.tip.label = F)
 # Ntip(sim.Results[[32]]$phylogenies$seq.phylo)
 
+# %%% SESmpd Analysis Plots: U/NU response metrics between original + baseline %%%----
 # 2 rows, 2 columns
 par(mfcol=c(2,2), mar = c(2,2,2,2), oma = c(0, 4, .5, .5), mgp = c(2, 0.6, 0))
 
@@ -596,6 +499,7 @@ mtext("Ultrametric", side = 2, outer = TRUE, line = 2, cex = 1.0, adj = 0.25)
 mtext("Correlations", side = 3, outer = TRUE, line = -1, cex = 1.0, adj = 0.20)
 mtext("Rank shifts", side = 3, outer = TRUE, line = -1, cex = 1.0, adj = 0.80)
 
+# %%% SESmpd Analysis Plots: U/NU response metrics between original + delta=1.0 %%%----
 # 2 rows, 2 columns
 par(mfcol=c(2,2), mar = c(2,2,2,2), oma = c(0, 4, .5, .5), mgp = c(2, 0.6, 0))
 
@@ -633,14 +537,14 @@ for(i in 1:length(sim.ultra.data)){
 rank.shifts <- mapply(.ranking.diff, sim.data, sim.SESmpds.seq)
 ymin <- (min(rank.shifts)-1.5); ymax <- (max(rank.shifts)+1.5)
 for(i in 1:length(sim.data)){
- if(i == 1){
-   plot(rank.shifts[,i] ~ deltas, main="", xlab="", ylab="",
-        ylim=c(ymin,ymax), pch=20, col=i)
-   lines(deltas, rank.shifts[,i], col=i)
- } else {
-   points(rank.shifts[,i] ~ deltas, col=i, pch=20)
-   lines(deltas, rank.shifts[,i], col=i)
- }
+  if(i == 1){
+    plot(rank.shifts[,i] ~ deltas, main="", xlab="", ylab="",
+         ylim=c(ymin,ymax), pch=20, col=i)
+    lines(deltas, rank.shifts[,i], col=i)
+  } else {
+    points(rank.shifts[,i] ~ deltas, col=i, pch=20)
+    lines(deltas, rank.shifts[,i], col=i)
+  }
 }
 
 # Ultrametric
@@ -661,3 +565,112 @@ mtext("Non-ultrametric", side = 2, outer = TRUE, line = 2, cex = 1.0, adj = 0.85
 mtext("Ultrametric", side = 2, outer = TRUE, line = 2, cex = 1.0, adj = 0.25)
 mtext("Correlations", side = 3, outer = TRUE, line = -1, cex = 1.0, adj = 0.20)
 mtext("Rank shifts", side = 3, outer = TRUE, line = -1, cex = 1.0, adj = 0.80)
+
+# # %%% Plotting--Old %%%----
+# # *** MPD correlations ***
+# # Raw correlation values against delta, intraspecific diversification, and seq. err. diversification
+# plot(results$correl ~ results$delta)
+# boxplot(results$correl ~ results$delta)
+# plot(results$correl ~ results$intra.div, col="red")
+# boxplot(results$correl ~ results$intra.div)
+# plot(results$correl ~ results$seq.div, col="blue")
+# boxplot(results$correl ~ results$seq.div)
+# 
+# # *** Rank shifts ***
+# # Raw rank shifts values against delta, intraspecific diversification, and seq. err. diversification
+# plot(results$rank.shifts ~ results$delta)
+# boxplot(results$rank.shifts ~ results$delta)
+# plot(results$rank.shifts ~ results$intra.div, col="red")
+# boxplot(results$rank.shifts ~ results$intra.div)
+# plot(results$rank.shifts ~ results$seq.div, col="blue")
+# boxplot(results$rank.shifts ~ results$seq.div)
+# 
+# # *** 6 plots: both response metrics, with median and standard deviation values ***
+# par(mfcol=c(3,2), mar = c(4,2,0,4), oma = c(0, 4, .5, .5), mgp = c(2, 0.6, 0))
+# 
+# # MPD CORRELATIONS
+# # Include correl response metric value at delta=1.0 in the results matrix, for each simulation instance. 
+# comp.correls <- results[which(results$delta == 1),18]
+# comp.correls <- rep(comp.correls, each=30)
+# results$comp.correls <- comp.correls
+# 
+# # Calculate median/sd of correl values MINUS values at delta=1.0, for original 
+# correl.d.medians <- tapply((results$correl-results$comp.correls), results$delta, median)
+# correl.d.sdevs <- tapply((results$correl-results$comp.correls), results$delta, sd)
+# 
+# plot(correl.d.medians ~ unique(results$delta), pch=16, ylim=range(c(-0.25, 0.25)), ylab="", xlab="Delta")
+# arrows(x0=unique(results$delta), y0=correl.d.medians-correl.d.sdevs, 
+#        x1=unique(results$delta), y1=correl.d.medians+correl.d.sdevs, 
+#        code=3, angle=90, length=0.1)
+# 
+# # Calculate median/sd of correl values MINUS values at delta=1.0, for intraspecific transforms
+# correl.i.medians <- tapply(results$correl-results$comp.correls, results$intra.div, median)
+# correl.i.sdevs <- tapply(results$correl-results$comp.correls, results$intra.div, sd)
+# 
+# plot(correl.i.medians ~ unique(results$intra.div), pch=16, col="red", ylim=range(c(-0.25, 0.25)), ylab="", xlab="Intraspecific diversification rate")
+# arrows(x0=unique(results$intra.div), y0=correl.i.medians-correl.i.sdevs, 
+#        x1=unique(results$intra.div), y1=correl.i.medians+correl.i.sdevs, 
+#        code=3, angle=90, length=0.1, col="red")
+# 
+# # Calculate median/sd of correl values MINUS values at delta=1.0, for seq. err. transforms
+# correl.s.medians <- tapply(results$correl-results$comp.correls, results$seq.div, median)
+# correl.s.sdevs <- tapply(results$correl-results$comp.correls, results$seq.div, sd)
+# 
+# plot(correl.s.medians ~ unique(results$seq.div), pch=16, col="blue", ylim=range(c(-0.25, 0.25)), ylab="", xlab="Sequencing error diversification rate")
+# arrows(x0=unique(results$seq.div), y0=correl.s.medians-correl.s.sdevs, 
+#        x1=unique(results$seq.div), y1=correl.s.medians+correl.s.sdevs, 
+#        code=3, angle=90, length=0.1, col="blue")
+# mtext("Median MPD correlations", side = 2, outer = TRUE, line = 2, cex = 1.0, adj = 0.55)
+# 
+# # RANK SHIFTS
+# # Include response delta=1.0 values in the results matrix, for each simulation instance
+# comp.rank.shifts <- results[which(results$delta == 1),20]
+# comp.rank.shifts <- rep(comp.rank.shifts, each=30)
+# results$comp.rank.shifts <- comp.rank.shifts
+# 
+# # Calculate median/sd of rank.shifts values MINUS values at delta=1.0, for original 
+# rank.shifts.d.medians <- tapply((results$rank.shifts-results$comp.rank.shifts), results$delta, median)
+# rank.shifts.d.sdevs <- tapply((results$rank.shifts-results$comp.rank.shifts), results$delta, sd)
+# 
+# plot(rank.shifts.d.medians ~ unique(results$delta), pch=16, ylim=range(c(-5, 5)), ylab="", xlab="Delta")
+# arrows(x0=unique(results$delta), y0=rank.shifts.d.medians-rank.shifts.d.sdevs, 
+#        x1=unique(results$delta), y1=rank.shifts.d.medians+rank.shifts.d.sdevs, 
+#        code=3, angle=90, length=0.1)
+# 
+# # Calculate median/sd of rank.shifts values MINUS values at delta=1.0, for intraspecific transforms 
+# rank.shifts.i.medians <- tapply((results$rank.shifts-results$comp.rank.shifts), results$intra.div, median)
+# rank.shifts.i.sdevs <- tapply((results$rank.shifts-results$comp.rank.shifts), results$intra.div, sd)
+# 
+# plot(rank.shifts.i.medians ~ unique(results$intra.div), pch=16, col="red", ylim=range(c(-5, 5)), ylab="", xlab="Intraspecific diversification rate")
+# arrows(x0=unique(results$intra.div), y0=rank.shifts.i.medians-rank.shifts.i.sdevs, 
+#        x1=unique(results$intra.div), y1=rank.shifts.i.medians+rank.shifts.i.sdevs, 
+#        code=3, angle=90, length=0.1, col="red")
+# 
+# # Calculate median/sd of rank.shifts values MINUS values at delta=1.0, for seq. err. transforms 
+# rank.shifts.s.medians <- tapply((results$rank.shifts-results$comp.rank.shifts), results$seq.div, median)
+# rank.shifts.s.sdevs <- tapply((results$rank.shifts-results$comp.rank.shifts), results$seq.div, sd)
+# 
+# plot(rank.shifts.s.medians ~ unique(results$seq.div), pch=16, col="blue", ylim=range(c(-5, 5)), ylab="", xlab="Sequencing error diversification rate")
+# arrows(x0=unique(results$seq.div), y0=rank.shifts.s.medians-rank.shifts.s.sdevs, 
+#        x1=unique(results$seq.div), y1=rank.shifts.s.medians+rank.shifts.s.sdevs, 
+#        code=3, angle=90, length=0.1, col="blue")
+# mtext("Median site ranking shifts", side = 2, outer = TRUE, line = -27, cex = 1.0, adj = 0.55)
+# 
+# # *** Plot raw MPD vs. delta ***
+# # Capture mean MPD values across sites for each simulation instance
+# mean.MPDs <- t(sapply(sim.data, function(x) apply(x,2,mean,na.rm="TRUE")))
+# 
+# # Capture mean MPD values across sites for original communities (prior to transformations)
+# mean.MPDs.Original <- sapply(sim.MPDs, mean)
+# 
+# # Subtract mean.MPDs.Original values from each column of mean.MPDs
+# final.MPDs <- matrix(nrow=675, ncol=30, dimnames=dimnames(mean.MPDs))
+# for(i in 1:ncol(mean.MPDs)){
+#   final.MPDs[,i] <- mean.MPDs[,i] - mean.MPDs.Original
+# }
+# 
+# # Plot lines representing centered mean MPD values for each simulation iteration versus delta
+# plot(final.MPDs[1,] ~ unique(results$delta), ylim=c(-20,20), type="n", ylab="Mean MPD Values", xlab="Delta")
+# for(i in 1:nrow(final.MPDs)){
+#   lines(unique(results$delta), final.MPDs[i,], col=rgb(red=0.3, green=0.1, blue=0.4, alpha=0.1))
+# }
