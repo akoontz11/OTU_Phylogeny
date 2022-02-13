@@ -28,118 +28,122 @@ library(ape) # Required for Ntip fxn
   return(meanRankChanges)
 }
 
-# %%% Ultrametric runs only, MPD -- Outdated %%%----
+# %%% Outdated: Ultrametric runs only, MPD %%%----
+# # %%% Read in simulation data %%%
+# # load("OTU_Phylogeny/simResults/simResults.ULTRA_ONLY.RData")
+# load("Documents/OTU_Phylogeny/simResults/simResults_20210514.RData") # Is this ultrametric only dataset?
+# # Generate backup data of simulation variables
+# backup <- sim.Results
+# b.params <- params
+# 
+# # Extract MPDs over delta transforms, from communities/phylogenies with intraspecific AND seq. error branches
+# sim.data <- lapply(sim.Results, function(x) x$transforms$seq.transform)
+# # Extract diversity metrics from untransformed phylogenies, for calculating response metrics
+# sim.MPDs <- lapply(sim.Results, function(x) x$values$MPDs)
+# 
+# # Build results matrix, from which linear model variables will be pulled
+# results <- params[rep(1:nrow(params), each=30),]
+# results$delta <- rep(deltas,length(sim.data))
+# # Create term for diversification (birth rate/death rate) for both intraspecific and seq.err.
+# results$intra.div <- results$intra.birth/results$intra.death
+# results$seq.div <- results$seq.birth/results$seq.death
+# 
+# # %%% MPD correlations between site and baseline %%%
+# # Calculate MPD correlations on simulation data
+# t.correls <- mapply(.new.correls, sim.data, sim.MPDs)
+# # Match the correlations to the parameters
+# results$correl <- as.numeric(t.correls)
+# # Model effects on MPD correlations
+# s.model.correl <- lm(correl ~ scale(log10(delta))+scale(intra.div)+scale(seq.div)+scale(comm.spp),data=results,na.action=na.omit)
+# summary(s.model.correl)
+# 
+# # %%% Ranking differences between site and baseline %%%
+# # Calculate mean number of site rank shifts
+# rank.shifts <- mapply(.ranking.diff, sim.data, sim.MPDs)
+# # Match the ranking differences to the parameters
+# results$rank.shifts <- as.numeric(rank.shifts)
+# # Model effects on site diversity rankings
+# s.model.rankShifts <- lm(rank.shifts ~ scale(log10(delta))+scale(intra.div)+scale(seq.div)+scale(comm.spp),data=results,na.action=na.omit)
+# summary(s.model.rankShifts)
+
+# %%% Outdated: Non-ultrametric runs, MPD %%%----
+# # %%% Read in simulation data %%%
+# # load("OTU_Phylogeny/simResults/simResults.RData")
+# load("Documents/OTU_Phylogeny/simResults/simResults_20210514.RData")
+# # Generate backup data of simulation variables
+# backup <- sim.Results
+# b.params <- params
+# 
+# # NON-ULTRAMETRIC INSTANCES
+# # Extract MPD values over delta transformations for "final" community/phylogey set
+# sim.data <- lapply(sim.Results, function(x) x$transforms$seq.transform)
+# # Subset parameters matrix by successful (i.e. not NULL) simulation instances
+# params <- params[sapply(sim.data, is.matrix),]
+# # Remove NAs from simulation data
+# sim.data <- sim.data[which(!is.na(sim.data))]
+# # Extract original MPD values of each community, prior to branch additions or transformations
+# sim.MPDs <- lapply(sim.Results, function(x) x$values$MPDs)
+# sim.MPDs <- sim.MPDs[sapply(sim.MPDs, Negate(is.null))]
+# # Build results matrix, from which linear model variables will be pulled
+# results <- params[rep(1:nrow(params), each=30),]
+# results$delta <- rep(deltas,length(sim.data))
+# # Create diversification rate terms
+# results$intra.div <- results$intra.birth/results$intra.death
+# results$seq.div <- results$seq.birth/results$seq.death
+# 
+# # %%% MPD correlations between site and baseline %%%
+# # Calculate MPD correlations on simulation data
+# t.correls <- mapply(.new.correls, sim.data, sim.MPDs)
+# results$correl <- as.numeric(t.correls)
+# # Model effects on MPD correlations
+# n.model.correl <- lm(correl ~ scale(log10(delta))+scale(intra.div)+scale(seq.div)+scale(comm.spp),data=results,na.action=na.omit)
+# summary(n.model.correl)
+# 
+# # %%% Ranking differences between site and baseline %%%
+# # Calculate mean number of site rank shifts
+# rank.shifts <- mapply(.ranking.diff, sim.data, sim.MPDs)
+# results$rank.shifts <- as.numeric(rank.shifts)
+# # Model effects on site diversity rankings
+# n.model.rankShifts <- lm(rank.shifts ~ scale(log10(delta))+scale(intra.div)+scale(seq.div)+scale(comm.spp),data=results,na.action=na.omit)
+# summary(n.model.rankShifts)
+# 
+# # ULTRAMETRIC INSTANCES
+# # Extract MPD values over delta transformations for "final" community/phylogey set
+# sim.ultra.final.SESmpds <- lapply(sim.ultraResults, function(x) x$transforms$seq.transform)
+# # Subset parameters matrix by successful (i.e. not NULL) simulation instances
+# ultra.params <- ultra.params[sapply(sim.ultra.final.SESmpds, is.matrix),]
+# # Remove NAs from simulation data
+# sim.ultra.final.SESmpds <- sim.ultra.final.SESmpds[which(!is.na(sim.ultra.final.SESmpds))]
+# # Extract original MPD values of each community, prior to branch additions or transformations
+# sim.ultraMPDs <- lapply(sim.ultraResults, function(x) x$values$MPDs)
+# sim.ultraMPDs <- sim.ultraMPDs[sapply(sim.ultraMPDs, Negate(is.null))]
+# # Build results matrix, from which linear model variables will be pulled
+# ultra.results <- ultra.params[rep(1:nrow(ultra.params), each=30),]
+# ultra.results$delta <- rep(deltas,length(sim.ultra.final.SESmpds))
+# 
+# # %%% MPD correlations between site and baseline %%%
+# # Calculate MPD correlations on simulation data
+# u.correls <- mapply(.new.correls, sim.ultra.final.SESmpds, sim.ultraMPDs)
+# ultra.results$correl <- as.numeric(u.correls)
+# # Model effects on MPD correlations
+# u.model.correl <- lm(correl ~ scale(log10(delta))+scale(comm.spp),data=ultra.results,na.action=na.omit)
+# summary(u.model.correl)
+# 
+# # %%% Ranking differences between site and baseline %%%
+# # Calculate mean number of site rank shifts
+# u.rank.shifts <- mapply(.ranking.diff, sim.ultra.final.SESmpds, sim.ultraMPDs)
+# ultra.results$rank.shifts <- as.numeric(u.rank.shifts)
+# # Model effects on site diversity rankings
+# u.model.rankShifts <- lm(rank.shifts ~ scale(log10(delta))+scale(comm.spp),data=ultra.results,na.action=na.omit)
+# summary(u.model.rankShifts)
+
+# %%% Non-ultrametric and ultrametric, SESmpd %%%----
 # %%% Read in simulation data %%%
-# load("OTU_Phylogeny/simResults/simResults.ULTRA_ONLY.RData")
-load("Documents/OTU_Phylogeny/simResults/simResults_20210514.RData") # Is this ultrametric only dataset?
-# Generate backup data of simulation variables
-backup <- sim.Results
-b.params <- params
-
-# Extract MPDs over delta transforms, from communities/phylogenies with intraspecific AND seq. error branches
-sim.data <- lapply(sim.Results, function(x) x$transforms$seq.transform)
-# Extract diversity metrics from untransformed phylogenies, for calculating response metrics
-sim.MPDs <- lapply(sim.Results, function(x) x$values$MPDs)
-
-# Build results matrix, from which linear model variables will be pulled
-results <- params[rep(1:nrow(params), each=30),]
-results$delta <- rep(deltas,length(sim.data))
-# Create term for diversification (birth rate/death rate) for both intraspecific and seq.err.
-results$intra.div <- results$intra.birth/results$intra.death
-results$seq.div <- results$seq.birth/results$seq.death
-
-# %%% MPD correlations between site and baseline %%%
-# Calculate MPD correlations on simulation data
-t.correls <- mapply(.new.correls, sim.data, sim.MPDs)
-# Match the correlations to the parameters
-results$correl <- as.numeric(t.correls)
-# Model effects on MPD correlations
-s.model.correl <- lm(correl ~ scale(log10(delta))+scale(intra.div)+scale(seq.div)+scale(comm.spp),data=results,na.action=na.omit)
-summary(s.model.correl)
-
-# %%% Ranking differences between site and baseline %%%
-# Calculate mean number of site rank shifts
-rank.shifts <- mapply(.ranking.diff, sim.data, sim.MPDs)
-# Match the ranking differences to the parameters
-results$rank.shifts <- as.numeric(rank.shifts)
-# Model effects on site diversity rankings
-s.model.rankShifts <- lm(rank.shifts ~ scale(log10(delta))+scale(intra.div)+scale(seq.div)+scale(comm.spp),data=results,na.action=na.omit)
-summary(s.model.rankShifts)
-
-# %%% Non-ultrametric runs, MPD -- Outdated %%%----
-# %%% Read in simulation data %%%
-# load("OTU_Phylogeny/simResults/simResults.RData")
-load("Documents/OTU_Phylogeny/simResults/simResults_20210514.RData")
-# Generate backup data of simulation variables
-backup <- sim.Results
-b.params <- params
-
-# NON-ULTRAMETRIC INSTANCES
-# Extract MPD values over delta transformations for "final" community/phylogey set
-sim.data <- lapply(sim.Results, function(x) x$transforms$seq.transform)
-# Subset parameters matrix by successful (i.e. not NULL) simulation instances
-params <- params[sapply(sim.data, is.matrix),]
-# Remove NAs from simulation data
-sim.data <- sim.data[which(!is.na(sim.data))]
-# Extract original MPD values of each community, prior to branch additions or transformations
-sim.MPDs <- lapply(sim.Results, function(x) x$values$MPDs)
-sim.MPDs <- sim.MPDs[sapply(sim.MPDs, Negate(is.null))]
-# Build results matrix, from which linear model variables will be pulled
-results <- params[rep(1:nrow(params), each=30),]
-results$delta <- rep(deltas,length(sim.data))
-# Create diversification rate terms
-results$intra.div <- results$intra.birth/results$intra.death
-results$seq.div <- results$seq.birth/results$seq.death
-
-# %%% MPD correlations between site and baseline %%%
-# Calculate MPD correlations on simulation data
-t.correls <- mapply(.new.correls, sim.data, sim.MPDs)
-results$correl <- as.numeric(t.correls)
-# Model effects on MPD correlations
-n.model.correl <- lm(correl ~ scale(log10(delta))+scale(intra.div)+scale(seq.div)+scale(comm.spp),data=results,na.action=na.omit)
-summary(n.model.correl)
-
-# %%% Ranking differences between site and baseline %%%
-# Calculate mean number of site rank shifts
-rank.shifts <- mapply(.ranking.diff, sim.data, sim.MPDs)
-results$rank.shifts <- as.numeric(rank.shifts)
-# Model effects on site diversity rankings
-n.model.rankShifts <- lm(rank.shifts ~ scale(log10(delta))+scale(intra.div)+scale(seq.div)+scale(comm.spp),data=results,na.action=na.omit)
-summary(n.model.rankShifts)
-
-# ULTRAMETRIC INSTANCES
-# Extract MPD values over delta transformations for "final" community/phylogey set
-sim.ultra.data <- lapply(sim.ultraResults, function(x) x$transforms$seq.transform)
-# Subset parameters matrix by successful (i.e. not NULL) simulation instances
-ultra.params <- ultra.params[sapply(sim.ultra.data, is.matrix),]
-# Remove NAs from simulation data
-sim.ultra.data <- sim.ultra.data[which(!is.na(sim.ultra.data))]
-# Extract original MPD values of each community, prior to branch additions or transformations
-sim.ultraMPDs <- lapply(sim.ultraResults, function(x) x$values$MPDs)
-sim.ultraMPDs <- sim.ultraMPDs[sapply(sim.ultraMPDs, Negate(is.null))]
-# Build results matrix, from which linear model variables will be pulled
-ultra.results <- ultra.params[rep(1:nrow(ultra.params), each=30),]
-ultra.results$delta <- rep(deltas,length(sim.ultra.data))
-
-# %%% MPD correlations between site and baseline %%%
-# Calculate MPD correlations on simulation data
-u.correls <- mapply(.new.correls, sim.ultra.data, sim.ultraMPDs)
-ultra.results$correl <- as.numeric(u.correls)
-# Model effects on MPD correlations
-u.model.correl <- lm(correl ~ scale(log10(delta))+scale(comm.spp),data=ultra.results,na.action=na.omit)
-summary(u.model.correl)
-
-# %%% Ranking differences between site and baseline %%%
-# Calculate mean number of site rank shifts
-u.rank.shifts <- mapply(.ranking.diff, sim.ultra.data, sim.ultraMPDs)
-ultra.results$rank.shifts <- as.numeric(u.rank.shifts)
-# Model effects on site diversity rankings
-u.model.rankShifts <- lm(rank.shifts ~ scale(log10(delta))+scale(comm.spp),data=ultra.results,na.action=na.omit)
-summary(u.model.rankShifts)
-
-# %%% Non-ultrametric, SESmpd %%%----
-# %%% Read in simulation data %%%
-# load("OTU_Phylogeny/simResults/simResults_20210520.RData")
+# Each simulation instance contains a list of 4 items
+  # 1. A list of phylogenies (inter, intra, seq)
+  # 2. A list of abundance matrices  (inter, intra, seq)
+  # 3. A list of SESmpd matrices after delta transforms (inter, intra, seq)
+  # 4. A list of SESmpd values (original phylogeny, prior to transformations)
 load("Documents/OTU_Phylogeny/simResults/simResults_20210520.RData")
 # Generate backup data of simulation variables
 nu.backup <- sim.Results 
@@ -147,47 +151,48 @@ u.backup <- sim.ultra.Results
 nu.params <- params
 u.params <- ultra.params
 
-# NON-ULTRAMETRIC INSTANCES
+# %%% NON-ULTRAMETRIC INSTANCES %%%
 # Remove params rows of instances in error
 params <- params[which(lapply(sim.Results, length) != 1),]
 # Remove errored instances
 sim.Results <- sim.Results[which(lapply(sim.Results, length) != 1)]
 
-# Extract MPD values over delta transformations for "final" community/phylogey set
-sim.data <- lapply(sim.Results, function(x) x$transforms$seq.transform)
+# Extract final SESmpds, original SESmpds, SESmpds for seq transformations at delta=1, and phylogenies
+# Extract SESmpd values over delta transformations for "final" community/phylogey set
+sim.final.SESmpds <- lapply(sim.Results, function(x) x$transforms$seq.transform)
 # Extract original SESmpd values of each community, prior to branch additions or transformations
-sim.SESmpds <- lapply(sim.Results, function(x) x$values$SESmpds)
+sim.original.SESmpds <- lapply(sim.Results, function(x) x$values$SESmpds)
 # Extract SESmpd values of phylogenies with intra+seq branches at delta=1.0
-sim.SESmpds.seq <- lapply(sim.Results, function(x) x$transforms$seq.transform[,10])
+sim.seq.SESmpds <- lapply(sim.Results, function(x) x$transforms$seq.transform[,10])
 # Extract phylogenies with intra and seq branches appended 
 sim.seq.phylos <- lapply(sim.Results, function(x) x$phylogenies$seq.phylo)
 
 # Build results matrix, from which linear model variables will be pulled
 results <- params[rep(1:nrow(params), each=30),]
-results$delta <- rep(deltas, length(sim.data))
+results$delta <- rep(deltas, length(sim.final.SESmpds))
 # Capture (total) number of species 
 results$tips <- sapply(sim.seq.phylos, Ntip)
 # Create diversification rate terms
-# results$inter.div <- results$inter.birth/results$inter.death
+# results$inter.div <- results$inter.birth/results$inter.death <-- in current simulatoins, inter.birth=1 and inter.deth=0
 results$intra.div <- results$intra.birth/results$intra.death
 results$seq.div <- results$seq.birth/results$seq.death
 
-# %%% MPD correlations between site and baseline %%%
-# Calculate MPD correlations on simulation data
-t.correls <- mapply(.new.correls, sim.data, sim.SESmpds)
+# %%% SESmpd correlations between site and baseline %%%
+# Calculate SESmpd correlations on simulation data
+t.correls <- mapply(.new.correls, sim.final.SESmpds, sim.original.SESmpds)
 results$correl <- as.numeric(t.correls)
-# Model effects on MPD correlations
+# Model effects on SESmpd correlations
 nu.correl.orig <- lm(correl ~ (I(scale(log10(delta))^2)+scale(log10(delta)))*
                        (scale(intra.ratio)+scale(seq.ratio)+scale(comm.spp)+
                           scale(intra.div)+scale(seq.div)+scale(tips)),data=results,na.action=na.omit)
 summary(nu.correl.orig)
 xtable(nu.correl.orig, caption="")
 
-# %%% MPD correlations between site and seq at delta=1.0 %%%
-# Calculate MPD correlations on simulation data
-seq.correls <- mapply(.new.correls, sim.data, sim.SESmpds.seq)
+# %%% SESmpd correlations between site and seq at delta=1.0 %%%
+# Calculate SESmpd correlations on simulation data
+seq.correls <- mapply(.new.correls, sim.final.SESmpds, sim.seq.SESmpds)
 results$correl.seq <- as.numeric(seq.correls)
-# Model effects on MPD correlations
+# Model effects on SESmpd correlations
 nu.correl.seq <- lm(correl.seq ~ (I(scale(log10(delta))^2)+scale(log10(delta)))*
                       (scale(intra.ratio)+scale(seq.ratio)+scale(comm.spp)+
                          scale(intra.div)+scale(seq.div)+scale(tips)),data=results,na.action=na.omit)
@@ -196,7 +201,7 @@ xtable(nu.correl.seq, caption="")
 
 # %%% Ranking differences between site and baseline %%%
 # Calculate mean number of site rank shifts
-rank.shifts <- mapply(.ranking.diff, sim.data, sim.SESmpds)
+rank.shifts <- mapply(.ranking.diff, sim.final.SESmpds, sim.original.SESmpds)
 results$rank.shifts <- as.numeric(rank.shifts)
 # Model effects on site diversity rankings
 nu.rankShifts.orig <- lm(rank.shifts ~ (I(scale(log10(delta))^2)+scale(log10(delta)))*
@@ -207,7 +212,7 @@ xtable(nu.rankShifts.orig, caption="")
 
 # %%% Ranking differences between site and seq at delta=1.0 %%%
 # Calculate mean number of site rank shifts
-rank.shifts.seq <- mapply(.ranking.diff, sim.data, sim.SESmpds.seq)
+rank.shifts.seq <- mapply(.ranking.diff, sim.final.SESmpds, sim.seq.SESmpds)
 results$rank.shifts.seq <- as.numeric(rank.shifts.seq)
 # Model effects on site diversity rankings
 nu.rankShifts.seq <- lm(rank.shifts.seq ~ (I(scale(log10(delta))^2)+scale(log10(delta)))*
@@ -216,34 +221,35 @@ nu.rankShifts.seq <- lm(rank.shifts.seq ~ (I(scale(log10(delta))^2)+scale(log10(
 summary(nu.rankShifts.seq)
 xtable(nu.rankShifts.seq, caption="")
 
-# ULTRAMETRIC INSTANCES
+# %%% ULTRAMETRIC INSTANCES %%%
 # Remove params rows of instances in error
 ultra.params <- ultra.params[which(lapply(sim.ultra.Results, length) != 1),]
 # Remove errored instances
 sim.ultra.Results <- sim.ultra.Results[which(lapply(sim.ultra.Results, length) != 1)]
 
-# Extract MPD values over delta transformations for "final" community/phylogey set
-sim.ultra.data <- lapply(sim.ultra.Results, function(x) x$transforms$seq.transform)
+# Extract final SESmpds, original SESmpds, SESmpds for seq transformations at delta=1, and phylogenies
+# Extract SESmpd values over delta transformations for "final" community/phylogey set
+sim.ultra.final.SESmpds <- lapply(sim.ultra.Results, function(x) x$transforms$seq.transform)
 # Extract SESmpd values of each community, prior to branch additions or transformations
-sim.ultra.SESmpds <- lapply(sim.ultra.Results, function(x) x$values$SESmpds)
+sim.ultra.original.SESmpds <- lapply(sim.ultra.Results, function(x) x$values$SESmpds)
 # Extract SESmpd values of each community, after branch additions and at delta = 1.0
-sim.ultra.SESmpds.seq <- lapply(sim.ultra.Results, function(x) x$transforms$seq.transform[,10])
+sim.ultra.seq.SESmpds <- lapply(sim.ultra.Results, function(x) x$transforms$seq.transform[,10])
 # Extract phylogenies with intra and seq branches appended 
 u.sim.seq.phylos <- lapply(sim.ultra.Results, function(x) x$phylogenies$seq.phylo)
 
 # Build results matrix, from which linear model variables will be pulled
 ultra.results <- ultra.params[rep(1:nrow(ultra.params), each=30),]
-ultra.results$delta <- rep(deltas, length(sim.ultra.data))
+ultra.results$delta <- rep(deltas, length(sim.ultra.final.SESmpds))
 # Capture (total) number of species 
 ultra.results$tips <- sapply(u.sim.seq.phylos, Ntip)
 # Calculate Pybus and Harvey (2000) gamma statistic
 ultra.results$gammas <- sapply(u.sim.seq.phylos, gammaStat)
 
-# %%% MPD correlations between site and baseline %%%
-# Calculate MPD correlations on simulation data
-u.correls <- mapply(.new.correls, sim.ultra.data, sim.ultra.SESmpds)
+# %%% SESmpd correlations between site and baseline %%%
+# Calculate SESmpd correlations on simulation data
+u.correls <- mapply(.new.correls, sim.ultra.final.SESmpds, sim.ultra.original.SESmpds)
 ultra.results$correl <- as.numeric(u.correls)
-# Model effects on MPD correlations (all terms: initial species, birth rates, tips, gamma)
+# Model effects on SESmpd correlations (all terms: initial species, birth rates, tips, gamma)
 u.correl.orig <- lm(correl ~ (I(scale(log10(delta))^2)+scale(log10(delta)))*
                       (scale(intra.ratio)+scale(seq.ratio)+scale(comm.spp)+
                          scale(intra.birth)+scale(seq.birth)+scale(tips)+scale(gammas)),
@@ -251,11 +257,11 @@ u.correl.orig <- lm(correl ~ (I(scale(log10(delta))^2)+scale(log10(delta)))*
 summary(u.correl.orig)
 xtable(u.correl.orig, caption="")
 
-# %%% MPD correlations between site and seq at delta=1.0 %%%
-# Calculate MPD correlations on simulation data
-u.correls.seq <- mapply(.new.correls, sim.ultra.data, sim.ultra.SESmpds.seq)
+# %%% SESmpd correlations between site and seq at delta=1.0 %%%
+# Calculate SESmpd correlations on simulation data
+u.correls.seq <- mapply(.new.correls, sim.ultra.final.SESmpds, sim.ultra.seq.SESmpds)
 ultra.results$correl.seq <- as.numeric(u.correls.seq)
-# Model effects on MPD correlations (all terms: initial species, birth rates, tips, gamma)
+# Model effects on SESmpd correlations (all terms: initial species, birth rates, tips, gamma)
 u.correl.seq <- lm(correl.seq ~ (I(scale(log10(delta))^2)+scale(log10(delta)))*
                      (scale(intra.ratio)+scale(seq.ratio)+scale(comm.spp)+
                         scale(intra.birth)+scale(seq.birth)+scale(tips)+scale(gammas)),
@@ -265,7 +271,7 @@ xtable(u.correl.seq, caption="")
 
 # %%% Ranking differences between site and baseline %%%
 # Calculate mean number of site rank shifts
-u.rank.shifts <- mapply(.ranking.diff, sim.ultra.data, sim.ultra.SESmpds)
+u.rank.shifts <- mapply(.ranking.diff, sim.ultra.final.SESmpds, sim.ultra.original.SESmpds)
 ultra.results$rank.shifts <- as.numeric(u.rank.shifts)
 # Model effects on site diversity rankings (all terms: initial species, birth rates, tips, gamma)
 u.rankShifts.orig <- lm(rank.shifts ~ (I(scale(log10(delta))^2)+scale(log10(delta)))*
@@ -277,7 +283,7 @@ xtable(u.rankShifts.orig, caption="")
 
 # %%% Ranking differences between site and seq at delta=1.0 %%%
 # Calculate mean number of site rank shifts
-u.rank.shifts.seq <- mapply(.ranking.diff, sim.ultra.data, sim.ultra.SESmpds.seq)
+u.rank.shifts.seq <- mapply(.ranking.diff, sim.ultra.final.SESmpds, sim.ultra.seq.SESmpds)
 ultra.results$rank.shifts.seq <- as.numeric(u.rank.shifts.seq)
 # Model effects on site diversity rankings (all terms: initial species, birth rates, tips, gamma)
 u.rankShifts.seq <- lm(rank.shifts.seq ~ (I(scale(log10(delta))^2)+scale(log10(delta)))*
@@ -287,15 +293,14 @@ u.rankShifts.seq <- lm(rank.shifts.seq ~ (I(scale(log10(delta))^2)+scale(log10(d
 summary(u.rankShifts.seq)
 xtable(u.rankShifts.seq, caption="")
 
-# %%% SESmpd Analysis Plots: raw values and power analysis %%%----
+# %%% Plotting: SESmpd %%%----
 # 1 row, 2 columns
 par(mfcol=c(2,1))
 
-# SESmpd values of seq trees over delta
+# Mean SESmpd values of seq trees over delta
 # Plot SESmpd means for each site over delta values--non-ultrametric
-ymin <- min(sapply(sim.data, min)); ymax <- max(sapply(sim.data, max))
-for(i in 1:length(sim.data)){
-  means <- apply(sim.data[[i]], 2, mean)
+for(i in 1:length(sim.final.SESmpds)){
+  means <- apply(sim.final.SESmpds[[i]], 2, mean)
   if(i == 1){
     plot(means ~ deltas, xlab="Delta", ylab="SESmpd", main="Non-ultrametric", ylim=c(-5,5), pch=20, col=i)
     lines(deltas, means, col=i)
@@ -306,9 +311,8 @@ for(i in 1:length(sim.data)){
 }
 
 # Plot SESmpd means for each site over delta values--ultrametric
-# ymin <- min(sapply(sim.ultra.data, min)); ymax <- max(sapply(sim.ultra.data, max))
-for(i in 1:length(sim.ultra.data)){
-  means <- apply(sim.ultra.data[[i]], 2, mean)
+for(i in 1:length(sim.ultra.final.SESmpds)){
+  means <- apply(sim.ultra.final.SESmpds[[i]], 2, mean)
   if(i == 1){
     plot(means ~ deltas, xlab="Delta", ylab="SESmpd", main="Ultrametric", ylim=c(-5,5), pch=20, col=i)
     lines(deltas, means, col=i)
@@ -319,30 +323,27 @@ for(i in 1:length(sim.ultra.data)){
 }
 
 # Capture mean SESmpd values across sites for non-ultrametric instances
-nu.mean.SESmpds <- t(sapply(sim.data, function(x) apply(x,2,mean,na.rm="TRUE")))
+nu.mean.SESmpds <- t(sapply(sim.final.SESmpds, function(x) apply(x,2,mean,na.rm="TRUE")))
 # Plot raw values using transparencies (alpha)
-plot(nu.mean.SESmpds[1,] ~ unique(results$delta), ylim=c(-4,4), 
-     type="n", ylab="Mean SESmpd Values", xlab="Delta", main="Non-ultrametric SESmpd")
+plot(nu.mean.SESmpds[1,] ~ unique(results$delta), ylim=c(-6,6), 
+     type="n", ylab="Mean SESmpd", xlab="Delta", main="Non-ultrametric")
 for(i in 2:nrow(nu.mean.SESmpds)){
   lines(unique(results$delta), nu.mean.SESmpds[i,], 
         col=rgb(red=0.3, green=0.1, blue=0.4, alpha=0.1))
 }
 
 # Capture mean SESmpd values across sites for ultrametric instances
-u.mean.SESmpds <- t(sapply(sim.ultra.data, function(x) apply(x,2,mean,na.rm="TRUE")))
+u.mean.SESmpds <- t(sapply(sim.ultra.final.SESmpds, function(x) apply(x,2,mean,na.rm="TRUE")))
 # Plot raw values using transparencies (alpha)
-plot(u.mean.SESmpds[1,] ~ unique(ultra.results$delta), ylim=c(-4,4), 
-     type="n", ylab="Mean SESmpd Values", xlab="Delta", main="Ultrametric SESmpd")
+plot(u.mean.SESmpds[1,] ~ unique(ultra.results$delta), ylim=c(-6,6), 
+     type="n", ylab="Mean SESmpd", xlab="Delta", main="Ultrametric")
 for(i in 2:nrow(u.mean.SESmpds)){
   lines(unique(ultra.results$delta), u.mean.SESmpds[i,], 
-        col=rgb(red=0.3, green=0.1, blue=0.4, alpha=0.1))
+        col=rgb(red=0.4, green=0.1, blue=0.1, alpha=0.1))
 }
 
 # Power analysis figure
-nu.correl.seq <- lm(correl.seq ~ (I(scale(log10(delta))^2)+scale(log10(delta)))*
-                      (scale(intra.ratio)+scale(seq.ratio)+scale(comm.spp)+
-                         scale(intra.div)+scale(seq.div)+scale(tips)),data=results,na.action=na.omit)
-
+# Original
 nu.correl.seq <- lm(correl.seq ~ (I(scale(log10(delta))^2)+scale(log10(delta)))*
                       (scale(intra.ratio)+scale(seq.ratio)+scale(comm.spp)+
                          scale(intra.div)+scale(seq.div)+scale(tips)),data=results,na.action=na.omit)
@@ -350,87 +351,31 @@ nu.correl.seq <- lm(correl.seq ~ (I(scale(log10(delta))^2)+scale(log10(delta)))*
 grid <- expand.grid(unique(results$intra.ratio), unique(results$seq.ratio))
 d <- setNames(data.frame(grid), c("Intra branches", "Seq branches"))
 vals <- predict(nu.correl.seq, newdata = d)
-# Generating error: "Error in scale(log10(delta)) : object 'delta' not found" 
-# (...even though delta is in the results data.frame. So, why isn't it being seen?)
+# Error: object 'delta' not found
+
+# Updated
+nu.correl.seq <- lm(correl.seq ~ (I(scale(log10(delta))^2)+scale(log10(delta)))*
+                      (scale(intra.ratio)+scale(seq.ratio)+scale(comm.spp)+
+                         scale(intra.div)+scale(seq.div)+scale(tips)),data=results,na.action=na.omit)
+
+# Create newdata data.frame by sampling simulation parameters
+d <- data.frame(delta=sample(results$delta, 50), intra.ratio=sample(results$intra.ratio, 50), 
+                seq.ratio=sample(results$seq.ratio, 50), comm.spp=sample(results$comm.spp, 50),
+                intra.div=sample(results$intra.div, 50), seq.div=sample(results$seq.div, 50),
+                tips=sample(results$tips, 50))
+vals <- predict(nu.correl.seq, newdata = d)
+# But...what do we do with this vector?
+
 
 nu.rankShifts.seq <- lm(rank.shifts.seq ~ (I(scale(log10(delta))^2)+scale(log10(delta)))*
                           (scale(intra.ratio)+scale(seq.ratio)+scale(comm.spp)+
                              scale(intra.div)+scale(seq.div)+scale(tips)),data=results,na.action=na.omit)
 
-# # Troubleshooting
-# plot(apply(sim.data[[25]], 2, mean) ~ deltas, xlab="Delta", ylab="SESmpd", main="Non-ultrametric, instance 25", ylim=c(-1.5,1.5), pch=20, col=4)
-# lines(deltas, apply(sim.data[[25]], 2, mean), col=4)
-# phy.d.transform.plot(sim.Results[[25]]$phylogenies$seq.phylo, sim.Results[[25]]$abundances$seq.community, deltas, "Sim Instance #25")
-# 
-# plot(apply(sim.data[[15]], 2, mean) ~ deltas, xlab="Delta", ylab="SESmpd", main="Non-ultrametric, instance 15", ylim=c(-3.5,1.5), pch=20, col=4)
-# lines(deltas, apply(sim.data[[15]], 2, mean), col=4)
-# phy.d.transform.plot(sim.Results[[15]]$phylogenies$seq.phylo, sim.Results[[15]]$abundances$seq.community, deltas, "Sim Instance #15")
-# 
-# which(sapply(sim.seq.phylos, Ntip) < 300)
-# sim.issues <- sim.Results[which(sapply(sim.seq.phylos, Ntip) < 300)]
-# sim.issue.data <- lapply(sim.issues, function(x) x$transforms$seq.transform)
-# 
-# for(i in 1:length(sim.issue.data)){
-#   means <- apply(sim.issue.data[[i]], 2, mean)
-#   if(i == 1){
-#     plot(means ~ deltas, xlab="Delta", ylab="SESmpd", main="", ylim=c(-1.5,1.5), pch=20, col=i)
-#     lines(deltas, means, col=i)
-#   } else {
-#     points(means ~ deltas, col=i, pch=20)
-#     lines(deltas, means, col=i)
-#   }
-# }
-# 
-# plot(apply(sim.data[[1]], 2, mean) ~ deltas, xlab="Delta", ylab="SESmpd", main="Non-ultrametric, instance 1", ylim=c(-1.5,1.5), pch=20, col=3)
-# lines(deltas, apply(sim.data[[1]], 2, mean), col=3)
-# 
-# plot(apply(sim.data[[73]], 2, mean) ~ deltas, xlab="Delta", ylab="SESmpd", main="Non-ultrametric, instance 1", ylim=c(-1.5,1.5), pch=20, col=3)
-# lines(deltas, apply(sim.data[[73]], 2, mean), col=3)
-# 
-# phy.d.transform.plot(sim.Results[[15]]$phylogenies$seq.phylo, sim.Results[[15]]$abundances$seq.community, deltas, "Sites correspond with one another")
-# phy.d.transform.plot(sim.Results[[73]]$phylogenies$seq.phylo, sim.Results[[73]]$abundances$seq.community, deltas, "Trends differ between sites")
-# 
-# # No change in SESmpd: site 16, 25
-# plot(apply(sim.data[[16]], 2, mean) ~ deltas, xlab="Delta", ylab="SESmpd", main="Non-ultrametric, instance 16", ylim=c(ymin,ymax), pch=20, col=3)
-# lines(deltas, apply(sim.data[[16]], 2, mean), col=3)
-# phy.d.transform.plot(sim.Results[[16]]$phylogenies$seq.phylo, sim.Results[[16]]$abundances$seq.community, deltas, "Sim Instance #16")
-# params[16,]
-# 
-# plot(sim.Results[[16]]$phylogenies$orig.phylo, show.tip.label = F)
-# plot(sim.Results[[16]]$phylogenies$intra.phylo, show.tip.label = F)
-# plot(sim.Results[[16]]$phylogenies$seq.phylo, show.tip.label = F)
-# Ntip(sim.Results[[16]]$phylogenies$seq.phylo)
-# 
-# plot(apply(sim.data[[25]], 2, mean) ~ deltas, xlab="Delta", ylab="SESmpd", main="Non-ultrametric, instance 25", ylim=c(ymin,ymax), pch=20, col=3)
-# lines(deltas, apply(sim.data[[25]], 2, mean), col=3)
-# phy.d.transform.plot(sim.Results[[25]]$phylogenies$seq.phylo, sim.Results[[25]]$abundances$seq.community, deltas, "Sim Instance #25")
-# params[25,]
-# 
-# plot(sim.Results[[25]]$phylogenies$orig.phylo, show.tip.label = F)
-# plot(sim.Results[[25]]$phylogenies$intra.phylo, show.tip.label = F)
-# plot(sim.Results[[25]]$phylogenies$seq.phylo, show.tip.label = F)
-# Ntip(sim.Results[[25]]$phylogenies$seq.phylo)
-# 
-# # Appreciable change in SESmpd: site 15, 32
-# plot(apply(sim.data[[15]], 2, mean) ~ deltas, xlab="Delta", ylab="SESmpd", main="Non-ultrametric, instance 15", ylim=c(ymin,ymax), pch=20, col=6)
-# lines(deltas, apply(sim.data[[15]], 2, mean), col=6)
-# phy.d.transform.plot(sim.Results[[15]]$phylogenies$seq.phylo, sim.Results[[15]]$abundances$seq.community, deltas, "Sim Instance #15")
-# params[15,]
-# 
-# plot(sim.Results[[15]]$phylogenies$orig.phylo, show.tip.label = F)
-# plot(sim.Results[[15]]$phylogenies$intra.phylo, show.tip.label = F)
-# plot(sim.Results[[15]]$phylogenies$seq.phylo, show.tip.label = F)
-# Ntip(sim.Results[[15]]$phylogenies$seq.phylo)
-# 
-# plot(apply(sim.data[[32]], 2, mean) ~ deltas, xlab="Delta", ylab="SESmpd", main="Non-ultrametric, instance 32", ylim=c(ymin,ymax), pch=20, col=6)
-# lines(deltas, apply(sim.data[[32]], 2, mean), col=6)
-# phy.d.transform.plot(sim.Results[[32]]$phylogenies$seq.phylo, sim.Results[[32]]$abundances$seq.community, deltas, "Sim Instance #32")
-# params[32,]
-# 
-# plot(sim.Results[[32]]$phylogenies$orig.phylo, show.tip.label = F)
-# plot(sim.Results[[32]]$phylogenies$intra.phylo, show.tip.label = F)
-# plot(sim.Results[[32]]$phylogenies$seq.phylo, show.tip.label = F)
-# Ntip(sim.Results[[32]]$phylogenies$seq.phylo)
+d <- data.frame(delta=sample(results$delta, 50), intra.ratio=sample(results$intra.ratio, 50), 
+                seq.ratio=sample(results$seq.ratio, 50), comm.spp=sample(results$comm.spp, 50),
+                intra.div=sample(results$intra.div, 50), seq.div=sample(results$seq.div, 50),
+                tips=sample(results$tips, 50))
+vals <- predict(nu.rankShifts.seq, newdata = d)
 
 # %%% SESmpd Analysis Plots: U/NU response metrics between original + baseline %%%----
 # 2 rows, 2 columns
@@ -438,9 +383,9 @@ par(mfcol=c(2,2), mar = c(2,2,2,2), oma = c(0, 4, .5, .5), mgp = c(2, 0.6, 0))
 
 # Correlations between original SESmpd metrics and baseline
 # Non-ultrametric
-correls <- mapply(.new.correls, sim.data, sim.SESmpds)
+correls <- mapply(.new.correls, sim.final.SESmpds, sim.SESmpds)
 ymin <- (min(correls)-1.5); ymax <- (max(correls)+1.5)
-for(i in 1:length(sim.data)){
+for(i in 1:length(sim.final.SESmpds)){
   if(i == 1){
     plot(correls[,i] ~ deltas, xlab="Delta", ylab="SESmpd correlations", 
          main="", ylim=c(ymin,ymax), pch=20, col=i)
@@ -452,9 +397,9 @@ for(i in 1:length(sim.data)){
 }
 
 # Ultrametric
-u.correls <- mapply(.new.correls, sim.ultra.data, sim.ultra.SESmpds)
+u.correls <- mapply(.new.correls, sim.ultra.final.SESmpds, sim.ultra.SESmpds)
 ymin <- (min(u.correls)-1.5); ymax <- (max(u.correls)+1.5)
-for(i in 1:length(sim.ultra.data)){
+for(i in 1:length(sim.ultra.final.SESmpds)){
   if(i == 1){
     plot(u.correls[,i] ~ deltas, xlab="Delta", ylab="SESmpd correlations", 
          main="", ylim=c(ymin,ymax), pch=20, col=i)
@@ -467,9 +412,9 @@ for(i in 1:length(sim.ultra.data)){
 
 # Site shifts in SESmpd ranking between sites at all delta values and baseline
 # Non-ultrametric
-rank.shifts <- mapply(.ranking.diff, sim.data, sim.SESmpds)
+rank.shifts <- mapply(.ranking.diff, sim.final.SESmpds, sim.SESmpds)
 ymin <- (min(rank.shifts)-1.5); ymax <- (max(rank.shifts)+1.5)
-for(i in 1:length(sim.data)){
+for(i in 1:length(sim.final.SESmpds)){
   if(i == 1){
     plot(rank.shifts[,i] ~ deltas, main="", xlab="", ylab="",
          ylim=c(ymin,ymax), pch=20, col=i)
@@ -481,9 +426,9 @@ for(i in 1:length(sim.data)){
 }
 
 # Ultrametric
-u.rank.shifts <- mapply(.ranking.diff, sim.ultra.data, sim.ultra.SESmpds)
+u.rank.shifts <- mapply(.ranking.diff, sim.ultra.final.SESmpds, sim.ultra.SESmpds)
 ymin <- (min(u.rank.shifts)-1.5); ymax <- (max(u.rank.shifts)+1.5)
-for(i in 1:length(sim.ultra.data)){
+for(i in 1:length(sim.ultra.final.SESmpds)){
   if(i == 1){
     plot(u.rank.shifts[,i] ~ deltas, main="", xlab="", ylab="",
          ylim=c(ymin,ymax), pch=20, col=i)
@@ -505,7 +450,7 @@ par(mfcol=c(2,2), mar = c(2,2,2,2), oma = c(0, 4, .5, .5), mgp = c(2, 0.6, 0))
 
 # Correlations between original SESmpd metrics and delta=1.0
 # Non-ultrametric
-correls <- mapply(.new.correls, sim.data, sim.SESmpds.seq)
+correls <- mapply(.new.correls, sim.data, sim.seq.SESmpds)
 ymin <- (min(correls)-1.5); ymax <- (max(correls)+1.5)
 for(i in 1:length(sim.data)){
   if(i == 1){
@@ -519,9 +464,9 @@ for(i in 1:length(sim.data)){
 }
 
 # Ultrametric
-u.correls <- mapply(.new.correls, sim.ultra.data, sim.ultra.SESmpds.seq)
+u.correls <- mapply(.new.correls, sim.ultra.final.SESmpds, sim.ultra.seq.SESmpds)
 ymin <- (min(u.correls)-1.5); ymax <- (max(u.correls)+1.5)
-for(i in 1:length(sim.ultra.data)){
+for(i in 1:length(sim.ultra.final.SESmpds)){
   if(i == 1){
     plot(u.correls[,i] ~ deltas, xlab="Delta", ylab="SESmpd correlations", 
          main="", ylim=c(ymin,ymax), pch=20, col=i)
@@ -534,7 +479,7 @@ for(i in 1:length(sim.ultra.data)){
 
 # Site shifts in SESmpd ranking between sites at all delta values and delta=1.0
 # Non-ultrametric
-rank.shifts <- mapply(.ranking.diff, sim.data, sim.SESmpds.seq)
+rank.shifts <- mapply(.ranking.diff, sim.data, sim.seq.SESmpds)
 ymin <- (min(rank.shifts)-1.5); ymax <- (max(rank.shifts)+1.5)
 for(i in 1:length(sim.data)){
   if(i == 1){
@@ -548,9 +493,9 @@ for(i in 1:length(sim.data)){
 }
 
 # Ultrametric
-u.rank.shifts <- mapply(.ranking.diff, sim.ultra.data, sim.ultra.SESmpds.seq)
+u.rank.shifts <- mapply(.ranking.diff, sim.ultra.final.SESmpds, sim.ultra.seq.SESmpds)
 ymin <- (min(u.rank.shifts)-1.5); ymax <- (max(u.rank.shifts)+1.5)
-for(i in 1:length(sim.ultra.data)){
+for(i in 1:length(sim.ultra.final.SESmpds)){
   if(i == 1){
     plot(u.rank.shifts[,i] ~ deltas, main="", xlab="", ylab="",
          ylim=c(ymin,ymax), pch=20, col=i)
