@@ -342,7 +342,7 @@ for(i in 2:nrow(u.mean.SESmpds)){
         col=rgb(red=0.4, green=0.1, blue=0.1, alpha=0.1))
 }
 
-# Power analysis figure
+# %%% Power analysis figure %%%
 # Original
 nu.correl.seq <- lm(correl.seq ~ (I(scale(log10(delta))^2)+scale(log10(delta)))*
                       (scale(intra.ratio)+scale(seq.ratio)+scale(comm.spp)+
@@ -354,6 +354,15 @@ vals <- predict(nu.correl.seq, newdata = d)
 # Error: object 'delta' not found
 
 # Updated
+nu.correl.seq.PA <- lm(correl.seq ~ (I(scale(log10(delta))^2))+
+                      (scale(intra.ratio)+scale(seq.ratio)+scale(comm.spp)+
+                         scale(intra.div)+scale(seq.div)+scale(tips)),data=results,na.action=na.omit)
+
+d <- data.frame(results$delta, results$intra.ratio, results$seq.ratio,
+                results$comm.spp, results$intra.div, results$seq.div, results$tips)
+
+vals <- predict(nu.correl.seq.PA, newdata = d)
+# Same error...need to get delta terms mapping onto one another
 nu.correl.seq <- lm(correl.seq ~ (I(scale(log10(delta))^2)+scale(log10(delta)))*
                       (scale(intra.ratio)+scale(seq.ratio)+scale(comm.spp)+
                          scale(intra.div)+scale(seq.div)+scale(tips)),data=results,na.action=na.omit)
@@ -363,9 +372,9 @@ d <- data.frame(delta=sample(results$delta, 50), intra.ratio=sample(results$intr
                 seq.ratio=sample(results$seq.ratio, 50), comm.spp=sample(results$comm.spp, 50),
                 intra.div=sample(results$intra.div, 50), seq.div=sample(results$seq.div, 50),
                 tips=sample(results$tips, 50))
-vals <- predict(nu.correl.seq, newdata = d)
-# But...what do we do with this vector?
 
+vals <- predict(nu.correl.seq, newdata = d)
+# Works, but......is it appropriate to sample our parameters like this?
 
 nu.rankShifts.seq <- lm(rank.shifts.seq ~ (I(scale(log10(delta))^2)+scale(log10(delta)))*
                           (scale(intra.ratio)+scale(seq.ratio)+scale(comm.spp)+
