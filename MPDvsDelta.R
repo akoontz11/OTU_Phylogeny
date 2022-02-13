@@ -173,4 +173,5 @@ phy.d.transform.plot <- function(phylo,abundance.matrix,d,plot.title,...){
 # deltas <- seq(0.1,3,by=0.1)
 # # Demonstrating function
 # laja.test <- phy.d.transform(invert.tree, species.abundances, deltas)
-# laja.test.plot <- phy.d.transform.plot(invert.tree, species.abundances, deltas, "Laja")
+# laja.test.plot <- phy.d.transform.plot(invert.tree, species.abundances, 
+#                                        deltas, "Laja: SESmpd over delta")
