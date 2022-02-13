@@ -163,7 +163,7 @@ SimulateCommunity <- function(comm.spp,comm.size,inter.birth,inter.death,
   # Community with sequencing error
   seq.transform <- phy.d.transform(seq.phy, seq.comm, deltas)
 
-  # Capture mpd of original phylogenies (for later comparison)----
+  # Capture SESmpd of original phylogenies (for later comparison)----
   orig.SESmpd <- tryCatch(.ses.mpd(comparative.comm(orig.phy, orig.comm, force.root = 0), abundance.weighted=TRUE), error=function(cond) {return(NULL)})
   orig.SESmpd <- orig.SESmpd$mpd.obs.z
   # Change names to match format from phy.d.transform function
@@ -175,36 +175,16 @@ SimulateCommunity <- function(comm.spp,comm.size,inter.birth,inter.death,
   community.abundances <- list(inter.community=orig.comm,intra.community=intra.comm,seq.community=seq.comm)
   # Phylogenies
   community.phylogenies <- list(inter.phylo=orig.phy,intra.phylo=intra.phy,seq.phylo=seq.phy)
-  # MPD matrices, from delta transforms
+  # SESmpd matrices, from delta transforms
   community.transforms <- list(inter.transform=orig.transform,intra.transform=intra.transform,seq.transform=seq.transform)
-  # Original MPD values
+  # Original SESmpd values
   original.diversityMetrics <- list(SESmpds=orig.SESmpd)
   # Return data
   simulation.data <- list(phylogenies=community.phylogenies,abundances=community.abundances,transforms=community.transforms,values=original.diversityMetrics)
   return(simulation.data)
 }
 
-# # Ultrametric (no death)
-# test <- SimulateCommunity(comm.spp=50, comm.size=50, inter.birth=1, inter.death=0,
-#                   intra.birth=0.5, intra.death=0, seq.birth=0.5, seq.death=0,
-#                   inter.ratio=25, intra.ratio=1, seq.ratio=0.5)
-# 
-# # Non-ultrametric intra/seq branches
-# test <- SimulateCommunity(comm.spp=50, comm.size=50, inter.birth=1, inter.death=0,
-#                           intra.birth=0.2, intra.death=0.1, seq.birth=0.2, seq.death=0.1,
-#                           inter.ratio=25, intra.ratio=1, seq.ratio=0.5)
-# 
-# # Test for fixing intra branch lengths
-# test <- SimulateCommunity(comm.spp=50, comm.size=50, inter.birth=1, inter.death=0,
-#                           intra.birth=0.5, intra.death=0, seq.birth=0.5, seq.death=0,
-#                           inter.ratio=25, intra.ratio=0, seq.ratio=0)
-# 
-# # Non-ultrametric inter/intra/seq (high death)
-# test <- SimulateCommunity(comm.spp=50, comm.size=50, inter.birth=1, inter.death=0,
-#                           intra.birth=0.2, intra.death=0.2, seq.birth=0.2, seq.death=0.2,
-#                           inter.ratio=25, intra.ratio=1, seq.ratio=0.5)
-
-# # %%% Simulate communities using sim.comm %%%----
+# # %%% SimulateCommunity using sim.comm %%%----
 # SimulateCommnunity <- function(comm.spp,comm.size,comm.birth,comm.death,comm.env,comm.abund,
 #                                intra.birth,intra.death,intra.steps,seq.birth,seq.death,seq.steps){
 #   # Simulate community (using Will's sim.comm function)
@@ -241,7 +221,7 @@ SimulateCommunity <- function(comm.spp,comm.size,inter.birth,inter.death,
 #     # orig.phy <- DemoCom$phy
 #   }
 # 
-#   # Add intraspecific differences----
+#   # %%% Add intraspecific differences %%%
 #   intra.phy <- add.branch(orig.phy,birth=intra.birth,death=intra.death,steps=intra.steps,"pops")
 #   # Create an empty matrix for the intra.phy
 #   # (tryCatch statement included to account for trees in which all species have gone extinct)
@@ -250,7 +230,7 @@ SimulateCommunity <- function(comm.spp,comm.size,inter.birth,inter.death,
 #   # Map abundance values from original community matrix to columns of intra.comm
 #   intra.comm <- abundance.mapping(species.names, population.names, sites, orig.comm, intra.comm)
 # 
-#   # Add sequencing error----
+#   # %%% Add sequencing error %%%
 #   seq.phy <- add.branch(intra.phy,birth=seq.birth,death=seq.death,steps=seq.steps,"seq.err")
 #   # Create an empty matrix for the seq.phy
 #   # (tryCatch statement included to account for trees in which all species have gone extinct)
@@ -259,7 +239,7 @@ SimulateCommunity <- function(comm.spp,comm.size,inter.birth,inter.death,
 #   # Map abundance values from original community matrix to columns of seq.comm
 #   seq.comm <- abundance.mapping(species.names, individual.names, sites, orig.comm, seq.comm)
 # 
-#   # Capture mpd values over transformations----
+#   # %%% Capture mpd values over transformations %%%
 #   # Original community
 #   orig.transform <- phy.d.transform(orig.phy, orig.comm, deltas)
 #   # Community with populations (intraspecific error)
@@ -267,14 +247,14 @@ SimulateCommunity <- function(comm.spp,comm.size,inter.birth,inter.death,
 #   # Community with sequencing error
 #   seq.transform <- phy.d.transform(seq.phy, seq.comm, deltas)
 # 
-#   # Capture mpd of original phylogenies (for later comparison)----
+#   # %%% Capture mpd of original phylogenies (for later comparison) %%%
 #   orig.MPD <- tryCatch(.mpd(comparative.comm(orig.phy, orig.comm, force.root = 0), abundance.weighted=TRUE), error=function(cond) {return(NULL)})
 #   # Change names to match format from phy.d.transform function
 #   if(!is.null(orig.MPD)){
 #     names(orig.MPD) <- paste("Site",1:nrow(orig.comm),sep="_")
 #   }
 # 
-#   # Export a list containing all simulation data, for each community "type" (original, intra, and seq)----
+#   # %%% Export a list containing all simulation data, for each community "type" (original, intra, and seq) %%%
 #   # Abundances
 #   community.abundances <- list(orig.community=orig.comm,intra.community=intra.comm,seq.community=seq.comm)
 #   # Phylogenies
@@ -308,7 +288,7 @@ SimulateCommunity <- function(comm.spp,comm.size,inter.birth,inter.death,
 # plot(test$phylogenies$seq.phylo, show.tip.label = FALSE)
 # test$values
 
-# # %%% Simulate communities using sim.meta.phy.comm %%%----
+# # %%% SimulateCommunity using sim.meta.phy.comm %%%----
 # SimulateCommnunity <- function(comm.size,comm.spp,comm.timesteps,comm.migrate,comm.env,comm.abund,comm.stoch,comm.speciate,intra.birth,intra.death,intra.steps,seq.birth,seq.death,seq.steps){
 # Simulate community (using pez function sim.meta.phy.comm)
 #   # Generate NULL for a DemoCom object that is in error
