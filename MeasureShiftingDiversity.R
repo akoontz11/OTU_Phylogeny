@@ -353,7 +353,29 @@ d <- setNames(data.frame(grid), c("Intra branches", "Seq branches"))
 vals <- predict(nu.correl.seq, newdata = d)
 # Error: object 'delta' not found
 
-# Updated
+# %%% Only comparing mean SESmpd and delta %%%
+# All model instances
+test.model <- lm(c(nu.mean.SESmpds) ~ rep(deltas, times=nrow(nu.mean.SESmpds)))
+PA.deltas <- seq(0.1, 3.0, 0.05)
+predictions <- data.frame(deltas=rep(PA.deltas, times=3888))
+predictions$explanatory <- predict(test.model, predictions, type="response")
+# Crashes R...
+
+# Single instance
+test.model.small <- lm(nu.mean.SESmpds[1,] ~ deltas)
+predictions <- data.frame(deltas=seq(0.1, 3.0, 0.05))
+predictions$explanatory <- predict(test.model.small, predictions, type="response")
+
+plot(nu.mean.SESmpds[1,] ~ unique(results$delta), ylim=c(-6,6), 
+     type="n", ylab="Mean SESmpd", xlab="Delta", main="Non-ultrametric")
+for(i in 2:nrow(nu.mean.SESmpds)){
+  lines(unique(results$delta), nu.mean.SESmpds[i,], 
+        col=rgb(red=0.3, green=0.1, blue=0.4, alpha=0.1))
+}
+
+with(predictions, lines(explanatory ~ deltas), col="blue", lwd=3)
+
+# %%% Looking at all model terms %%%%
 nu.correl.seq.PA <- lm(correl.seq ~ (I(scale(log10(delta))^2))+
                       (scale(intra.ratio)+scale(seq.ratio)+scale(comm.spp)+
                          scale(intra.div)+scale(seq.div)+scale(tips)),data=results,na.action=na.omit)
@@ -363,6 +385,8 @@ d <- data.frame(results$delta, results$intra.ratio, results$seq.ratio,
 
 vals <- predict(nu.correl.seq.PA, newdata = d)
 # Same error...need to get delta terms mapping onto one another
+
+# %%% Looking at all model terms, sampling for parameters %%%
 nu.correl.seq <- lm(correl.seq ~ (I(scale(log10(delta))^2)+scale(log10(delta)))*
                       (scale(intra.ratio)+scale(seq.ratio)+scale(comm.spp)+
                          scale(intra.div)+scale(seq.div)+scale(tips)),data=results,na.action=na.omit)
@@ -374,17 +398,8 @@ d <- data.frame(delta=sample(results$delta, 50), intra.ratio=sample(results$intr
                 tips=sample(results$tips, 50))
 
 vals <- predict(nu.correl.seq, newdata = d)
-# Works, but......is it appropriate to sample our parameters like this?
-
-nu.rankShifts.seq <- lm(rank.shifts.seq ~ (I(scale(log10(delta))^2)+scale(log10(delta)))*
-                          (scale(intra.ratio)+scale(seq.ratio)+scale(comm.spp)+
-                             scale(intra.div)+scale(seq.div)+scale(tips)),data=results,na.action=na.omit)
-
-d <- data.frame(delta=sample(results$delta, 50), intra.ratio=sample(results$intra.ratio, 50), 
-                seq.ratio=sample(results$seq.ratio, 50), comm.spp=sample(results$comm.spp, 50),
-                intra.div=sample(results$intra.div, 50), seq.div=sample(results$seq.div, 50),
-                tips=sample(results$tips, 50))
-vals <- predict(nu.rankShifts.seq, newdata = d)
+# Works, but......this is generated using all variables. 
+# It's not obvious to me how to use this
 
 # %%% SESmpd Analysis Plots: U/NU response metrics between original + baseline %%%----
 # 2 rows, 2 columns
